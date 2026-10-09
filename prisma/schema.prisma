@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String
+  manager     String?
+  processType String?  // 'management', 'core', 'support'
+  createdAt   DateTime @default(now())
+  audits      Audit[]
+}
+
+model Requirement {
+  id           String      @id @default(uuid())
+  chapter      String      @unique
+  title        String
+  description  String
+  category     String?
+  originalText String?
+  departments  String?     @default("all") // stored as JSON or comma separated string
+  roles        String?     @default("all")
+  isStandard   Boolean     @default(true)
+  auditItems   AuditItem[]
+}
+
+model Audit {
+  id           String      @id @default(uuid())
+  departmentId String
+  department   Department  @relation(fields: [departmentId], references: [id])
+  auditor      String
+  date         DateTime    @default(now())
+  status       String      @default("open") // open, in_progress, completed
+  items        AuditItem[]
+}
+
+model AuditItem {
+  id                   String      @id @default(uuid())
+  auditId              String
+  audit                Audit       @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  requirementId        String
+  requirement          Requirement @relation(fields: [requirementId], references: [id])
+  status               String      @default("open") // fulfilled, partially, not_fulfilled, not_applicable
+  implementationNotes  String?
+  evidenceFileUrl      String?
+  evidenceLink         String?
+  plannedDate          String?
+  responsible          String?
+  auditee              String?
+  auditDate            String?
+}
+
+model Complaint {
+  id          String            @id @default(uuid())
+  title       String
+  description String
+  type        String            // 'internal' | 'external'
+  status      String            @default("open") // open, in_progress, closed
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  actions     ComplaintAction[]
+}
+
+model ComplaintAction {
+  id          String    @id @default(uuid())
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  description String
+  responsible String
+  plannedDate DateTime
+  status      String    @default("open") // open, done
+  emailSent   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}
