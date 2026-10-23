@@ -98,10 +98,9 @@ export default function ProcessMapPage() {
       onDragStart={(e) => {
         e.dataTransfer.setData('deptId', d.id);
       }}
-      className="cursor-move bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-lg px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 hover:border-blue-400 transition-colors flex items-center justify-between group"
+      className="cursor-move bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-lg px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 hover:border-blue-400 hover:shadow-sm transition-all flex items-center group"
     >
       <span>{d.name}</span>
-      <span className="text-slate-400 group-hover:text-blue-500">≡</span>
     </div>
   );
 
