@@ -173,7 +173,7 @@ export default function RequirementsPage() {
   // Audit State
   const [auditingId, setAuditingId] = useState<string | null>(null);
   const [auditDept, setAuditDept] = useState<string>('');
-  const [auditStatus, setAuditStatus] = useState<'fulfilled' | 'not_fulfilled'>('fulfilled');
+  const [auditStatus, setAuditStatus] = useState<'' | 'fulfilled' | 'not_fulfilled'>('');
   const [auditNotes, setAuditNotes] = useState<string>('');
   const [auditPlannedDate, setAuditPlannedDate] = useState<string>('');
   const [auditResponsible, setAuditResponsible] = useState<string>('');
@@ -184,7 +184,7 @@ export default function RequirementsPage() {
     setAuditingId(req.id);
     setEditingId(null); // Close edit mode if open
     setAuditDept('');
-    setAuditStatus('fulfilled');
+    setAuditStatus('');
     setAuditNotes('');
     setAuditPlannedDate('');
     setAuditResponsible('');
@@ -195,6 +195,10 @@ export default function RequirementsPage() {
   const handleAuditSave = async (reqId: string) => {
     if (!auditDept) {
       alert('Bitte eine Abteilung auswählen.');
+      return;
+    }
+    if (!auditStatus) {
+      alert('Bitte eine Bewertung auswählen: "Erfüllt" oder "Nicht erfüllt".');
       return;
     }
     
@@ -376,12 +380,13 @@ export default function RequirementsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Bewertung</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Bewertung *</label>
                   <select 
                     value={auditStatus}
                     onChange={(e) => setAuditStatus(e.target.value as any)}
                     className="w-full px-3 py-2 rounded-md border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm focus:ring-2 focus:ring-blue-500 font-medium"
                   >
+                    <option value="">-- Bewertung auswählen --</option>
                     <option value="fulfilled">✅ Erfüllt (Konform)</option>
                     <option value="not_fulfilled">❌ Nicht erfüllt (Abweichung)</option>
                   </select>
@@ -413,13 +418,20 @@ export default function RequirementsPage() {
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Wie wird die Norm erfüllt? (Begründung)</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase">
+                    Wie wird die Norm erfüllt? (Begründung, Nachweise & Links)
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    💡 Links (https://...) direkt als normaler Text einfügen
+                  </span>
+                </div>
                 <textarea 
                   value={auditNotes}
                   onChange={(e) => setAuditNotes(e.target.value)}
-                  rows={3}
-                  placeholder="Beschreibe kurz, wie diese Anforderung in der Abteilung umgesetzt wird..."
-                  className="w-full px-3 py-2 rounded-md border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm focus:ring-2 focus:ring-blue-500"
+                  rows={6}
+                  placeholder="Beschreibe ausführlich, wie diese Anforderung in der Abteilung umgesetzt wird. Du kannst auch mehrere Nachweis-Links (z.B. https://..., Intranet, DMS) direkt hier als Text einfügen..."
+                  className="w-full p-3 rounded-xl border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm focus:ring-2 focus:ring-blue-500 leading-relaxed"
                 />
               </div>
 

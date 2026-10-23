@@ -5,6 +5,29 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { updateAuditReportItem, deleteAuditItem } from '@/actions/audits';
 
+function renderTextWithLinks(text?: string | null) {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center gap-0.5 break-all font-medium"
+        >
+          {part} ↗
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 export default function AuditsClient({ 
   initialItems = [], 
   initialUsers = [],
@@ -34,7 +57,7 @@ export default function AuditsClient({
   // Modal State for Reading & Updating Audit Items
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [modalTab, setModalTab] = useState<'edit' | 'requirement'>('edit');
-  const [editStatus, setEditStatus] = useState<'fulfilled' | 'not_fulfilled'>('fulfilled');
+  const [editStatus, setEditStatus] = useState<'open' | 'fulfilled' | 'not_fulfilled'>('open');
   const [editNotes, setEditNotes] = useState('');
   const [editAuditee, setEditAuditee] = useState('');
   const [editAuditDate, setEditAuditDate] = useState('');
@@ -161,8 +184,8 @@ export default function AuditsClient({
 
   const handleOpenItem = (item: any) => {
     setSelectedItem(item);
-    // Default to 'fulfilled' unless it is already an established non-conformity ('not_fulfilled')
-    setEditStatus(item.status === 'not_fulfilled' ? 'not_fulfilled' : 'fulfilled');
+    // Do NOT preselect fulfilled when status is open: user must explicitly choose
+    setEditStatus((item.status === 'fulfilled' || item.status === 'not_fulfilled') ? item.status : 'open');
     setEditNotes(item.implementationNotes || '');
     setEditAuditee(item.auditee || '');
     setEditAuditDate(item.auditDate ? new Date(item.auditDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
@@ -215,6 +238,10 @@ export default function AuditsClient({
 
   const handleSaveItem = async () => {
     if (!selectedItem) return;
+    if (editStatus === 'open') {
+      setToast({ text: 'Bitte wähle zuerst eine Bewertung aus: "Erfüllt" oder "Nicht erfüllt".', type: 'error' });
+      return;
+    }
     setIsSaving(true);
     setToast(null);
 
@@ -451,8 +478,10 @@ export default function AuditsClient({
                         <span className="text-slate-400 italic">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300 max-w-xs truncate">
-                      {item.implementationNotes || <span className="text-slate-400 italic">Keine Anmerkung</span>}
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300 max-w-sm">
+                      <div className="line-clamp-2">
+                        {item.implementationNotes ? renderTextWithLinks(item.implementationNotes) : <span className="text-slate-400 italic">Keine Anmerkung</span>}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-1.5">
@@ -594,7 +623,7 @@ export default function AuditsClient({
                       className={`p-3.5 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                         editStatus === 'fulfilled'
                           ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-500/20'
-                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:border-emerald-300'
                       }`}
                     >
                       <span className="text-base">✅</span> Erfüllt (Konform)
@@ -605,13 +634,20 @@ export default function AuditsClient({
                       className={`p-3.5 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                         editStatus === 'not_fulfilled'
                           ? 'bg-red-600 text-white border-red-600 shadow-md ring-2 ring-red-500/20'
-                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-950/20'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-950/20 hover:border-red-300'
                       }`}
                     >
                       <span className="text-base">❌</span> Nicht erfüllt (Abweichung)
                     </button>
                   </div>
                 </div>
+
+                {editStatus === 'open' && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/80 rounded-xl text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2 animate-in fade-in duration-150">
+                    <span className="text-sm">⏳</span>
+                    <span><strong>Noch nicht bewertet:</strong> Bitte wähle aus, ob diese Vorgabe <strong>Erfüllt</strong> oder <strong>Nicht erfüllt</strong> ist.</span>
+                  </div>
+                )}
 
                 {editStatus === 'fulfilled' && (
                   <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/80 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 animate-in fade-in duration-150">
@@ -620,8 +656,8 @@ export default function AuditsClient({
                   </div>
                 )}
 
-                {/* Audit Meta (Auditee, Date, Evidence) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Audit Meta (Auditee, Date) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
                       👤 Geprüfte Person
@@ -646,32 +682,62 @@ export default function AuditsClient({
                       className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                      🔗 Nachweis / Link
-                    </label>
-                    <input 
-                      type="text"
-                      value={editEvidenceLink}
-                      onChange={e => setEditEvidenceLink(e.target.value)}
-                      placeholder="Link oder Dokumenten-ID"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
                 </div>
 
-                {/* Feststellung / Notizen */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    📝 Audit-Feststellung / Begründung & Anmerkung
-                  </label>
+                {/* Großer Textbereich für Feststellung, Begründung und mehrere Nachweis-Links */}
+                <div className="space-y-1.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      📝 Audit-Feststellung / Begründung & Nachweise
+                    </label>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      💡 Links (https://...) können direkt als Text eingefügt werden
+                    </span>
+                  </div>
                   <textarea 
-                    rows={3}
+                    rows={7}
                     value={editNotes}
                     onChange={e => setEditNotes(e.target.value)}
-                    placeholder="Beschreibung der Situation, Feststellungen, Prüfnachweise oder Begründung der Bewertung..."
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                    placeholder="Beschreibe hier ausführlich die Feststellungen, Prüfnachweise, Begründung oder füge beliebig viele Nachweis-Links ein (z.B. https://sharepoint.firma.de/dokument, Intranet-Pfade, SOPs, QAPs)..."
+                    className="w-full p-3.5 text-sm rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 min-h-[160px] resize-y leading-relaxed"
+                  />
+                  
+                  {/* Erkannte Links im Text automatisch klickbar vorschauen */}
+                  {editNotes && /(https?:\/\/[^\s]+)/.test(editNotes) && (
+                    <div className="p-2.5 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-xl text-xs space-y-1 animate-in fade-in">
+                      <div className="font-bold text-blue-900 dark:text-blue-300 text-[11px] uppercase flex items-center gap-1.5">
+                        <span>🔗</span> Erkannte Nachweis-Links (direkt klickbar):
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-0.5">
+                        {Array.from(new Set(editNotes.match(/(https?:\/\/[^\s]+)/g) || [])).map((url, i) => (
+                          <a
+                            key={i}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:underline max-w-xs truncate font-medium text-xs shadow-sm"
+                            title={url}
+                          >
+                            <span>↗</span>
+                            <span className="truncate">{url}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Zusätzliche Nachweise / Links */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    🔗 Zusätzliche Nachweis-Dokumente / Dateipfade (Optional)
+                  </label>
+                  <textarea 
+                    rows={2}
+                    value={editEvidenceLink}
+                    onChange={e => setEditEvidenceLink(e.target.value)}
+                    placeholder="z.B. SOP-04, SharePoint-Link, Dokumenten-ID..."
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 resize-y"
                   />
                 </div>
 
