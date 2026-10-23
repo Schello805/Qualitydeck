@@ -4,6 +4,23 @@ import { getDepartments } from '@/actions/departments';
 import { saveAuditItem } from '@/actions/audits';
 import { getRequirements, updateRequirement, createRequirement, deleteRequirement } from '@/actions/requirements';
 
+function parseDepartments(deptValue: any): string[] | 'all' {
+  if (!deptValue || deptValue === 'all') return 'all';
+  if (Array.isArray(deptValue)) return deptValue;
+  try {
+    const parsed = JSON.parse(deptValue);
+    if (Array.isArray(parsed)) {
+      if (parsed.length === 1 && parsed[0] === 'Alle Bereiche') return 'all';
+      return parsed;
+    }
+  } catch {}
+  if (typeof deptValue === 'string') {
+    if (deptValue === 'Alle Bereiche') return 'all';
+    return deptValue.split(',').map((s: string) => s.trim()).filter(Boolean);
+  }
+  return 'all';
+}
+
 export default function RequirementsPage() {
   const [requirements, setRequirements] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,9 +116,13 @@ export default function RequirementsPage() {
         getRequirements()
       ]);
       setAvailableDepts(depts.map((d: any) => d.name));
+      const parsedReqs = reqs.map((r: any) => ({
+        ...r,
+        departments: parseDepartments(r.departments)
+      }));
       // Sort reqs naturally by chapter
-      reqs.sort((a: any, b: any) => a.chapter.localeCompare(b.chapter, undefined, { numeric: true, sensitivity: 'base' }));
-      setRequirements(reqs);
+      parsedReqs.sort((a: any, b: any) => a.chapter.localeCompare(b.chapter, undefined, { numeric: true, sensitivity: 'base' }));
+      setRequirements(parsedReqs);
       setIsLoading(false);
     }
     loadData();
@@ -118,7 +139,7 @@ export default function RequirementsPage() {
     setEditDesc(req.description);
     setEditOriginalText(req.originalText || '');
     setEditRoles(req.roles || 'all');
-    setEditDepts(req.departments || 'all');
+    setEditDepts(parseDepartments(req.departments));
   };
 
   const handleSaveClick = async (reqId: string) => {
@@ -427,15 +448,21 @@ export default function RequirementsPage() {
               
               {/* Tags Display */}
               <div className="flex flex-wrap gap-2 mb-3">
-                {req.departments === 'all' ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-semibold">
-                    <span>🏢</span> Alle Abteilungen
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-xs font-semibold">
-                    <span>🎯</span> Spezifisch: {Array.isArray(req.departments) ? req.departments.join(', ') : ''}
-                  </span>
-                )}
+                {(() => {
+                  const depts = parseDepartments(req.departments);
+                  if (depts === 'all' || (Array.isArray(depts) && depts.length === 0)) {
+                    return (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-semibold">
+                        <span>🏢</span> Alle Abteilungen
+                      </span>
+                    );
+                  }
+                  return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-xs font-semibold">
+                      <span>🎯</span> {depts.join(', ')}
+                    </span>
+                  );
+                })()}
                 
                 {req.roles === 'all' ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-semibold">
