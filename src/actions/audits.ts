@@ -1,6 +1,5 @@
 'use server';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function saveAuditItem(data: {
@@ -116,5 +115,60 @@ export async function getAllAuditItems() {
   } catch (error) {
     console.error('Error fetching all audit items:', error);
     return [];
+  }
+}
+
+export async function updateAuditReportItem(
+  id: string,
+  data: {
+    status: string;
+    notes?: string;
+    auditee?: string;
+    auditDate?: string;
+    evidenceLink?: string;
+    immediateAction?: string;
+    immediatePlannedDate?: string;
+    preventiveAction?: string;
+    preventivePlannedDate?: string;
+    responsible?: string;
+    responsibleEmail?: string;
+    plannedDate?: string;
+  }
+) {
+  try {
+    const updated = await prisma.auditItem.update({
+      where: { id },
+      data: {
+        status: data.status,
+        ...(data.notes !== undefined ? { implementationNotes: data.notes } : {}),
+        ...(data.auditee !== undefined ? { auditee: data.auditee } : {}),
+        ...(data.auditDate !== undefined ? { auditDate: data.auditDate } : {}),
+        ...(data.evidenceLink !== undefined ? { evidenceLink: data.evidenceLink } : {}),
+        ...(data.immediateAction !== undefined ? { immediateAction: data.immediateAction } : {}),
+        ...(data.immediatePlannedDate !== undefined ? { immediatePlannedDate: data.immediatePlannedDate } : {}),
+        ...(data.preventiveAction !== undefined ? { preventiveAction: data.preventiveAction } : {}),
+        ...(data.preventivePlannedDate !== undefined ? { preventivePlannedDate: data.preventivePlannedDate } : {}),
+        ...(data.responsible !== undefined ? { responsible: data.responsible } : {}),
+        ...(data.responsibleEmail !== undefined ? { responsibleEmail: data.responsibleEmail } : {}),
+        ...(data.plannedDate !== undefined ? { plannedDate: data.plannedDate } : {}),
+      },
+      include: {
+        requirement: true,
+        audit: {
+          include: {
+            department: true
+          }
+        }
+      }
+    });
+
+    revalidatePath('/audits');
+    revalidatePath('/requirements');
+    revalidatePath('/action-log');
+    revalidatePath('/dashboard');
+    return { success: true, item: updated };
+  } catch (error: any) {
+    console.error('Error updating audit report item:', error);
+    return { error: error.message || 'Fehler beim Aktualisieren des Auditpunkts.' };
   }
 }

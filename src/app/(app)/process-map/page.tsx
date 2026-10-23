@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { getDepartments } from '@/actions/departments';
 import { updateDepartmentProcessType } from '@/actions/process-map';
 
@@ -64,10 +64,17 @@ export default function ProcessMapPage() {
 
   // Load from local storage on mount
   useEffect(() => {
-    const savedS = localStorage.getItem('pm-stakeholders');
-    const savedO = localStorage.getItem('pm-outcomes');
-    if (savedS) setStakeholders(JSON.parse(savedS));
-    if (savedO) setOutcomes(JSON.parse(savedO));
+    const timer = setTimeout(() => {
+      try {
+        const savedS = localStorage.getItem('pm-stakeholders');
+        const savedO = localStorage.getItem('pm-outcomes');
+        if (savedS) setStakeholders(JSON.parse(savedS));
+        if (savedO) setOutcomes(JSON.parse(savedO));
+      } catch {
+        // ignore parse error
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (isLoading) {
@@ -120,11 +127,11 @@ export default function ProcessMapPage() {
     if (!mapRef.current) return;
     
     try {
-      const canvas = await html2canvas(mapRef.current, {
-        scale: 2, // High resolution
+      const dataUrl = await toPng(mapRef.current, {
+        cacheBust: true,
         backgroundColor: '#ffffff',
+        pixelRatio: 2, // High resolution
       });
-      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = 'Prozesslandkarte.png';
       link.href = dataUrl;

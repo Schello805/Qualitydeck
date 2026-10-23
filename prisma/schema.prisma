@@ -46,39 +46,93 @@ model AuditItem {
   requirementId        String
   requirement          Requirement @relation(fields: [requirementId], references: [id])
   status               String      @default("open") // fulfilled, partially, not_fulfilled, not_applicable
-  implementationNotes  String?
+  implementationNotes  String? // Korrekturmaßnahme
+  immediateAction      String? // Sofortmaßnahme
+  preventiveAction     String? // Langfristige Abstellmaßnahme zur Vermeidung von Wiederholungen
   evidenceFileUrl      String?
   evidenceLink         String?
-  plannedDate          String?
-  responsible          String?
-  auditee              String?
-  auditDate            String?
+  plannedDate             String? // Zieldatum 2. Korrekturmaßnahme (max. 10 Tage)
+  immediatePlannedDate    String? // Zieldatum 1. Sofortmaßnahme (max. 3 Tage)
+  preventivePlannedDate   String? // Zieldatum 3. Langfristige Abstellmaßnahme (max. 30 Tage)
+  extensionHistory        String? // JSON-Array mit dokumentierten Fristverlängerungen
+  responsible             String?
+  responsibleEmail        String?
+  emailSent               Boolean     @default(false)
+  auditee                 String?
+  auditDate               String?
 }
 
 model Complaint {
-  id          String            @id @default(uuid())
-  title       String
-  description String
-  type        String            // 'internal' | 'external'
-  status      String            @default("open") // open, in_progress, closed
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  actions     ComplaintAction[]
+  id                    String            @id @default(uuid())
+  title                 String
+  description           String
+  type                  String            // 'internal' | 'supplier' | 'customer'
+  status                String            @default("open") // open, in_progress, closed
+  pdcaPhase             String?           @default("plan") // 'plan' | 'do' | 'check' | 'act'
+
+  // 1. Sofortmaßnahme (Containment) - SLA: max 3 Tage
+  immediateAction       String?
+  immediatePlannedDate  String?
+
+  // Ursachenanalyse (Root Cause / 5-Why / Ishikawa)
+  rootCause             String?
+
+  // 2. Korrekturmaßnahme (Korrektur & Ursachenbeseitigung) - SLA: max 10 Tage
+  correctiveAction      String?
+  plannedDate           String?
+
+  // 3. Langfristige Abstellmaßnahme (Wiederholvermeidung) - SLA: max 30 Tage
+  preventiveAction      String?
+  preventivePlannedDate String?
+
+  // Check (D8 Wirksamkeitsprüfung)
+  effectivenessCheck    String?
+  effectivenessDate     String?
+  effectivenessVerifier String?
+
+  // Act (Standardisierung & Lessons Learned)
+  standardizationNote   String?
+  standardizedDocs      String?
+
+  // Verantwortlicher Gesamt-Reklamation
+  responsible           String?
+  responsibleEmail      String?
+  extensionHistory      String?
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  actions               ComplaintAction[]
 }
 
 model ComplaintAction {
-  id          String    @id @default(uuid())
-  complaintId String
-  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
-  description String
-  responsible String
-  plannedDate DateTime
-  status      String    @default("open") // open, done
-  emailSent   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  id               String    @id @default(uuid())
+  complaintId      String
+  complaint        Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  description      String
+  actionType       String?   @default("corrective") // 'immediate' | 'corrective' | 'preventive'
+  pdcaPhase        String?   @default("do") // 'plan' | 'do' | 'check' | 'act'
+  responsible      String
+  responsibleEmail String?
+  plannedDate      DateTime
+  status           String    @default("open") // open, in_progress, done
+  extensionHistory String?
+  emailSent        Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  role       String?  // 'QMB', 'Auditor', 'Verantwortlicher', etc.
+  department String?
+  image      String?  // Profile picture / Avatar (Data URL or URL)
+  phone      String?
+  createdAt  DateTime @default(now())
 }
 
 model Setting {
   key   String @id
   value String
 }
+

@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 export const instant = false;
 
 export default async function DashboardPage() {
@@ -8,6 +7,14 @@ export default async function DashboardPage() {
   const departments = await prisma.department.findMany();
   const allItems = await prisma.auditItem.findMany({
     include: { requirement: true }
+  });
+  
+  const openComplaintsCount = await prisma.complaint.count({
+    where: { status: { in: ['open', 'in_progress'] } }
+  });
+
+  const openActionsCount = await prisma.complaintAction.count({
+    where: { status: 'open' }
   });
 
   const totalItems = allItems.length;
@@ -25,16 +32,6 @@ export default async function DashboardPage() {
     chapterStats[mainChapter].total++;
     if (item.status === 'fulfilled') chapterStats[mainChapter].fulfilled++;
   }
-
-  const chapterLabels: Record<string, string> = {
-    "4": "Kap 4: Kontext",
-    "5": "Kap 5: Führung",
-    "6": "Kap 6: Planung",
-    "7": "Kap 7: Unterstützung",
-    "8": "Kap 8: Betrieb",
-    "9": "Kap 9: Bewertung",
-    "1": "Kap 10: Verbesserung" // usually chapter 10 starts with 10.x, so main chapter is "10", wait: "10".charAt(0) is "1". Let's use split.
-  };
 
   const chartData = [4,5,6,7,8,9,10].map(ch => {
     // Filter all items where chapter starts with ch + "."
@@ -68,7 +65,6 @@ export default async function DashboardPage() {
         </div>
         <button 
           className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
-          onClick={null as any} // we can't use onClick in Server Component natively without "use client", but this is just design for now. We can omit it or make a client wrapper.
         >
           <span>📑</span> PDF Bericht generieren
         </button>
@@ -103,24 +99,23 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-          <span className="text-slate-500 text-sm font-semibold uppercase tracking-wider">Abweichungen</span>
+          <span className="text-slate-500 text-sm font-semibold uppercase tracking-wider">Reklamationen</span>
           <div>
-            <span className="text-4xl font-black text-rose-500">{notFulfilledCount}</span>
-            <p className="text-slate-500 text-sm mt-1">Nicht erfüllt</p>
+            <span className="text-4xl font-black text-rose-500">{openComplaintsCount}</span>
+            <p className="text-slate-500 text-sm mt-1">Offen / In Bearbeitung</p>
           </div>
-          <span className="text-xs text-rose-700 font-bold bg-rose-100 dark:bg-rose-900/30 w-max px-3 py-1 rounded-full mt-4">Kritisch: {notFulfilledCount}</span>
+          <span className="text-xs text-rose-700 font-bold bg-rose-100 dark:bg-rose-900/30 w-max px-3 py-1 rounded-full mt-4">{notFulfilledCount} Audit Abweichungen</span>
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <span className="text-slate-500 text-sm font-semibold uppercase tracking-wider">Maßnahmen (CAPA)</span>
           <div>
-            <span className="text-4xl font-black text-amber-500">{partialCount}</span>
-            <p className="text-slate-500 text-sm mt-1">Teilweise erfüllt / Offen</p>
+            <span className="text-4xl font-black text-amber-500">{openActionsCount + partialCount}</span>
+            <p className="text-slate-500 text-sm mt-1">Offene Aufgaben gesamt</p>
           </div>
-          <div className="flex -space-x-2 mt-4">
-            <div className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-amber-500 flex items-center justify-center text-white text-xs font-bold">JD</div>
-            <div className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-blue-500 flex items-center justify-center text-white text-xs font-bold">MS</div>
-            <div className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 text-xs font-bold">+ {Math.max(0, partialCount - 2)}</div>
+          <div className="mt-4 flex flex-col gap-1 text-sm text-slate-500">
+            <span>• {openActionsCount} aus Reklamationen</span>
+            <span>• {partialCount} aus Audits</span>
           </div>
         </div>
       </div>
@@ -138,7 +133,7 @@ export default async function DashboardPage() {
                     className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ${
                       item.val === 100 ? 'bg-green-500' : item.val >= 80 ? 'bg-blue-500' : item.val === 0 ? 'bg-slate-300 dark:bg-slate-700' : 'bg-amber-500'
                     }`} 
-                    style={{ width: `${Math.max(item.val, 5)}%` }} // Minimum width 5% just for visibility if 0 it will be 0 but styled gray
+                    style={{ width: `${item.val}%` }}
                   ></div>
                 </div>
                 <span className="w-10 text-right text-sm font-bold">{item.val}%</span>

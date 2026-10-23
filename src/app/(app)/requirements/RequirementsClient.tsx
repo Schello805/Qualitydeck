@@ -398,17 +398,19 @@ export default function RequirementsPage() {
           {editingId === req.id ? (
             <button 
               onClick={() => handleSaveClick(req.id)}
-              className="text-white bg-green-600 hover:bg-green-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm"
+              disabled={isSaving}
+              className="text-white bg-green-600 hover:bg-green-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm disabled:opacity-50"
             >
-              Speichern
+              {isSaving ? 'Speichert...' : 'Speichern'}
             </button>
           ) : auditingId === req.id ? (
             <div className="flex flex-col gap-2">
               <button 
                 onClick={() => handleAuditSave(req.chapter)}
-                className="text-white bg-blue-600 hover:bg-blue-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm"
+                disabled={isSaving}
+                className="text-white bg-blue-600 hover:bg-blue-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm disabled:opacity-50"
               >
-                Prüfung speichern
+                {isSaving ? 'Speichert...' : 'Prüfung speichern'}
               </button>
               <button 
                 onClick={() => setAuditingId(null)}
@@ -492,7 +494,11 @@ export default function RequirementsPage() {
       </div>
 
       <div className="space-y-6">
-        {searchTerm ? (
+        {isLoading ? (
+          <div className="p-12 text-center text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+            Lade Normkatalog...
+          </div>
+        ) : searchTerm ? (
           // Flat list for search
           filteredReqs.length === 0 ? (
             <div className="p-12 text-center text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">

@@ -11,8 +11,8 @@ export async function updateDepartmentProcessType(departmentId: string, processT
     });
     revalidatePath('/process-map');
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating process type:", error);
-    return { error: error.message };
+    return { error: error instanceof Error ? error.message : 'Unbekannter Fehler' };
   }
 }

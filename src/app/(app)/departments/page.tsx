@@ -1,5 +1,4 @@
 import { getDepartments, createDepartment, deleteDepartment } from '@/actions/departments';
-import { revalidatePath } from 'next/cache';
 
 export const instant = false;
 

@@ -14,34 +14,63 @@ export async function getDepartments() {
   }
 }
 
-export async function createDepartment(formData: FormData) {
+export async function createDepartmentDirect(data: { name: string; manager?: string; processType?: string }) {
+  const name = data.name.trim();
+  if (!name) return { error: 'Abteilungsname darf nicht leer sein.' };
+
+  try {
+    const existing = await prisma.department.findFirst({
+      where: { name }
+    });
+    if (existing) {
+      return { success: true, department: existing };
+    }
+
+    const department = await prisma.department.create({
+      data: {
+        name,
+        manager: data.manager?.trim() || null,
+        processType: data.processType || 'core'
+      }
+    });
+
+    revalidatePath('/departments');
+    revalidatePath('/users');
+    revalidatePath('/action-log');
+    return { success: true, department };
+  } catch (error: any) {
+    console.error("Error creating department:", error);
+    return { error: error.message || "Fehler beim Erstellen der Abteilung." };
+  }
+}
+
+export async function createDepartment(formData: FormData): Promise<void> {
   const name = formData.get('name') as string;
   const manager = formData.get('manager') as string;
 
   if (!name) return;
-
-  try {
-    await prisma.department.create({
-      data: {
-        name,
-        manager
-      }
-    });
-    revalidatePath('/departments');
-  } catch (error) {
-    console.error("Error creating department:", error);
-  }
+  await createDepartmentDirect({ name, manager });
 }
 
 export async function deleteDepartment(id: string) {
   try {
+    const relatedAudits = await prisma.audit.count({
+      where: { departmentId: id }
+    });
+
+    if (relatedAudits > 0) {
+      return { 
+        error: `Diese Abteilung kann nicht gelöscht werden, da noch ${relatedAudits} Audit(s) damit verknüpft sind. Bitte lösche oder verschiebe die Audits zuerst.` 
+      };
+    }
+
     await prisma.department.delete({
       where: { id }
     });
     revalidatePath('/departments');
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting department:", error);
-    return { error: "Fehler beim Löschen" };
+    return { error: error.message || "Fehler beim Löschen der Abteilung." };
   }
 }

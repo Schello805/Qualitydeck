@@ -1,5 +1,4 @@
 import { getComplaints } from '@/actions/complaints';
-import Link from 'next/link';
 import ClientPage from './ClientPage';
 
 export const instant = false;
