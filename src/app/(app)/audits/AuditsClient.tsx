@@ -56,7 +56,6 @@ export default function AuditsClient({
 
   // Modal State for Reading & Updating Audit Items
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
-  const [modalTab, setModalTab] = useState<'edit' | 'requirement'>('edit');
   const [editStatus, setEditStatus] = useState<'open' | 'fulfilled' | 'not_fulfilled'>('open');
   const [editNotes, setEditNotes] = useState('');
   const [editAuditee, setEditAuditee] = useState('');
@@ -217,7 +216,6 @@ export default function AuditsClient({
     }
 
     setToast(null);
-    setModalTab('edit');
   };
 
   const handleUserSelect = (val: string) => {
@@ -515,51 +513,20 @@ export default function AuditsClient({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-3xl p-6 space-y-5 my-8 max-h-[92vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 text-xs font-mono font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 rounded-lg">
-                    Kapitel {selectedItem.requirement?.chapter}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">
-                    Abteilung: <strong className="text-slate-700 dark:text-slate-200">{selectedItem.audit?.department?.name || 'QM'}</strong>
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-                  {selectedItem.requirement?.title}
-                </h3>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Auditpunkt prüfen & bewerten
+                </span>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+                  Kap. {selectedItem.requirement?.chapter} – {selectedItem.requirement?.title}
+                </h2>
               </div>
               <button 
                 onClick={() => setSelectedItem(null)}
-                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-2xl font-bold p-1"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-2xl font-bold p-1 rounded-lg"
               >
                 ✕
-              </button>
-            </div>
-
-            {/* Modal Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <button
-                type="button"
-                onClick={() => setModalTab('edit')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                  modalTab === 'edit'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <span>✏️</span> Audit-Ergebnis korrigieren & updaten
-              </button>
-              <button
-                type="button"
-                onClick={() => setModalTab('requirement')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                  modalTab === 'requirement'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <span>📖</span> ISO 9001 Normtext lesen
               </button>
             </div>
 
@@ -574,48 +541,51 @@ export default function AuditsClient({
               </div>
             )}
 
-            {/* Tab 1: Normvorgabe lesen */}
-            {modalTab === 'requirement' && (
-              <div className="space-y-4 animate-in fade-in">
-                <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-blue-800 dark:text-blue-300">
-                    <span>DIN EN ISO 9001:2015 Anforderung</span>
-                    <span>Kategorie: {selectedItem.requirement?.category || 'Standard'}</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {selectedItem.requirement?.chapter} {selectedItem.requirement?.title}
-                  </h4>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                    {selectedItem.requirement?.description}
-                  </p>
+            {/* 1. NORMVORGABE & NORMTEXT (Direkt über der Bewertung) */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-1 text-xs font-mono font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 rounded-lg">
+                    Kapitel {selectedItem.requirement?.chapter}
+                  </span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    Abteilung: <strong className="text-blue-600 dark:text-blue-400">{selectedItem.audit?.department?.name || 'QM'}</strong>
+                  </span>
                 </div>
-
-                {selectedItem.requirement?.originalText && (
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-1.5">
-                    <span className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">
-                      Wortlaut der Norm:
-                    </span>
-                    <p className="text-xs text-slate-700 dark:text-slate-300 italic leading-relaxed">
-                      „{selectedItem.requirement?.originalText}“
-                    </p>
-                  </div>
+                {selectedItem.requirement?.category && (
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    DIN EN ISO 9001:2015 • {selectedItem.requirement.category}
+                  </span>
                 )}
-
-                <div className="flex items-center gap-4 text-xs text-slate-500 pt-2">
-                  <span>Relevante Abteilungen: <strong>{selectedItem.requirement?.departments || 'Alle'}</strong></span>
-                  <span>Rollen: <strong>{selectedItem.requirement?.roles || 'Alle'}</strong></span>
-                </div>
               </div>
-            )}
 
-            {/* Tab 2: Edit Form */}
-            {modalTab === 'edit' && (
-              <div className="space-y-4 animate-in fade-in">
-                {/* Status Switcher Buttons */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">
-                    Audit-Bewertung (Status) *
-                  </label>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                {selectedItem.requirement?.title}
+              </h3>
+
+              {selectedItem.requirement?.description && (
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                  {selectedItem.requirement.description}
+                </p>
+              )}
+
+              {selectedItem.requirement?.originalText && (
+                <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border-l-4 border-blue-500 dark:border-blue-400 text-xs text-slate-700 dark:text-slate-300 italic leading-relaxed whitespace-pre-line">
+                  <span className="block font-bold not-italic text-[10px] uppercase text-blue-700 dark:text-blue-300 mb-1">
+                    📖 Originaltext der Norm DIN EN ISO 9001:
+                  </span>
+                  „{selectedItem.requirement.originalText}“
+                </div>
+              )}
+            </div>
+
+            {/* 2. AUDIT-BEWERTUNG & DOKUMENTATION (Direkt darunter) */}
+            <div className="space-y-4 pt-1">
+              {/* Status Switcher Buttons */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">
+                  Audit-Bewertung (Status) *
+                </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -892,7 +862,6 @@ export default function AuditsClient({
                   </div>
                 )}
               </div>
-            )}
 
             {/* Footer Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
