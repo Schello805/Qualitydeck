@@ -140,9 +140,11 @@ export async function startNewAudit(departmentId: string, auditor?: string) {
       if (!req.departments || req.departments === 'all') return true;
       try {
         const depts = JSON.parse(req.departments);
-        if (Array.isArray(depts)) return depts.includes(department.name);
+        if (Array.isArray(depts)) {
+          return depts.includes(department.name) || depts.includes('Alle Bereiche');
+        }
       } catch {
-        return req.departments.includes(department.name);
+        return req.departments.includes(department.name) || req.departments.includes('Alle Bereiche');
       }
       return true;
     });
