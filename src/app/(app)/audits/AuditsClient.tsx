@@ -161,10 +161,11 @@ export default function AuditsClient({
 
   const handleOpenItem = (item: any) => {
     setSelectedItem(item);
-    setEditStatus((item.status === 'fulfilled' ? 'fulfilled' : 'not_fulfilled'));
+    // Default to 'fulfilled' unless it is already an established non-conformity ('not_fulfilled')
+    setEditStatus(item.status === 'not_fulfilled' ? 'not_fulfilled' : 'fulfilled');
     setEditNotes(item.implementationNotes || '');
     setEditAuditee(item.auditee || '');
-    setEditAuditDate(item.auditDate ? new Date(item.auditDate).toISOString().split('T')[0] : '');
+    setEditAuditDate(item.auditDate ? new Date(item.auditDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
     setEditEvidenceLink(item.evidenceLink || '');
     setEditImmediateAction(item.immediateAction || '');
     setEditImmediatePlannedDate(item.immediatePlannedDate ? new Date(item.immediatePlannedDate).toISOString().split('T')[0] : '');
@@ -584,33 +585,40 @@ export default function AuditsClient({
                 {/* Status Switcher Buttons */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">
-                    Audit-Bewertung (Status)
+                    Audit-Bewertung (Status) *
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setEditStatus('fulfilled')}
-                      className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                      className={`p-3.5 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                         editStatus === 'fulfilled'
                           ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-500/20'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20'
                       }`}
                     >
-                      <span className="text-base">✅</span> Erfüllt (Konform nach ISO 9001)
+                      <span className="text-base">✅</span> Erfüllt (Konform)
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditStatus('not_fulfilled')}
-                      className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                      className={`p-3.5 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                         editStatus === 'not_fulfilled'
                           ? 'bg-red-600 text-white border-red-600 shadow-md ring-2 ring-red-500/20'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-950/20'
                       }`}
                     >
-                      <span className="text-base">❌</span> Abweichung (Korrekturmaßnahme erforderlich)
+                      <span className="text-base">❌</span> Nicht erfüllt (Abweichung)
                     </button>
                   </div>
                 </div>
+
+                {editStatus === 'fulfilled' && (
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/80 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 animate-in fade-in duration-150">
+                    <span className="text-sm">✅</span>
+                    <span><strong>Anforderung erfüllt:</strong> Die Vorgabe ist konform umgesetzt. Kein Maßnahmenplan erforderlich.</span>
+                  </div>
+                )}
 
                 {/* Audit Meta (Auditee, Date, Evidence) */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
