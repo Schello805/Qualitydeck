@@ -162,10 +162,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         )}
       </div>
       
-      <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+      <nav className="flex-1 p-3.5 space-y-5 overflow-y-auto overflow-x-hidden">
         {navGroups.map((group, i) => (
           <div key={i}>
-            <h3 className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
               {group.title}
             </h3>
             <div className="space-y-1">
@@ -175,18 +175,18 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   <Link 
                     key={link.href}
                     href={link.href} 
-                    className={`flex items-center justify-between px-4 py-2.5 rounded-xl font-medium transition-colors ${
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium transition-colors group ${
                       isActive 
                         ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-semibold shadow-sm" 
                         : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg opacity-80">{link.icon}</span> 
-                      <span className="text-sm">{link.label}</span>
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                      <span className="text-lg opacity-85 shrink-0">{link.icon}</span> 
+                      <span className="text-sm whitespace-nowrap">{link.label}</span>
                     </div>
                     {link.badge && (
-                      <span className={`text-[11px] font-black px-2 py-0.5 rounded-full ${link.badgeColor || 'bg-blue-600 text-white'} shadow-sm`}>
+                      <span className={`text-[11px] font-black px-2 py-0.5 rounded-full shrink-0 ${link.badgeColor || 'bg-blue-600 text-white'} shadow-sm`}>
                         {link.badge}
                       </span>
                     )}
@@ -218,7 +218,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 print:bg-white print:text-black">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col print:hidden shrink-0">
+      <aside className="hidden md:flex w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col print:hidden shrink-0 overflow-x-hidden">
         {renderNavContent()}
       </aside>
 
@@ -229,7 +229,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             onClick={() => setMobileMenuOpen(false)}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
           />
-          <aside className="relative w-72 max-w-[80vw] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shadow-2xl z-10 animate-in slide-in-from-left duration-300">
+          <aside className="relative w-80 max-w-[85vw] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shadow-2xl z-10 animate-in slide-in-from-left duration-300 overflow-x-hidden">
             {renderNavContent()}
           </aside>
         </div>
