@@ -74,7 +74,7 @@ export async function updateComplaintStatus(id: string, status: string) {
   }
 }
 
-import { getTransporter, formatSmtpError, getAppBaseUrl, escapeHtml } from '@/lib/email';
+import { getTransporter, formatSmtpError, getAppBaseUrl } from '@/lib/email';
 
 export async function updateComplaintFields(
   id: string, 
@@ -147,7 +147,7 @@ export async function updateComplaintFields(
       let historyList: any[] = [];
       try {
         if (current.extensionHistory) historyList = JSON.parse(current.extensionHistory);
-      } catch (e) {
+      } catch {
         historyList = [];
       }
 
@@ -161,7 +161,8 @@ export async function updateComplaintFields(
       updatedHistory = JSON.stringify(historyList);
     }
 
-    const { extensionReason, ...fieldsToUpdate } = data;
+    const { extensionReason: _unusedReason, ...fieldsToUpdate } = data;
+    void _unusedReason;
 
     await prisma.complaint.update({
       where: { id },
@@ -332,7 +333,7 @@ export async function updateComplaintAction(
       let historyList: any[] = [];
       try {
         if (current.extensionHistory) historyList = JSON.parse(current.extensionHistory);
-      } catch (e) {
+      } catch {
         historyList = [];
       }
 
@@ -565,7 +566,7 @@ export async function getNavCounts() {
       openActions: openComplaintActions + unfulfilledAuditItems,
       unfulfilledAuditItems,
     };
-  } catch (error) {
+  } catch {
     return { openComplaints: 0, openActions: 0, unfulfilledAuditItems: 0 };
   }
 }

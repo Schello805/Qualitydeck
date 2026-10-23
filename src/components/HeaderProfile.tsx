@@ -1,16 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { getCurrentProfile, updateProfile, getUsers } from '@/actions/users';
 
 export default function HeaderProfile() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [profile, setProfile] = useState<any>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -44,10 +47,11 @@ export default function HeaderProfile() {
   };
 
   useEffect(() => {
-    setMounted(true);
-    loadProfile();
+    Promise.resolve().then(() => loadProfile());
 
-    const handleProfileUpdate = () => loadProfile();
+    const handleProfileUpdate = () => {
+      Promise.resolve().then(() => loadProfile());
+    };
     window.addEventListener('profile-updated', handleProfileUpdate);
 
     // Close dropdown on outside click

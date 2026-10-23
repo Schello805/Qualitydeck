@@ -123,12 +123,12 @@ export default function ActionLogClient({
       if (targetId) {
         const found = items.find(i => i.id === targetId);
         if (found) {
-          handleOpenEdit(found);
+          Promise.resolve().then(() => handleOpenEdit(found));
         }
       }
       const searchParam = params.get('search');
       if (searchParam) {
-        setSearch(searchParam);
+        Promise.resolve().then(() => setSearch(searchParam));
       }
     }
   }, [items]);

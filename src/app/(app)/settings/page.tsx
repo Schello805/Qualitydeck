@@ -20,7 +20,7 @@ export default function SettingsPage() {
   // Logo upload state
   const [isUploading, setIsUploading] = useState(false);
   const [logoMessage, setLogoMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
-  const [logoPreviewBuster, setLogoPreviewBuster] = useState(Date.now());
+  const [logoPreviewBuster, setLogoPreviewBuster] = useState(0);
 
   // SMTP Settings
   const [smtpSettings, setSmtpSettings] = useState({

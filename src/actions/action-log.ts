@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { getTransporter, formatSmtpError, getAppBaseUrl, escapeHtml } from '@/lib/email';
+import { getTransporter, formatSmtpError, getAppBaseUrl } from '@/lib/email';
 import { updateComplaintFields } from '@/actions/complaints';
 
 export async function getActionLogItems() {
@@ -195,7 +195,7 @@ export async function updateAuditItemAction(
       let historyList: any[] = [];
       try {
         if (current.extensionHistory) historyList = JSON.parse(current.extensionHistory);
-      } catch (e) {
+      } catch {
         historyList = [];
       }
 

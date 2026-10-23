@@ -32,10 +32,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDark(true);
+      Promise.resolve().then(() => setIsDark(true));
       document.documentElement.classList.add('dark');
     } else {
-      setIsDark(false);
+      Promise.resolve().then(() => setIsDark(false));
       document.documentElement.classList.remove('dark');
     }
   }, []);
@@ -78,7 +78,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   // Close mobile menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
+    Promise.resolve().then(() => setMobileMenuOpen(false));
   }, [pathname]);
 
   const handleLogoError = () => {

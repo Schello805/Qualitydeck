@@ -84,7 +84,7 @@ export function getAppBaseUrl(settings?: Record<string, string>, reqUrl?: string
     try {
       const u = new URL(reqUrl);
       return u.origin;
-    } catch (e) {}
+    } catch {}
   }
   return 'http://localhost:3000';
 }
