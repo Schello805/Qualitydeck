@@ -252,3 +252,58 @@ export async function updateAuditReportItem(
     return { error: error.message || 'Fehler beim Aktualisieren des Auditpunkts.' };
   }
 }
+
+export async function deleteAuditItem(id: string) {
+  try {
+    const item = await prisma.auditItem.findUnique({
+      where: { id },
+      include: { audit: true }
+    });
+
+    if (!item) {
+      return { error: 'Auditpunkt nicht gefunden.' };
+    }
+
+    await prisma.auditItem.delete({
+      where: { id }
+    });
+
+    // If audit has no more items, clean up the empty audit
+    const remainingCount = await prisma.auditItem.count({
+      where: { auditId: item.auditId }
+    });
+
+    if (remainingCount === 0) {
+      await prisma.audit.delete({
+        where: { id: item.auditId }
+      }).catch(() => null);
+    }
+
+    revalidatePath('/audits');
+    revalidatePath('/requirements');
+    revalidatePath('/action-log');
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting audit item:', error);
+    return { error: error.message || 'Fehler beim Löschen des Auditpunkts.' };
+  }
+}
+
+export async function deleteAudit(auditId: string) {
+  try {
+    await prisma.audit.delete({
+      where: { id: auditId }
+    });
+
+    revalidatePath('/audits');
+    revalidatePath('/requirements');
+    revalidatePath('/action-log');
+    revalidatePath('/dashboard');
+    revalidatePath('/departments');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting audit:', error);
+    return { error: error.message || 'Fehler beim Löschen des Audits.' };
+  }
+}

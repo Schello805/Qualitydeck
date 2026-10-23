@@ -55,6 +55,33 @@ export async function createDepartment(formData: FormData): Promise<void> {
   await createDepartmentDirect({ name, manager });
 }
 
+export async function updateDepartment(id: string, data: { name: string; manager?: string; processType?: string }) {
+  const name = data.name.trim();
+  if (!name) return { error: 'Abteilungsname darf nicht leer sein.' };
+
+  try {
+    const updated = await prisma.department.update({
+      where: { id },
+      data: {
+        name,
+        manager: data.manager?.trim() || null,
+        ...(data.processType ? { processType: data.processType } : {})
+      }
+    });
+
+    revalidatePath('/departments');
+    revalidatePath('/audits');
+    revalidatePath('/requirements');
+    revalidatePath('/users');
+    revalidatePath('/action-log');
+    revalidatePath('/dashboard');
+    return { success: true, department: updated };
+  } catch (error: any) {
+    console.error("Error updating department:", error);
+    return { error: error.message || "Fehler beim Aktualisieren der Abteilung." };
+  }
+}
+
 export async function deleteDepartment(id: string) {
   try {
     const relatedAudits = await prisma.audit.count({

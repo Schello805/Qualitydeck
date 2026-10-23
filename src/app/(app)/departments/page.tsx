@@ -1,5 +1,5 @@
-import { getDepartments, createDepartment, deleteDepartment } from '@/actions/departments';
-import StartAuditButton from './StartAuditButton';
+import { getDepartments, createDepartment } from '@/actions/departments';
+import DepartmentCard from './DepartmentCard';
 
 export const instant = false;
 
@@ -54,29 +54,7 @@ export default async function DepartmentsPage() {
           </div>
         ) : (
           departments.map((dept) => (
-            <div key={dept.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden flex flex-col">
-              
-              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <form action={async () => {
-                  'use server';
-                  await deleteDepartment(dept.id);
-                }}>
-                  <button type="submit" className="text-slate-400 hover:text-red-600 bg-white dark:bg-slate-900 p-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
-                    🗑️
-                  </button>
-                </form>
-              </div>
-
-              <div className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center text-xl mb-4">
-                🏢
-              </div>
-              <h3 className="text-xl font-bold mb-1">{dept.name}</h3>
-              <p className="text-slate-500 text-sm mb-4">Leitung: {dept.manager || 'Nicht zugewiesen'}</p>
-              
-              <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
-                <StartAuditButton departmentId={dept.id} departmentName={dept.name} />
-              </div>
-            </div>
+            <DepartmentCard key={dept.id} dept={dept} />
           ))
         )}
       </div>

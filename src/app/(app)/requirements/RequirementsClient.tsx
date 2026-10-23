@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getDepartments } from '@/actions/departments';
 import { saveAuditItem } from '@/actions/audits';
-import { getRequirements, updateRequirement } from '@/actions/requirements';
+import { getRequirements, updateRequirement, createRequirement, deleteRequirement } from '@/actions/requirements';
 
 export default function RequirementsPage() {
   const [requirements, setRequirements] = useState<any[]>([]);
@@ -19,6 +19,77 @@ export default function RequirementsPage() {
   
   const [availableDepts, setAvailableDepts] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // New Requirement Modal State
+  const [isCreating, setIsCreating] = useState(false);
+  const [newChapter, setNewChapter] = useState('');
+  const [newTitle, setNewTitle] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+  const [newOriginalText, setNewOriginalText] = useState('');
+  const [newRoles, setNewRoles] = useState<'all' | 'leadership'>('all');
+  const [newDepts, setNewDepts] = useState<'all' | string[]>('all');
+  const [newCategory, setNewCategory] = useState('');
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const handleCreateReq = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChapter.trim() || !newTitle.trim()) {
+      setCreateError('Kapitelnummer und Titel sind Pflichtfelder.');
+      return;
+    }
+
+    setIsSaving(true);
+    setCreateError(null);
+
+    const res = await createRequirement({
+      chapter: newChapter,
+      title: newTitle,
+      description: newDesc,
+      originalText: newOriginalText,
+      category: newCategory || undefined,
+      roles: newRoles,
+      departments: newDepts === 'all' ? 'all' : JSON.stringify(newDepts)
+    });
+
+    setIsSaving(false);
+
+    if (res?.error) {
+      setCreateError(res.error);
+    } else if (res?.requirement) {
+      setRequirements(prev => {
+        const next = [...prev, res.requirement];
+        next.sort((a, b) => a.chapter.localeCompare(b.chapter, undefined, { numeric: true, sensitivity: 'base' }));
+        return next;
+      });
+      setIsCreating(false);
+      setNewChapter('');
+      setNewTitle('');
+      setNewDesc('');
+      setNewOriginalText('');
+      setNewRoles('all');
+      setNewDepts('all');
+      setNewCategory('');
+    }
+  };
+
+  const handleDeleteReq = async (reqToDelete: any) => {
+    if (!confirm(`Möchtest du die Anforderung "Kap. ${reqToDelete.chapter} - ${reqToDelete.title}" wirklich löschen?\n\nHinweis: Eventuell vorhandene Prüfpunkte in Audits zu diesem Kapitel werden ebenfalls entfernt.`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    const res = await deleteRequirement(reqToDelete.id);
+    setIsDeleting(false);
+
+    if (res?.success) {
+      setRequirements(prev => prev.filter(r => r.id !== reqToDelete.id));
+      if (editingId === reqToDelete.id) setEditingId(null);
+      if (auditingId === reqToDelete.id) setAuditingId(null);
+    } else {
+      alert(res?.error || 'Fehler beim Löschen der Anforderung.');
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -427,12 +498,22 @@ export default function RequirementsPage() {
               >
                 <span>📋</span> Auditieren
               </button>
-              <button 
-                onClick={() => handleEditClick(req)}
-                className="text-slate-400 hover:text-blue-600 text-sm font-medium px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors bg-white dark:bg-slate-900"
-              >
-                Bearbeiten
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button 
+                  onClick={() => handleEditClick(req)}
+                  className="flex-1 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors bg-white dark:bg-slate-900 text-center"
+                >
+                  Bearbeiten
+                </button>
+                <button
+                  onClick={() => handleDeleteReq(req)}
+                  disabled={isDeleting}
+                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors bg-white dark:bg-slate-900 text-xs shadow-sm"
+                  title="Anforderung löschen"
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -475,7 +556,13 @@ export default function RequirementsPage() {
           >
             <span>📄</span> Norm herunterladen
           </a>
-          <button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-md transition-colors flex items-center gap-2">
+          <button 
+            onClick={() => {
+              setIsCreating(true);
+              setCreateError(null);
+            }}
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-md transition-colors flex items-center gap-2"
+          >
             <span>+</span> Vorgabe hinzufügen
           </button>
         </div>
@@ -570,6 +657,182 @@ export default function RequirementsPage() {
           })
         )}
       </div>
+
+      {/* CREATE REQUIREMENT MODAL */}
+      {isCreating && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl p-6 space-y-5 my-8 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>➕</span> Neue Anforderung anlegen
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Erstelle ein neues Normkapitel oder eine unternehmensspezifische Vorgabe für interne Audits.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreating(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-2xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateReq} className="space-y-4">
+              {createError && (
+                <div className="p-3 text-xs text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl">
+                  {createError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                    Kapitelnummer *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="z.B. 8.5.7"
+                    value={newChapter}
+                    onChange={(e) => setNewChapter(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-[10px] text-slate-400">z.B. 4.4.2 oder 8.5.7</span>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                    Titel der Anforderung *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="z.B. Besondere Kundenanforderungen"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                  Kategorie / Hauptüberschrift (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Automatisch aus Kapitel abgeleitet (oder z.B. Betrieb, Führung...)"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                  Kurzbeschreibung / Erläuterung
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Was besagt diese Anforderung in verständlichen Worten?"
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                  Normtext / Originaltext (Optional)
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Originale Textpassage der Norm oder interne Richtlinie..."
+                  value={newOriginalText}
+                  onChange={(e) => setNewOriginalText(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white italic focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Scope & Roles */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-2">
+                    Geltungsbereich (Abteilungen)
+                  </label>
+                  <select
+                    value={newDepts === 'all' ? 'all' : 'specific'}
+                    onChange={(e) => setNewDepts(e.target.value === 'all' ? 'all' : [])}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+                  >
+                    <option value="all">🏢 Alle Abteilungen</option>
+                    <option value="specific">🎯 Bestimmte Abteilungen...</option>
+                  </select>
+                  {Array.isArray(newDepts) && (
+                    <div className="mt-2 flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1">
+                      {availableDepts.length === 0 ? (
+                        <span className="text-xs text-amber-600">Keine Abteilungen vorhanden.</span>
+                      ) : (
+                        availableDepts.map((dept: string) => (
+                          <label key={dept} className="flex items-center gap-1.5 text-xs bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={newDepts.includes(dept)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setNewDepts([...newDepts, dept]);
+                                } else {
+                                  setNewDepts(newDepts.filter(d => d !== dept));
+                                }
+                              }}
+                            />
+                            {dept}
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-2">
+                    Zielgruppe (Rollen)
+                  </label>
+                  <select
+                    value={newRoles}
+                    onChange={(e) => setNewRoles(e.target.value as 'all' | 'leadership')}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+                  >
+                    <option value="all">👥 Alle Mitarbeiter</option>
+                    <option value="leadership">👑 Nur Führungskräfte</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsCreating(false)}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSaving ? 'Speichert...' : '💾 Anforderung speichern'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

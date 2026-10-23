@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { updateAuditReportItem } from '@/actions/audits';
+import { updateAuditReportItem, deleteAuditItem } from '@/actions/audits';
 
 export default function AuditsClient({ 
   initialItems = [], 
@@ -51,7 +51,28 @@ export default function AuditsClient({
   const [editResponsibleEmail, setEditResponsibleEmail] = useState('');
   
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const handleDeleteItem = async (itemToDelete: any) => {
+    if (!itemToDelete) return;
+    const chapterName = itemToDelete.requirement?.chapter ? `Kap. ${itemToDelete.requirement.chapter}` : 'diesen Punkt';
+    const deptName = itemToDelete.audit?.department?.name ? `(${itemToDelete.audit.department.name})` : '';
+    if (!confirm(`Möchtest du den Auditpunkt ${chapterName} ${deptName} wirklich löschen?`)) {
+      return;
+    }
+    setIsDeleting(true);
+    const res = await deleteAuditItem(itemToDelete.id);
+    setIsDeleting(false);
+    if (res?.success) {
+      setItems(prev => prev.filter(i => i.id !== itemToDelete.id));
+      if (selectedItem?.id === itemToDelete.id) {
+        setSelectedItem(null);
+      }
+    } else {
+      alert(res?.error || 'Fehler beim Löschen des Auditpunkts.');
+    }
+  };
 
   // Departments
   const departments = useMemo(() => {
@@ -433,13 +454,23 @@ export default function AuditsClient({
                       {item.implementationNotes || <span className="text-slate-400 italic">Keine Anmerkung</span>}
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => handleOpenItem(item)}
-                        className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:hover:bg-blue-600 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-1.5 mx-auto shadow-sm"
-                        title="Diesen Auditpunkt einsehen & korrigieren"
-                      >
-                        <span>✏️</span> Lesen & Korrigieren
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenItem(item)}
+                          className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:hover:bg-blue-600 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-1.5 shadow-sm"
+                          title="Diesen Auditpunkt einsehen & korrigieren"
+                        >
+                          <span>✏️</span> Lesen & Korrigieren
+                        </button>
+                        <button
+                          onClick={() => handleDeleteItem(item)}
+                          disabled={isDeleting}
+                          className="p-1.5 rounded-xl text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
+                          title="Auditpunkt löschen"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -790,16 +821,26 @@ export default function AuditsClient({
             )}
 
             {/* Footer Buttons */}
-            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
-              <Link 
-                href="/requirements"
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                target="_blank"
-              >
-                📋 Im Normkatalog öffnen ↗
-              </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteItem(selectedItem)}
+                  disabled={isSaving || isDeleting}
+                  className="px-3 py-1.5 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors flex items-center gap-1.5"
+                >
+                  🗑️ Punkt löschen
+                </button>
+                <Link 
+                  href="/requirements"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                  target="_blank"
+                >
+                  📋 Im Normkatalog öffnen ↗
+                </Link>
+              </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
