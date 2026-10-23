@@ -3,13 +3,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import { getDepartments } from '@/actions/departments';
-import { updateDepartmentProcessType } from '@/actions/process-map';
+import { updateProcessMapOrder } from '@/actions/process-map';
 
-type Department = { id: string; name: string; processType: string | null };
+type Department = { id: string; name: string; processType: string | null; order?: number };
 
 export default function ProcessMapPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,20 +23,71 @@ export default function ProcessMapPage() {
     load();
   }, []);
 
-  const handleDrop = async (e: React.DragEvent, type: string | null) => {
+  const reorderDepartments = (sourceId: string, targetId: string | null, targetType: string | null) => {
+    setDepartments(prev => {
+      const sourceItem = prev.find(d => d.id === sourceId);
+      if (!sourceItem) return prev;
+
+      // Filter out dragged item
+      const remaining = prev.filter(d => d.id !== sourceId);
+      const updatedSource: Department = { ...sourceItem, processType: targetType };
+
+      let nextList: Department[] = [];
+
+      if (targetId) {
+        // Dropped directly on another department card: insert immediately before it
+        const targetIndex = remaining.findIndex(d => d.id === targetId);
+        if (targetIndex === -1) {
+          nextList = [...remaining, updatedSource];
+        } else {
+          nextList = [
+            ...remaining.slice(0, targetIndex),
+            updatedSource,
+            ...remaining.slice(targetIndex)
+          ];
+        }
+      } else {
+        // Dropped on lane background: append to the end of that lane
+        let lastLaneIndex = -1;
+        for (let i = remaining.length - 1; i >= 0; i--) {
+          if (remaining[i].processType === targetType) {
+            lastLaneIndex = i;
+            break;
+          }
+        }
+        if (lastLaneIndex === -1) {
+          nextList = [...remaining, updatedSource];
+        } else {
+          nextList = [
+            ...remaining.slice(0, lastLaneIndex + 1),
+            updatedSource,
+            ...remaining.slice(lastLaneIndex + 1)
+          ];
+        }
+      }
+
+      // Re-index order numbers sequentially
+      const ordered = nextList.map((d, index) => ({ ...d, order: index }));
+
+      // Save to database
+      updateProcessMapOrder(ordered.map(d => ({ id: d.id, processType: d.processType, order: d.order || 0 })));
+
+      return ordered;
+    });
+  };
+
+  const handleLaneDrop = (e: React.DragEvent, laneType: string | null) => {
     e.preventDefault();
-    const id = e.dataTransfer.getData('deptId');
-    if (!id) return;
-    
-    // Optimistic UI
-    setDepartments(prev => prev.map(d => d.id === id ? { ...d, processType: type } : d));
-    
-    // Save to DB
-    await updateDepartmentProcessType(id, type);
+    const sourceId = e.dataTransfer.getData('deptId') || draggedId;
+    setDragOverId(null);
+    setDraggedId(null);
+    if (!sourceId) return;
+    reorderDepartments(sourceId, null, laneType);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
   };
 
   const initialStakeholders = [
@@ -91,22 +144,60 @@ export default function ProcessMapPage() {
   const core = departments.filter(d => d.processType === 'core');
   const support = departments.filter(d => d.processType === 'support');
 
-  const renderDraggableDept = (d: Department) => (
-    <div
-      key={d.id}
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.setData('deptId', d.id);
-      }}
-      className="cursor-move bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-lg px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 hover:border-blue-400 hover:shadow-sm transition-all flex items-center group"
-    >
-      <span>{d.name}</span>
-    </div>
-  );
+  const renderDraggableDept = (d: Department) => {
+    const isBeingDragged = draggedId === d.id;
+    const isDragOver = dragOverId === d.id && draggedId !== d.id;
 
-
-
-
+    return (
+      <div
+        key={d.id}
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData('deptId', d.id);
+          e.dataTransfer.effectAllowed = 'move';
+          setDraggedId(d.id);
+        }}
+        onDragEnd={() => {
+          setDraggedId(null);
+          setDragOverId(null);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          if (dragOverId !== d.id) {
+            setDragOverId(d.id);
+          }
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (dragOverId === d.id) {
+            setDragOverId(null);
+          }
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const sourceId = e.dataTransfer.getData('deptId') || draggedId;
+          setDragOverId(null);
+          setDraggedId(null);
+          if (sourceId && sourceId !== d.id) {
+            reorderDepartments(sourceId, d.id, d.processType);
+          }
+        }}
+        className={`cursor-grab active:cursor-grabbing bg-white dark:bg-slate-800 border rounded-lg px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 transition-all flex items-center select-none ${
+          isBeingDragged 
+            ? 'opacity-30 scale-95 border-dashed border-blue-400 dark:border-blue-500 shadow-inner' 
+            : isDragOver
+              ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/30 scale-102 shadow-lg bg-blue-50/50 dark:bg-blue-950/40'
+              : 'border-slate-200 dark:border-slate-700 shadow-sm hover:border-blue-400 hover:shadow-md'
+        }`}
+      >
+        <span>{d.name}</span>
+      </div>
+    );
+  };
 
   const updateStakeholder = (index: number, value: string) => {
     const next = [...stakeholders];
@@ -147,7 +238,7 @@ export default function ProcessMapPage() {
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Prozesslandkarte</h1>
           <p className="text-slate-500 mt-2">
-            Ordne deine Abteilungen per Drag & Drop den Kategorien zu. Du kannst die Texte der linken und rechten Boxen einfach anklicken und überschreiben!
+            Ordne deine Abteilungen per Drag & Drop frei an. Du kannst Karten zwischen Gruppen verschieben sowie die Reihenfolge innerhalb einer Gruppe per Klick & Ziehen anpassen!
           </p>
         </div>
         <button 
@@ -188,9 +279,9 @@ export default function ProcessMapPage() {
         <div className="flex-1 flex flex-col gap-4 z-10 min-w-[300px]">
           {/* Management */}
           <div 
-            className="flex-1 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm print:bg-rose-100 print:border-rose-300"
+            className="flex-1 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm transition-colors print:bg-rose-100 print:border-rose-300"
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'management')}
+            onDrop={(e) => handleLaneDrop(e, 'management')}
           >
             <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-3 text-sm flex items-center gap-2 print:text-black">
               <span contentEditable suppressContentEditableWarning className="outline-none">Managementprozesse</span>
@@ -206,9 +297,9 @@ export default function ProcessMapPage() {
 
           {/* Core */}
           <div 
-            className="flex-1 relative rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm print:bg-rose-100 print:border-rose-300"
+            className="flex-1 relative rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm transition-colors print:bg-rose-100 print:border-rose-300"
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'core')}
+            onDrop={(e) => handleLaneDrop(e, 'core')}
           >
             {/* Arrow shape approximation for Core processes */}
             <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[40px] border-y-transparent border-l-[16px] border-l-rose-200 dark:border-l-rose-900/50 z-0 hidden lg:block print:border-l-rose-300"></div>
@@ -228,9 +319,9 @@ export default function ProcessMapPage() {
 
           {/* Support */}
           <div 
-            className="flex-1 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm print:bg-rose-100 print:border-rose-300"
+            className="flex-1 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm transition-colors print:bg-rose-100 print:border-rose-300"
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'support')}
+            onDrop={(e) => handleLaneDrop(e, 'support')}
           >
             <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-3 text-sm flex items-center gap-2 print:text-black">
               <span contentEditable suppressContentEditableWarning className="outline-none">Unterstützungsprozesse</span>
@@ -276,7 +367,7 @@ export default function ProcessMapPage() {
         <div 
           className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 print:hidden"
           onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, null)}
+          onDrop={(e) => handleLaneDrop(e, null)}
         >
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">Nicht zugewiesene Abteilungen</h2>
           <div className="flex flex-wrap gap-4 p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">

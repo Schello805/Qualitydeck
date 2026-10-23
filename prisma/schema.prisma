@@ -12,6 +12,7 @@ model Department {
   name        String
   manager     String?
   processType String?  // 'management', 'core', 'support'
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
   audits      Audit[]
 }

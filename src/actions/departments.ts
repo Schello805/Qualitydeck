@@ -6,7 +6,10 @@ import { revalidatePath } from 'next/cache';
 export async function getDepartments() {
   try {
     return await prisma.department.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: [
+        { order: 'asc' },
+        { name: 'asc' }
+      ]
     });
   } catch (error) {
     console.error("Error fetching departments:", error);
