@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { getCurrentProfile, updateProfile, getUsers } from '@/actions/users';
 
 export default function HeaderProfile() {
+  const [mounted, setMounted] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +44,7 @@ export default function HeaderProfile() {
   };
 
   useEffect(() => {
+    setMounted(true);
     loadProfile();
 
     const handleProfileUpdate = () => loadProfile();
@@ -239,9 +242,9 @@ export default function HeaderProfile() {
       )}
 
       {/* Edit Profile Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 space-y-5 my-8">
+      {isEditing && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 space-y-5 my-8 relative">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
@@ -423,7 +426,8 @@ export default function HeaderProfile() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
