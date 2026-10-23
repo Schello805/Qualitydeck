@@ -1,4 +1,5 @@
 import { getDepartments, createDepartment, deleteDepartment } from '@/actions/departments';
+import StartAuditButton from './StartAuditButton';
 
 export const instant = false;
 
@@ -73,9 +74,7 @@ export default async function DepartmentsPage() {
               <p className="text-slate-500 text-sm mb-4">Leitung: {dept.manager || 'Nicht zugewiesen'}</p>
               
               <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button className="w-full py-2 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 rounded-lg text-sm font-medium transition-colors">
-                  Neues Audit starten
-                </button>
+                <StartAuditButton departmentId={dept.id} departmentName={dept.name} />
               </div>
             </div>
           ))

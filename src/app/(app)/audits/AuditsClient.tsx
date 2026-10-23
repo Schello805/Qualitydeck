@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { updateAuditReportItem } from '@/actions/audits';
 
 export default function AuditsClient({ 
@@ -13,14 +14,22 @@ export default function AuditsClient({
   initialUsers?: any[];
   items?: any[];
 }) {
+  const searchParams = useSearchParams();
   const [items, setItems] = useState<any[]>(initialItems.length ? initialItems : (itemsProp || []));
   const [users] = useState<any[]>(initialUsers || []);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'fulfilled' | 'not_fulfilled'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'open' | 'fulfilled' | 'not_fulfilled'>('ALL');
   const [deptFilter, setDeptFilter] = useState('ALL');
   const [chapterFilter, setChapterFilter] = useState('ALL');
   const [sortField, setSortField] = useState<'chapter' | 'status' | 'department' | 'date'>('chapter');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  useEffect(() => {
+    const deptParam = searchParams.get('dept');
+    if (deptParam) {
+      Promise.resolve().then(() => setDeptFilter(deptParam));
+    }
+  }, [searchParams]);
 
   // Modal State for Reading & Updating Audit Items
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
@@ -54,6 +63,7 @@ export default function AuditsClient({
   }, [items]);
 
   // Overall stats
+  const openCount = items.filter(i => i.status === 'open').length;
   const fulfilledCount = items.filter(i => i.status === 'fulfilled').length;
   const unfulfilledCount = items.filter(i => i.status === 'not_fulfilled').length;
 
@@ -231,6 +241,11 @@ export default function AuditsClient({
           >
             🖨️ Bericht drucken
           </button>
+          {openCount > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-xl border border-blue-200 dark:border-blue-800 text-xs font-bold">
+              ⏳ {openCount} Offen
+            </div>
+          )}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 rounded-xl border border-green-200 dark:border-green-800 text-xs font-bold">
             ✅ {fulfilledCount} Erfüllt
           </div>
@@ -294,6 +309,7 @@ export default function AuditsClient({
               className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="ALL">📋 Alle Status</option>
+              <option value="open">⏳ Offen (Zur Prüfung)</option>
               <option value="fulfilled">✅ Erfüllt</option>
               <option value="not_fulfilled">❌ Abweichung</option>
             </select>
@@ -389,6 +405,10 @@ export default function AuditsClient({
                       {item.status === 'fulfilled' ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
                           ✅ Erfüllt
+                        </span>
+                      ) : item.status === 'open' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs font-bold border border-blue-200 dark:border-blue-800">
+                          ⏳ Offen
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-xs font-bold border border-orange-200 dark:border-orange-800">

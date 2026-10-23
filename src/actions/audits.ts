@@ -95,6 +95,86 @@ export async function saveAuditItem(data: {
   }
 }
 
+export async function startNewAudit(departmentId: string, auditor?: string) {
+  try {
+    const department = await prisma.department.findUnique({
+      where: { id: departmentId }
+    });
+    if (!department) return { error: 'Abteilung nicht gefunden.' };
+
+    // Find existing open or in_progress audit, or create one
+    let audit = await prisma.audit.findFirst({
+      where: { 
+        departmentId: department.id,
+        status: { in: ['open', 'in_progress'] }
+      },
+      include: { items: true },
+      orderBy: { date: 'desc' }
+    });
+
+    if (!audit) {
+      audit = await prisma.audit.create({
+        data: {
+          departmentId: department.id,
+          auditor: auditor || 'QMB / Interner Auditor',
+          status: 'in_progress',
+          date: new Date()
+        },
+        include: { items: true }
+      });
+    }
+
+    // Check existing requirements in this audit
+    const existingReqIds = new Set(audit.items.map(i => i.requirementId));
+
+    // Get all ISO 9001 requirements
+    const allRequirements = await prisma.requirement.findMany({
+      orderBy: { chapter: 'asc' }
+    });
+
+    const auditDateStr = new Date().toISOString().split('T')[0];
+
+    // Filter requirements applicable to this department
+    const reqsToCreate = allRequirements.filter(req => {
+      if (existingReqIds.has(req.id)) return false;
+      if (!req.departments || req.departments === 'all') return true;
+      try {
+        const depts = JSON.parse(req.departments);
+        if (Array.isArray(depts)) return depts.includes(department.name);
+      } catch {
+        return req.departments.includes(department.name);
+      }
+      return true;
+    });
+
+    for (const req of reqsToCreate) {
+      await prisma.auditItem.create({
+        data: {
+          auditId: audit.id,
+          requirementId: req.id,
+          status: 'open',
+          auditDate: auditDateStr,
+          auditee: department.manager || undefined
+        }
+      });
+    }
+
+    revalidatePath('/audits');
+    revalidatePath('/departments');
+    revalidatePath('/dashboard');
+
+    return { 
+      success: true, 
+      auditId: audit.id, 
+      departmentName: department.name,
+      createdCount: reqsToCreate.length 
+    };
+  } catch (error: any) {
+    console.error('Error starting new audit:', error);
+    return { error: error.message || 'Fehler beim Starten des Audits.' };
+  }
+}
+
 export async function getAllAuditItems() {
   try {
     const items = await prisma.auditItem.findMany({

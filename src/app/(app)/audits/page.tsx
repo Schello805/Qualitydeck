@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { getAllAuditItems } from '@/actions/audits';
 import { getUsers } from '@/actions/users';
 import AuditsClient from './AuditsClient';
@@ -10,5 +11,9 @@ export default async function AuditsPage() {
     getUsers()
   ]);
 
-  return <AuditsClient initialItems={items} initialUsers={users} />;
+  return (
+    <Suspense fallback={<div className="p-8 text-slate-500">Lade Audits...</div>}>
+      <AuditsClient initialItems={items} initialUsers={users} />
+    </Suspense>
+  );
 }
