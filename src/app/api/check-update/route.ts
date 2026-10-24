@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import versionData from '@/data/version.json';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
   try {
     const currentCommit = versionData.commit;

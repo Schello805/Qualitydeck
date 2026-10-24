@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 21 (b5d5592)](https://github.com/Schello805/Qualitydeck/commit/b5d55927835ff73635e2423ba69d776b21943295) • Zuletzt aktualisiert: 24.10.2026 08:39:25
+**Aktueller Stand:** [Rev. 22 (e6c9a18)](https://github.com/Schello805/Qualitydeck/commit/e6c9a1870d7fef974fa2c95c878c456a88720aea) • Zuletzt aktualisiert: 24.10.2026 08:44:50
 
 ---
 
-### [Rev. 21] - 24.10.2026, 08:39 (`b5d5592`)
+### [Rev. 22] - 24.10.2026, 08:44 (`e6c9a18`)
+* **🐛 Behoben:** Remove dynamic export in check-update API for Next.js 16 cacheComponents compatibility
+* *Commit:* [`e6c9a18`](https://github.com/Schello805/Qualitydeck/commit/e6c9a1870d7fef974fa2c95c878c456a88720aea)
+
+### [Rev. 21] - 24.10.2026, 08:39 (`1f550f2`)
 * **✨ Neu:** Complete automated push script, changelog modal, and update checker
-* *Commit:* [`b5d5592`](https://github.com/Schello805/Qualitydeck/commit/b5d55927835ff73635e2423ba69d776b21943295)
+* *Commit:* [`1f550f2`](https://github.com/Schello805/Qualitydeck/commit/1f550f234e93072ed8a849b7d71c7a7521fdf6b8)
 
 ### [Rev. 20] - 24.10.2026, 08:37 (`a329375`)
 * **🔧 Wartung:** Configure automated git hooks for pre-commit and pre-push

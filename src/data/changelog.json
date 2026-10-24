@@ -1,9 +1,20 @@
 [
   {
+    "revision": 22,
+    "revisionDisplay": "Rev. 22",
+    "commit": "e6c9a18",
+    "fullCommit": "e6c9a1870d7fef974fa2c95c878c456a88720aea",
+    "date": "2026-10-24T08:44:50+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Remove dynamic export in check-update API for Next.js 16 cacheComponents compatibility",
+    "rawMessage": "fix: Remove dynamic export in check-update API for Next.js 16 cacheComponents compatibility"
+  },
+  {
     "revision": 21,
     "revisionDisplay": "Rev. 21",
-    "commit": "b5d5592",
-    "fullCommit": "b5d55927835ff73635e2423ba69d776b21943295",
+    "commit": "1f550f2",
+    "fullCommit": "1f550f234e93072ed8a849b7d71c7a7521fdf6b8",
     "date": "2026-10-24T08:39:24+02:00",
     "type": "feature",
     "badge": "✨ Neu",
