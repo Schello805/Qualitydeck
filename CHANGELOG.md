@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 39 (7a04f6a)](https://github.com/Schello805/Qualitydeck/commit/7a04f6a7ae901d8c180d57286a4547dfc1b032bb) • Zuletzt aktualisiert: 24.10.2026 15:29:12
+**Aktueller Stand:** [Rev. 40 (047ae68)](https://github.com/Schello805/Qualitydeck/commit/047ae689827e8867cf269f20ebee565ba79fa8ae) • Zuletzt aktualisiert: 24.10.2026 20:09:15
 
 ---
 
-### [Rev. 39] - 24.10.2026, 15:29 (`7a04f6a`)
+### [Rev. 40] - 24.10.2026, 20:09 (`047ae68`)
+* **🐛 Behoben:** Remove window history replaceState and ensure update.sh compiles fresh production build
+* *Commit:* [`047ae68`](https://github.com/Schello805/Qualitydeck/commit/047ae689827e8867cf269f20ebee565ba79fa8ae)
+
+### [Rev. 39] - 24.10.2026, 15:29 (`d756179`)
 * **🐛 Behoben:** Ensure immediate client-side filtering on department dropdown without router re-renders
-* *Commit:* [`7a04f6a`](https://github.com/Schello805/Qualitydeck/commit/7a04f6a7ae901d8c180d57286a4547dfc1b032bb)
+* *Commit:* [`d756179`](https://github.com/Schello805/Qualitydeck/commit/d75617916fb2721aa42c7a7c4c8ac37ad643210e)
 
 ### [Rev. 38] - 24.10.2026, 14:11 (`1eb84f8`)
 * **✨ Neu:** Prefill ISO 9001 assignments for all 22 departments & rename Plant Management to Geschäftsführung

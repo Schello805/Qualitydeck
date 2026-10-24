@@ -1,9 +1,20 @@
 [
   {
+    "revision": 40,
+    "revisionDisplay": "Rev. 40",
+    "commit": "047ae68",
+    "fullCommit": "047ae689827e8867cf269f20ebee565ba79fa8ae",
+    "date": "2026-10-24T20:09:15+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Remove window history replaceState and ensure update.sh compiles fresh production build",
+    "rawMessage": "fix(audits): Remove window history replaceState and ensure update.sh compiles fresh production build"
+  },
+  {
     "revision": 39,
     "revisionDisplay": "Rev. 39",
-    "commit": "7a04f6a",
-    "fullCommit": "7a04f6a7ae901d8c180d57286a4547dfc1b032bb",
+    "commit": "d756179",
+    "fullCommit": "d75617916fb2721aa42c7a7c4c8ac37ad643210e",
     "date": "2026-10-24T15:29:12+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",

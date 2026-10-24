@@ -67,7 +67,7 @@ export default function AuditsClient({
   const [includeSpecific, setIncludeSpecific] = useState<boolean>(true);
   const [includeGeneral, setIncludeGeneral] = useState<boolean>(true);
 
-  // Read URL params once on client mount without triggering router re-renders
+  // Initialize from URL once on client mount (read-only, no writing to history)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
@@ -84,7 +84,7 @@ export default function AuditsClient({
         setIncludeSpecific(false);
         setIncludeGeneral(true);
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, []);
@@ -95,35 +95,8 @@ export default function AuditsClient({
     }
   }, [initialItems]);
 
-  const updateBrowserUrl = (newDept: string, newSpecific: boolean, newGeneral: boolean) => {
-    if (typeof window === 'undefined') return;
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (newDept === 'ALL') {
-        params.delete('dept');
-      } else {
-        params.set('dept', newDept);
-      }
-
-      if (newSpecific && !newGeneral) {
-        params.set('scope', 'specific');
-      } else if (!newSpecific && newGeneral) {
-        params.set('scope', 'general');
-      } else {
-        params.delete('scope');
-      }
-
-      const query = params.toString();
-      const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
-      window.history.replaceState(null, '', newUrl);
-    } catch (e) {
-      // ignore
-    }
-  };
-
   const handleDeptFilterChange = (val: string) => {
     setDeptFilter(val);
-    updateBrowserUrl(val, includeSpecific, includeGeneral);
   };
 
   const handleScopeChange = (newSpecific: boolean, newGeneral: boolean) => {
@@ -138,7 +111,6 @@ export default function AuditsClient({
     }
     setIncludeSpecific(spec);
     setIncludeGeneral(gen);
-    updateBrowserUrl(deptFilter, spec, gen);
   };
 
   // Modal State for Reading & Updating Audit Items

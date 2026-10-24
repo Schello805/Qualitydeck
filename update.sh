@@ -84,20 +84,34 @@ node scripts/update-changelog.js
 NEW_REV=$(node -e "try { console.log(require('./src/data/version.json').revisionDisplay); } catch(e) { console.log('unbekannt'); }")
 NEW_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unbekannt")
 
-# 6. Build prüfen (optional im Produktivmodus)
-echo -e "\n${CYAN}🏗️  [6/6] Build-Status & Dienst-Neustart...${NC}"
-if command -v pm2 >/dev/null 2>&1 && pm2 list | grep -q "qualitydeck"; then
-  echo -e "${BLUE}  🔄 Starte PM2-Dienst 'qualitydeck' neu...${NC}"
-  npm run build || true
-  pm2 restart qualitydeck
-  echo -e "${GREEN}  ✓ PM2-Dienst neu gestartet.${NC}"
-elif systemctl is-active --quiet qualitydeck 2>/dev/null; then
+# 6. Next.js Build & Dienst-Neustart
+echo -e "\n${CYAN}🏗️  [6/6] Erstelle aktuellen Produktions-Build (Next.js)...${NC}"
+npm run build
+
+RESTARTED=0
+if command -v pm2 >/dev/null 2>&1; then
+  if pm2 list | grep -q "qualitydeck"; then
+    echo -e "${BLUE}  🔄 Starte PM2-Dienst 'qualitydeck' neu...${NC}"
+    pm2 restart qualitydeck || true
+    RESTARTED=1
+  elif pm2 list | grep -q "online"; then
+    echo -e "${BLUE}  🔄 Starte aktive PM2-Prozesse neu...${NC}"
+    pm2 restart all || true
+    RESTARTED=1
+  fi
+fi
+
+if systemctl is-active --quiet qualitydeck 2>/dev/null; then
   echo -e "${BLUE}  🔄 Starte systemd-Dienst 'qualitydeck' neu...${NC}"
-  npm run build || true
-  sudo systemctl restart qualitydeck
-  echo -e "${GREEN}  ✓ systemd-Dienst neu gestartet.${NC}"
+  sudo systemctl restart qualitydeck || true
+  RESTARTED=1
+fi
+
+if [ "$RESTARTED" -eq 1 ]; then
+  echo -e "${GREEN}  ✓ Hintergrunddienste erfolgreich neu gestartet.${NC}"
 else
-  echo -e "${GREEN}  ✓ Kein Hintergrunddienst aktiv (Entwicklungs- oder Standardmodus).${NC}"
+  echo -e "${GREEN}  ✓ Build erfolgreich erstellt.${NC}"
+  echo -e "${YELLOW}  ℹ Falls deine Anwendung in einer separaten Terminal-Sitzung (z.B. mit 'npm run dev' oder 'npm start') läuft, bitte einmal neu starten.${NC}"
 fi
 
 echo -e "\n${GREEN}${BOLD}=================================================================${NC}"
