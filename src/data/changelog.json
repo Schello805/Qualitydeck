@@ -1,9 +1,20 @@
 [
   {
+    "revision": 42,
+    "revisionDisplay": "Rev. 42",
+    "commit": "78a65d1",
+    "fullCommit": "78a65d1e35eac3d42653fd448c71a27afce68612",
+    "date": "2026-10-24T21:36:13+02:00",
+    "type": "update",
+    "badge": "🚀 Update",
+    "title": "style: Fine-tune root font size to 13.5px for ultra-crisp compact enterprise UI",
+    "rawMessage": "style: Fine-tune root font size to 13.5px for ultra-crisp compact enterprise UI"
+  },
+  {
     "revision": 41,
     "revisionDisplay": "Rev. 41",
-    "commit": "942474c",
-    "fullCommit": "942474cee361e993d464a09e23b6c95d2e99e6b7",
+    "commit": "6e39978",
+    "fullCommit": "6e399784842df4905986958d9f5d716e9bdcbb67",
     "date": "2026-10-24T21:33:23+02:00",
     "type": "update",
     "badge": "🚀 Update",

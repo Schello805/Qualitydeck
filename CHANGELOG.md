@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 41 (942474c)](https://github.com/Schello805/Qualitydeck/commit/942474cee361e993d464a09e23b6c95d2e99e6b7) • Zuletzt aktualisiert: 24.10.2026 21:33:23
+**Aktueller Stand:** [Rev. 42 (78a65d1)](https://github.com/Schello805/Qualitydeck/commit/78a65d1e35eac3d42653fd448c71a27afce68612) • Zuletzt aktualisiert: 24.10.2026 21:36:13
 
 ---
 
-### [Rev. 41] - 24.10.2026, 21:33 (`942474c`)
+### [Rev. 42] - 24.10.2026, 21:36 (`78a65d1`)
+* **🚀 Update:** style: Fine-tune root font size to 13.5px for ultra-crisp compact enterprise UI
+* *Commit:* [`78a65d1`](https://github.com/Schello805/Qualitydeck/commit/78a65d1e35eac3d42653fd448c71a27afce68612)
+
+### [Rev. 41] - 24.10.2026, 21:33 (`6e39978`)
 * **🚀 Update:** style: Optimize base typography, reduce root font size to 14.5px for compact clean view
-* *Commit:* [`942474c`](https://github.com/Schello805/Qualitydeck/commit/942474cee361e993d464a09e23b6c95d2e99e6b7)
+* *Commit:* [`6e39978`](https://github.com/Schello805/Qualitydeck/commit/6e399784842df4905986958d9f5d716e9bdcbb67)
 
 ### [Rev. 40] - 24.10.2026, 20:09 (`ac05af9`)
 * **🐛 Behoben:** Remove window history replaceState and ensure update.sh compiles fresh production build
