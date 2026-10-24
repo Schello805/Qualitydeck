@@ -28,7 +28,7 @@ export default function ExportExcelButton({ items }: { items: any[] }) {
           const list = JSON.parse(item.extensionHistory);
           if (Array.isArray(list)) extCount = list.length;
         }
-      } catch (e) {}
+      } catch {}
 
       return [
         { type: String, value: String(item.originBadge || (item.originType === 'complaint' ? '🚨 Reklamation' : '📋 Audit')) },

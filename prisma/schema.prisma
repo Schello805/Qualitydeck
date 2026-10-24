@@ -15,6 +15,8 @@ model Department {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   audits      Audit[]
+
+  @@index([order, name])
 }
 
 model Requirement {
@@ -28,6 +30,8 @@ model Requirement {
   roles        String?     @default("all")
   isStandard   Boolean     @default(true)
   auditItems   AuditItem[]
+
+  @@index([category])
 }
 
 model Audit {
@@ -38,6 +42,9 @@ model Audit {
   date         DateTime    @default(now())
   status       String      @default("open") // open, in_progress, completed
   items        AuditItem[]
+
+  @@index([departmentId])
+  @@index([status])
 }
 
 model AuditItem {
@@ -61,6 +68,11 @@ model AuditItem {
   emailSent               Boolean     @default(false)
   auditee                 String?
   auditDate               String?
+
+  @@index([auditId])
+  @@index([requirementId])
+  @@index([status])
+  @@index([plannedDate])
 }
 
 model Complaint {
@@ -103,6 +115,9 @@ model Complaint {
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
   actions               ComplaintAction[]
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model ComplaintAction {
@@ -119,6 +134,10 @@ model ComplaintAction {
   extensionHistory String?
   emailSent        Boolean   @default(false)
   createdAt        DateTime  @default(now())
+
+  @@index([complaintId])
+  @@index([status])
+  @@index([plannedDate])
 }
 
 model User {

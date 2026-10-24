@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 29 (f9b60fa)](https://github.com/Schello805/Qualitydeck/commit/f9b60faeb4740ae43ec8bec58c0f618c25ba0fb2) • Zuletzt aktualisiert: 24.10.2026 11:28:12
+**Aktueller Stand:** [Rev. 30 (c4cc99e)](https://github.com/Schello805/Qualitydeck/commit/c4cc99ef47e086be92dea94c56617a3c17fe9412) • Zuletzt aktualisiert: 24.10.2026 11:36:42
 
 ---
 
-### [Rev. 29] - 24.10.2026, 11:28 (`f9b60fa`)
+### [Rev. 30] - 24.10.2026, 11:36 (`c4cc99e`)
+* **🚀 Update:** perf(quality): Add database indexes, parallelize queries, batch audit creation and clean linter warnings
+* *Commit:* [`c4cc99e`](https://github.com/Schello805/Qualitydeck/commit/c4cc99ef47e086be92dea94c56617a3c17fe9412)
+
+### [Rev. 29] - 24.10.2026, 11:28 (`722bc4d`)
 * **✨ Neu:** Redirect root page directly to /dashboard
-* *Commit:* [`f9b60fa`](https://github.com/Schello805/Qualitydeck/commit/f9b60faeb4740ae43ec8bec58c0f618c25ba0fb2)
+* *Commit:* [`722bc4d`](https://github.com/Schello805/Qualitydeck/commit/722bc4d48f49554988a594d1b27a0b3392e5b870)
 
 ### [Rev. 28] - 24.10.2026, 11:25 (`e794003`)
 * **🐛 Behoben:** Patch vulnerabilities, enforce security headers, sanitize upload, protect cron and mask credentials

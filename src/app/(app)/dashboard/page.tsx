@@ -3,19 +3,31 @@ import { prisma } from '@/lib/prisma';
 export const instant = false;
 
 export default async function DashboardPage() {
-  // Fetch data
-  const departments = await prisma.department.findMany();
-  const allItems = await prisma.auditItem.findMany({
-    include: { requirement: true }
-  });
-  
-  const openComplaintsCount = await prisma.complaint.count({
-    where: { status: { in: ['open', 'in_progress'] } }
-  });
-
-  const openActionsCount = await prisma.complaintAction.count({
-    where: { status: 'open' }
-  });
+  // Parallel optimized data fetching
+  const [departments, allItems, openComplaintsCount, openActionsCount] = await Promise.all([
+    prisma.department.findMany({
+      select: { id: true, name: true }
+    }),
+    prisma.auditItem.findMany({
+      select: {
+        id: true,
+        status: true,
+        implementationNotes: true,
+        requirement: {
+          select: {
+            chapter: true,
+            title: true,
+          }
+        }
+      }
+    }),
+    prisma.complaint.count({
+      where: { status: { in: ['open', 'in_progress'] } }
+    }),
+    prisma.complaintAction.count({
+      where: { status: 'open' }
+    })
+  ]);
 
   const totalItems = allItems.length;
   const fulfilledCount = allItems.filter(i => i.status === 'fulfilled').length;

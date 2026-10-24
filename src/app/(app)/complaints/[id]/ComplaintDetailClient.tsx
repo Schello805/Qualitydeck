@@ -8,7 +8,6 @@ import {
   updateComplaintFields, 
   addComplaintAction, 
   updateComplaintAction,
-  markActionDone, 
   toggleActionStatus,
   deleteComplaintAction,
   deleteComplaint,
@@ -27,7 +26,7 @@ export default function ComplaintDetailClient({
   // Basic Information
   const [status, setStatus] = useState(complaint.status || 'open');
   const [title, setTitle] = useState(complaint.title || '');
-  const [type, setType] = useState(complaint.type || 'internal');
+  const [type] = useState(complaint.type || 'internal');
   const [description, setDescription] = useState(complaint.description || '');
   const [responsibleComplaint, setResponsibleComplaint] = useState(complaint.responsible || '');
   const [responsibleEmail, setResponsibleEmail] = useState(complaint.responsibleEmail || '');
@@ -63,7 +62,6 @@ export default function ComplaintDetailClient({
   // Deadline extension tracking
   const [extensionReason, setExtensionReason] = useState('');
   const [showExtensionModal, setShowExtensionModal] = useState(false);
-  const [pendingSaveWithExtension, setPendingSaveWithExtension] = useState(false);
 
   // Saving state & feedback
   const [isSavingFields, setIsSavingFields] = useState(false);
@@ -270,7 +268,7 @@ export default function ComplaintDetailClient({
     if (complaint.extensionHistory) {
       extensionHistoryList = JSON.parse(complaint.extensionHistory);
     }
-  } catch (e) {
+  } catch {
     extensionHistoryList = [];
   }
 

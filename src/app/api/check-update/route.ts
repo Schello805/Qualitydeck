@@ -4,7 +4,6 @@ import versionData from '@/data/version.json';
 export async function GET() {
   try {
     const currentCommit = versionData.commit;
-    const currentRevision = versionData.revision;
     const currentRevisionDisplay = versionData.revisionDisplay;
 
     // Check remote GitHub repository

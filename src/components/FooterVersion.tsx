@@ -18,23 +18,19 @@ interface UpdateInfo {
 export default function FooterVersion({ compact = false }: { compact?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
-  const [checking, setChecking] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     // Check update on mount
     async function checkUpdate() {
       try {
-        setChecking(true);
         const res = await fetch('/api/check-update');
         if (res.ok) {
           const data = await res.json();
           setUpdateInfo(data);
         }
-      } catch (e) {
+      } catch {
         // Silently fallback to current version
-      } finally {
-        setChecking(false);
       }
     }
     checkUpdate();

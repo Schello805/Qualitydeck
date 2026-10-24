@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import ExportExcelButton from './ExportExcelButton';
 import { 
   updateActionLogItem, 
@@ -9,6 +9,39 @@ import {
 } from '@/actions/action-log';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+// Pure helper moved to top-level for performance and clean dependency graphs
+function getUrgency(dateStr?: string | null) {
+  if (!dateStr) return { type: 'NO_DATE', label: 'Kein Termin', days: null, color: 'text-slate-400 bg-slate-100 dark:bg-slate-800' };
+  const date = new Date(dateStr);
+  date.setHours(0, 0, 0, 0);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return { 
+      type: 'OVERDUE', 
+      label: `${Math.abs(diffDays)} Tage überfällig`, 
+      days: diffDays, 
+      color: 'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-950/60 border border-red-300 dark:border-red-800 animate-pulse' 
+    };
+  }
+  if (diffDays <= 7) {
+    return { 
+      type: 'DUE_SOON', 
+      label: diffDays === 0 ? 'Heute fällig' : `Fällig in ${diffDays} Tagen`, 
+      days: diffDays, 
+      color: 'text-amber-800 bg-amber-100 dark:text-amber-300 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800' 
+    };
+  }
+  return { 
+    type: 'FUTURE', 
+    label: `Fällig in ${diffDays} Tagen`, 
+    days: diffDays, 
+    color: 'text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/60' 
+  };
+}
 
 export default function ActionLogClient({ 
   initialItems, 
@@ -19,7 +52,7 @@ export default function ActionLogClient({
 }) {
   const router = useRouter();
   const [items, setItems] = useState<any[]>(initialItems);
-  const [users, setUsers] = useState<any[]>(initialUsers);
+  const [users] = useState<any[]>(initialUsers);
   
   // Filters
   const [search, setSearch] = useState('');
@@ -69,7 +102,7 @@ export default function ActionLogClient({
     return d.toISOString().split('T')[0];
   };
 
-  const handleOpenEdit = (item: any) => {
+  const handleOpenEdit = useCallback((item: any) => {
     setEditItem(item);
     setEditImmediateAction(item.immediateAction || '');
     setEditNotes(item.implementationNotes || '');
@@ -113,7 +146,7 @@ export default function ActionLogClient({
 
     setEditStatus(item.status || 'not_fulfilled');
     setSendEmailOnSave(Boolean(item.responsibleEmail || matchedUser?.email));
-  };
+  }, [users]);
 
   // Auto-open measure if ?id=... was passed in email link
   useEffect(() => {
@@ -131,7 +164,7 @@ export default function ActionLogClient({
         Promise.resolve().then(() => setSearch(searchParam));
       }
     }
-  }, [items]);
+  }, [items, handleOpenEdit]);
 
   // Detect which deadlines were extended compared to previously saved values
   const extendedMeasures = useMemo(() => {
@@ -233,7 +266,7 @@ export default function ActionLogClient({
               });
             }
             newHistory = JSON.stringify(parsed);
-          } catch (e) {}
+          } catch {}
         }
         return {
           ...i,
@@ -286,40 +319,6 @@ export default function ActionLogClient({
     });
     return Array.from(set).sort();
   }, [items]);
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  // Urgency helper
-  const getUrgency = (dateStr?: string | null) => {
-    if (!dateStr) return { type: 'NO_DATE', label: 'Kein Termin', days: null, color: 'text-slate-400 bg-slate-100 dark:bg-slate-800' };
-    const date = new Date(dateStr);
-    date.setHours(0, 0, 0, 0);
-    const diffDays = Math.round((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return { 
-        type: 'OVERDUE', 
-        label: `${Math.abs(diffDays)} Tage überfällig`, 
-        days: diffDays, 
-        color: 'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-950/60 border border-red-300 dark:border-red-800 animate-pulse' 
-      };
-    }
-    if (diffDays <= 7) {
-      return { 
-        type: 'DUE_SOON', 
-        label: diffDays === 0 ? 'Heute fällig' : `Fällig in ${diffDays} Tagen`, 
-        days: diffDays, 
-        color: 'text-amber-800 bg-amber-100 dark:text-amber-300 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800' 
-      };
-    }
-    return { 
-      type: 'FUTURE', 
-      label: `Fällig in ${diffDays} Tagen`, 
-      days: diffDays, 
-      color: 'text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/60' 
-    };
-  };
 
   // Metrics
   const metrics = useMemo(() => {
@@ -912,7 +911,7 @@ export default function ActionLogClient({
                                   </div>
                                 );
                               }
-                            } catch (e) {}
+                            } catch {}
                             return null;
                           })()}
                         </div>

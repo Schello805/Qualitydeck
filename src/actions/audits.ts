@@ -149,15 +149,15 @@ export async function startNewAudit(departmentId: string, auditor?: string) {
       return true;
     });
 
-    for (const req of reqsToCreate) {
-      await prisma.auditItem.create({
-        data: {
+    if (reqsToCreate.length > 0) {
+      await prisma.auditItem.createMany({
+        data: reqsToCreate.map(req => ({
           auditId: audit.id,
           requirementId: req.id,
           status: 'open',
           auditDate: auditDateStr,
           auditee: department.manager || undefined
-        }
+        }))
       });
     }
 
