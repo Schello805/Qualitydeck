@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 23 (c6de82a)](https://github.com/Schello805/Qualitydeck/commit/c6de82aced152b7cc11d0d2e74a3a95da1aebfeb) • Zuletzt aktualisiert: 24.10.2026 08:56:41
+**Aktueller Stand:** [Rev. 24 (ce24034)](https://github.com/Schello805/Qualitydeck/commit/ce24034fb01bbd5b3519c98c0ee8db662af1b7ce) • Zuletzt aktualisiert: 24.10.2026 08:57:41
 
 ---
 
-### [Rev. 23] - 24.10.2026, 08:56 (`c6de82a`)
+### [Rev. 24] - 24.10.2026, 08:57 (`ce24034`)
+* **🐛 Behoben:** Avoid new Date() in prerendered server component page.tsx
+* *Commit:* [`ce24034`](https://github.com/Schello805/Qualitydeck/commit/ce24034fb01bbd5b3519c98c0ee8db662af1b7ce)
+
+### [Rev. 23] - 24.10.2026, 08:56 (`4697c70`)
 * **🐛 Behoben:** Use stable webpack bundler for dev script to prevent Turbopack loader panics
-* *Commit:* [`c6de82a`](https://github.com/Schello805/Qualitydeck/commit/c6de82aced152b7cc11d0d2e74a3a95da1aebfeb)
+* *Commit:* [`4697c70`](https://github.com/Schello805/Qualitydeck/commit/4697c70a30bffb91981b67f14fecf1b22d356189)
 
 ### [Rev. 22] - 24.10.2026, 08:44 (`66f6f51`)
 * **🐛 Behoben:** Remove dynamic export in check-update API for Next.js 16 cacheComponents compatibility

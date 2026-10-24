@@ -1,9 +1,20 @@
 [
   {
+    "revision": 24,
+    "revisionDisplay": "Rev. 24",
+    "commit": "ce24034",
+    "fullCommit": "ce24034fb01bbd5b3519c98c0ee8db662af1b7ce",
+    "date": "2026-10-24T08:57:41+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Avoid new Date() in prerendered server component page.tsx",
+    "rawMessage": "fix: Avoid new Date() in prerendered server component page.tsx"
+  },
+  {
     "revision": 23,
     "revisionDisplay": "Rev. 23",
-    "commit": "c6de82a",
-    "fullCommit": "c6de82aced152b7cc11d0d2e74a3a95da1aebfeb",
+    "commit": "4697c70",
+    "fullCommit": "4697c70a30bffb91981b67f14fecf1b22d356189",
     "date": "2026-10-24T08:56:41+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",

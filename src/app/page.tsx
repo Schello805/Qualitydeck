@@ -52,7 +52,7 @@ export default function Home() {
         </div>
 
         <footer className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 w-full flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} Quality Deck • DIN EN ISO 9001:2015 Management App</p>
+          <p>© 2026 Quality Deck • DIN EN ISO 9001:2015 Management App</p>
           <FooterVersion />
         </footer>
       </div>
