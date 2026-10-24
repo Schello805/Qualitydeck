@@ -57,42 +57,19 @@ export default function AuditsClient({
   const [isStartingAudit, setIsStartingAudit] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'open' | 'fulfilled' | 'not_fulfilled'>('ALL');
-  // Initialize deptFilter from URL if present
+  
+  // Initialize deptFilter & scope from URL once on mount
   const urlDept = searchParams.get('dept');
+  const urlScope = searchParams.get('scope');
+
   const [deptFilter, setDeptFilter] = useState<string>(() => urlDept || 'ALL');
   const [chapterFilter, setChapterFilter] = useState('ALL');
   const [sortField, setSortField] = useState<'chapter' | 'status' | 'department' | 'date'>('chapter');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Scope Filter: Spezifisch vs. Allgemein ("Alle Abteilungen")
-  const urlScope = searchParams.get('scope');
   const [includeSpecific, setIncludeSpecific] = useState<boolean>(() => urlScope !== 'general');
   const [includeGeneral, setIncludeGeneral] = useState<boolean>(() => urlScope !== 'specific');
-
-  const prevDeptParamRef = useRef<string | null>(urlDept);
-  const prevScopeParamRef = useRef<string | null>(urlScope);
-
-  useEffect(() => {
-    const currentParam = searchParams.get('dept');
-    if (currentParam !== prevDeptParamRef.current) {
-      prevDeptParamRef.current = currentParam;
-      setDeptFilter(currentParam || 'ALL');
-    }
-    const currentScope = searchParams.get('scope');
-    if (currentScope !== prevScopeParamRef.current) {
-      prevScopeParamRef.current = currentScope;
-      if (currentScope === 'specific') {
-        setIncludeSpecific(true);
-        setIncludeGeneral(false);
-      } else if (currentScope === 'general') {
-        setIncludeSpecific(false);
-        setIncludeGeneral(true);
-      } else {
-        setIncludeSpecific(true);
-        setIncludeGeneral(true);
-      }
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     if (initialItems && initialItems.length > 0) {
@@ -100,7 +77,8 @@ export default function AuditsClient({
     }
   }, [initialItems]);
 
-  const syncUrlParams = (newDept: string, newSpecific: boolean, newGeneral: boolean) => {
+  const updateBrowserUrl = (newDept: string, newSpecific: boolean, newGeneral: boolean) => {
+    if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     if (newDept === 'ALL') {
       params.delete('dept');
@@ -110,23 +88,20 @@ export default function AuditsClient({
 
     if (newSpecific && !newGeneral) {
       params.set('scope', 'specific');
-      prevScopeParamRef.current = 'specific';
     } else if (!newSpecific && newGeneral) {
       params.set('scope', 'general');
-      prevScopeParamRef.current = 'general';
     } else {
       params.delete('scope');
-      prevScopeParamRef.current = null;
     }
 
     const query = params.toString();
-    router.replace(query ? `/audits?${query}` : '/audits', { scroll: false });
+    const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+    window.history.replaceState(null, '', newUrl);
   };
 
   const handleDeptFilterChange = (val: string) => {
     setDeptFilter(val);
-    prevDeptParamRef.current = val === 'ALL' ? null : val;
-    syncUrlParams(val, includeSpecific, includeGeneral);
+    updateBrowserUrl(val, includeSpecific, includeGeneral);
   };
 
   const handleScopeChange = (newSpecific: boolean, newGeneral: boolean) => {
@@ -141,7 +116,7 @@ export default function AuditsClient({
     }
     setIncludeSpecific(spec);
     setIncludeGeneral(gen);
-    syncUrlParams(deptFilter, spec, gen);
+    updateBrowserUrl(deptFilter, spec, gen);
   };
 
   // Modal State for Reading & Updating Audit Items
@@ -289,26 +264,41 @@ export default function AuditsClient({
         return true;
       })
       .sort((a, b) => {
-        let valA: any = '';
-        let valB: any = '';
+        let comp = 0;
 
         if (sortField === 'chapter') {
-          valA = a.requirement?.chapter || '';
-          valB = b.requirement?.chapter || '';
-        } else if (sortField === 'status') {
-          valA = a.status || '';
-          valB = b.status || '';
+          comp = (a.requirement?.chapter || '').localeCompare(
+            b.requirement?.chapter || '', 
+            undefined, 
+            { numeric: true, sensitivity: 'base' }
+          );
         } else if (sortField === 'department') {
-          valA = a.audit?.department?.name || '';
-          valB = b.audit?.department?.name || '';
+          const deptA = a.audit?.department?.name || '';
+          const deptB = b.audit?.department?.name || '';
+          comp = deptA.localeCompare(deptB, 'de');
+          if (comp === 0) {
+            comp = (a.requirement?.chapter || '').localeCompare(
+              b.requirement?.chapter || '', 
+              undefined, 
+              { numeric: true, sensitivity: 'base' }
+            );
+          }
+        } else if (sortField === 'status') {
+          comp = (a.status || '').localeCompare(b.status || '');
+          if (comp === 0) {
+            comp = (a.requirement?.chapter || '').localeCompare(
+              b.requirement?.chapter || '', 
+              undefined, 
+              { numeric: true, sensitivity: 'base' }
+            );
+          }
         } else if (sortField === 'date') {
-          valA = a.auditDate ? new Date(a.auditDate).getTime() : 0;
-          valB = b.auditDate ? new Date(b.auditDate).getTime() : 0;
+          const valA = a.auditDate ? new Date(a.auditDate).getTime() : 0;
+          const valB = b.auditDate ? new Date(b.auditDate).getTime() : 0;
+          comp = valA - valB;
         }
 
-        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
+        return sortDirection === 'asc' ? comp : -comp;
       });
   }, [items, search, statusFilter, deptFilter, includeSpecific, includeGeneral, chapterFilter, sortField, sortDirection]);
 

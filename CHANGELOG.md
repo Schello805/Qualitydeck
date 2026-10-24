@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 36 (a03121d)](https://github.com/Schello805/Qualitydeck/commit/a03121d8e760ba60202b63eb3497802684ceecda) • Zuletzt aktualisiert: 24.10.2026 13:46:26
+**Aktueller Stand:** [Rev. 37 (ba3ea00)](https://github.com/Schello805/Qualitydeck/commit/ba3ea0097e9e9492cff4f4523b326e016d061d8a) • Zuletzt aktualisiert: 24.10.2026 14:03:53
 
 ---
 
-### [Rev. 36] - 24.10.2026, 13:46 (`a03121d`)
+### [Rev. 37] - 24.10.2026, 14:03 (`ba3ea00`)
+* **🐛 Behoben:** Fix dropdown filter state race condition and enable natural chapter sorting
+* *Commit:* [`ba3ea00`](https://github.com/Schello805/Qualitydeck/commit/ba3ea0097e9e9492cff4f4523b326e016d061d8a)
+
+### [Rev. 36] - 24.10.2026, 13:46 (`9779614`)
 * **✨ Neu:** Add interactive ISO 9001 Norm-Zuordnungsmatrix and self-healing audit synchronization
-* *Commit:* [`a03121d`](https://github.com/Schello805/Qualitydeck/commit/a03121d8e760ba60202b63eb3497802684ceecda)
+* *Commit:* [`9779614`](https://github.com/Schello805/Qualitydeck/commit/97796142c235049371350da363d86b2fa64e3b05)
 
 ### [Rev. 35] - 24.10.2026, 13:23 (`72947d6`)
 * **✨ Neu:** Add optional checkbox and quick-switch for general ('Alle Abteilungen') vs specific audit scope

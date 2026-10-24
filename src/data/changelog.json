@@ -1,9 +1,20 @@
 [
   {
+    "revision": 37,
+    "revisionDisplay": "Rev. 37",
+    "commit": "ba3ea00",
+    "fullCommit": "ba3ea0097e9e9492cff4f4523b326e016d061d8a",
+    "date": "2026-10-24T14:03:53+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Fix dropdown filter state race condition and enable natural chapter sorting",
+    "rawMessage": "fix(audits): Fix dropdown filter state race condition and enable natural chapter sorting"
+  },
+  {
     "revision": 36,
     "revisionDisplay": "Rev. 36",
-    "commit": "a03121d",
-    "fullCommit": "a03121d8e760ba60202b63eb3497802684ceecda",
+    "commit": "9779614",
+    "fullCommit": "97796142c235049371350da363d86b2fa64e3b05",
     "date": "2026-10-24T13:46:26+02:00",
     "type": "feature",
     "badge": "✨ Neu",
