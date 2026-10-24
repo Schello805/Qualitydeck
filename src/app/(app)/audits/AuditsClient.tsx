@@ -28,6 +28,17 @@ function renderTextWithLinks(text?: string | null) {
   });
 }
 
+export function isRequirementGeneral(departmentsField?: string | null): boolean {
+  if (!departmentsField || departmentsField === 'all') return true;
+  try {
+    const parsed = JSON.parse(departmentsField);
+    if (Array.isArray(parsed)) return parsed.includes('Alle Bereiche');
+  } catch {
+    return departmentsField.includes('Alle Bereiche');
+  }
+  return false;
+}
+
 export default function AuditsClient({ 
   initialItems = [], 
   initialUsers = [],
@@ -53,13 +64,33 @@ export default function AuditsClient({
   const [sortField, setSortField] = useState<'chapter' | 'status' | 'department' | 'date'>('chapter');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
+  // Scope Filter: Spezifisch vs. Allgemein ("Alle Abteilungen")
+  const urlScope = searchParams.get('scope');
+  const [includeSpecific, setIncludeSpecific] = useState<boolean>(() => urlScope !== 'general');
+  const [includeGeneral, setIncludeGeneral] = useState<boolean>(() => urlScope !== 'specific');
+
   const prevDeptParamRef = useRef<string | null>(urlDept);
+  const prevScopeParamRef = useRef<string | null>(urlScope);
 
   useEffect(() => {
     const currentParam = searchParams.get('dept');
     if (currentParam !== prevDeptParamRef.current) {
       prevDeptParamRef.current = currentParam;
       setDeptFilter(currentParam || 'ALL');
+    }
+    const currentScope = searchParams.get('scope');
+    if (currentScope !== prevScopeParamRef.current) {
+      prevScopeParamRef.current = currentScope;
+      if (currentScope === 'specific') {
+        setIncludeSpecific(true);
+        setIncludeGeneral(false);
+      } else if (currentScope === 'general') {
+        setIncludeSpecific(false);
+        setIncludeGeneral(true);
+      } else {
+        setIncludeSpecific(true);
+        setIncludeGeneral(true);
+      }
     }
   }, [searchParams]);
 
@@ -69,17 +100,48 @@ export default function AuditsClient({
     }
   }, [initialItems]);
 
+  const syncUrlParams = (newDept: string, newSpecific: boolean, newGeneral: boolean) => {
+    const params = new URLSearchParams(window.location.search);
+    if (newDept === 'ALL') {
+      params.delete('dept');
+    } else {
+      params.set('dept', newDept);
+    }
+
+    if (newSpecific && !newGeneral) {
+      params.set('scope', 'specific');
+      prevScopeParamRef.current = 'specific';
+    } else if (!newSpecific && newGeneral) {
+      params.set('scope', 'general');
+      prevScopeParamRef.current = 'general';
+    } else {
+      params.delete('scope');
+      prevScopeParamRef.current = null;
+    }
+
+    const query = params.toString();
+    router.replace(query ? `/audits?${query}` : '/audits', { scroll: false });
+  };
+
   const handleDeptFilterChange = (val: string) => {
     setDeptFilter(val);
     prevDeptParamRef.current = val === 'ALL' ? null : val;
-    const params = new URLSearchParams(window.location.search);
-    if (val === 'ALL') {
-      params.delete('dept');
-    } else {
-      params.set('dept', val);
+    syncUrlParams(val, includeSpecific, includeGeneral);
+  };
+
+  const handleScopeChange = (newSpecific: boolean, newGeneral: boolean) => {
+    let spec = newSpecific;
+    let gen = newGeneral;
+    if (!spec && !gen) {
+      if (!newSpecific) {
+        gen = true;
+      } else {
+        spec = true;
+      }
     }
-    const query = params.toString();
-    router.replace(query ? `/audits?${query}` : '/audits', { scroll: false });
+    setIncludeSpecific(spec);
+    setIncludeGeneral(gen);
+    syncUrlParams(deptFilter, spec, gen);
   };
 
   // Modal State for Reading & Updating Audit Items
@@ -155,10 +217,40 @@ export default function AuditsClient({
     }
   };
 
-  // Overall stats
-  const openCount = items.filter(i => i.status === 'open').length;
-  const fulfilledCount = items.filter(i => i.status === 'fulfilled').length;
-  const unfulfilledCount = items.filter(i => i.status === 'not_fulfilled').length;
+  // Pre-calculate specific vs general counts matching current dept, chapter, search & status filters
+  const { specificCountInScope, generalCountInScope } = useMemo(() => {
+    let spec = 0;
+    let gen = 0;
+    items.forEach(item => {
+      // Dept
+      if (deptFilter !== 'ALL') {
+        const itemDept = (item.audit?.department?.name || '').trim().toLowerCase();
+        const targetDept = deptFilter.trim().toLowerCase();
+        if (itemDept !== targetDept) return;
+      }
+      // Chapter
+      if (chapterFilter !== 'ALL') {
+        if (!item.requirement?.chapter?.startsWith(chapterFilter + '.')) return;
+      }
+      // Search
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const matchChapter = item.requirement?.chapter?.toLowerCase().includes(q);
+        const matchTitle = item.requirement?.title?.toLowerCase().includes(q);
+        const matchDept = item.audit?.department?.name?.toLowerCase().includes(q);
+        const matchAuditee = item.auditee?.toLowerCase().includes(q);
+        const matchNotes = item.implementationNotes?.toLowerCase().includes(q);
+        if (!matchChapter && !matchTitle && !matchDept && !matchAuditee && !matchNotes) return;
+      }
+      // Status
+      if (statusFilter !== 'ALL' && item.status !== statusFilter) return;
+
+      const isGen = isRequirementGeneral(item.requirement?.departments);
+      if (isGen) gen++;
+      else spec++;
+    });
+    return { specificCountInScope: spec, generalCountInScope: gen };
+  }, [items, deptFilter, chapterFilter, search, statusFilter]);
 
   const filteredItems = useMemo(() => {
     return items
@@ -183,6 +275,11 @@ export default function AuditsClient({
           const targetDept = deptFilter.trim().toLowerCase();
           if (itemDept !== targetDept) return false;
         }
+
+        // Scope filter: Spezifisch vs. Allgemein ("Alle Abteilungen")
+        const isGen = isRequirementGeneral(item.requirement?.departments);
+        if (!includeGeneral && isGen) return false;
+        if (!includeSpecific && !isGen) return false;
 
         // Chapter
         if (chapterFilter !== 'ALL') {
@@ -213,7 +310,14 @@ export default function AuditsClient({
         if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
       });
-  }, [items, search, statusFilter, deptFilter, chapterFilter, sortField, sortDirection]);
+  }, [items, search, statusFilter, deptFilter, includeSpecific, includeGeneral, chapterFilter, sortField, sortDirection]);
+
+  // Dynamic stats: show filtered counts when filters are active, otherwise overall
+  const isFiltered = Boolean(search.trim() || statusFilter !== 'ALL' || deptFilter !== 'ALL' || chapterFilter !== 'ALL' || !includeSpecific || !includeGeneral);
+  const activeItems = isFiltered ? filteredItems : items;
+  const openCount = activeItems.filter(i => i.status === 'open').length;
+  const fulfilledCount = activeItems.filter(i => i.status === 'fulfilled').length;
+  const unfulfilledCount = activeItems.filter(i => i.status === 'not_fulfilled').length;
 
   const handleSort = (field: 'chapter' | 'status' | 'department' | 'date') => {
     if (sortField === field) {
@@ -417,12 +521,106 @@ export default function AuditsClient({
           </div>
         </div>
 
+        {/* Audit Scope / Checkboxen: Spezifisch vs. Alle Abteilungen */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200/70 dark:border-slate-700/60">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <span>🎯 Prüfungsumfang:</span>
+            </span>
+
+            {/* Checkbox: Spezifische Abteilungsanforderungen */}
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-800 dark:text-slate-200 hover:text-blue-600 transition-colors">
+              <input 
+                type="checkbox" 
+                checked={includeSpecific}
+                onChange={(e) => handleScopeChange(e.target.checked, includeGeneral)}
+                className="w-4 h-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <span className="flex items-center gap-1.5">
+                <span>🏢 Spezifische Fachanforderungen</span>
+                <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 rounded-md text-[10px] font-bold">
+                  {specificCountInScope}
+                </span>
+              </span>
+            </label>
+
+            {/* Checkbox: Allgemeine Normanforderungen ("Alle Abteilungen") */}
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-800 dark:text-slate-200 hover:text-purple-600 transition-colors">
+              <input 
+                type="checkbox" 
+                checked={includeGeneral}
+                onChange={(e) => handleScopeChange(includeSpecific, e.target.checked)}
+                className="w-4 h-4 text-purple-600 rounded border-slate-300 dark:border-slate-600 focus:ring-purple-500 cursor-pointer"
+              />
+              <span className="flex items-center gap-1.5">
+                <span>🌐 &quot;Alle Abteilungen&quot; (Allgemeine Normanforderungen)</span>
+                <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 rounded-md text-[10px] font-bold">
+                  {generalCountInScope}
+                </span>
+              </span>
+            </label>
+          </div>
+
+          {/* Quick-Preset Buttons */}
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="hidden md:inline text-[11px]">Schnellwahl:</span>
+            <button
+              type="button"
+              onClick={() => handleScopeChange(true, true)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                includeSpecific && includeGeneral 
+                  ? 'bg-blue-600 text-white shadow-sm font-bold' 
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              Vollständig ({specificCountInScope + generalCountInScope})
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScopeChange(true, false)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                includeSpecific && !includeGeneral 
+                  ? 'bg-blue-600 text-white shadow-sm font-bold' 
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              Nur Spezifisch ({specificCountInScope})
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScopeChange(false, true)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                !includeSpecific && includeGeneral 
+                  ? 'bg-purple-600 text-white shadow-sm font-bold' 
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              Nur Allgemein ({generalCountInScope})
+            </button>
+          </div>
+        </div>
+
         {/* Info */}
-        {(search || statusFilter !== 'ALL' || deptFilter !== 'ALL' || chapterFilter !== 'ALL') && (
+        {(search || statusFilter !== 'ALL' || deptFilter !== 'ALL' || chapterFilter !== 'ALL' || !includeSpecific || !includeGeneral) && (
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <span>Gefiltert: <strong>{filteredItems.length}</strong> von {items.length} Auditpunkten</span>
+            <span>
+              Gefiltert: <strong>{filteredItems.length}</strong> von {items.length} Auditpunkten
+              {includeSpecific && includeGeneral ? (
+                <span className="ml-2 text-slate-400">({specificCountInScope} spezifisch + {generalCountInScope} allgemein)</span>
+              ) : !includeGeneral ? (
+                <span className="ml-2 text-blue-600 dark:text-blue-400 font-semibold">(Nur spezifische Fachprüfung)</span>
+              ) : (
+                <span className="ml-2 text-purple-600 dark:text-purple-400 font-semibold">(Nur allgemeine Prüfung / &quot;Alle Abteilungen&quot;)</span>
+              )}
+            </span>
             <button 
-              onClick={() => { setSearch(''); setStatusFilter('ALL'); handleDeptFilterChange('ALL'); setChapterFilter('ALL'); }}
+              onClick={() => { 
+                setSearch(''); 
+                setStatusFilter('ALL'); 
+                setChapterFilter('ALL'); 
+                handleScopeChange(true, true);
+                handleDeptFilterChange('ALL'); 
+              }}
               className="text-blue-600 hover:underline font-medium cursor-pointer"
             >
               Filter zurücksetzen
@@ -517,6 +715,23 @@ export default function AuditsClient({
                         <span className="px-2 py-0.5 text-xs font-mono bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded font-bold">
                           Kap. {item.requirement?.chapter}
                         </span>
+                        {isRequirementGeneral(item.requirement?.departments) ? (
+                          <span 
+                            title="Bereichsübergreifend: Gilt für alle Abteilungen"
+                            className="px-2 py-0.5 text-[10px] bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 rounded border border-purple-200 dark:border-purple-800/60 font-semibold inline-flex items-center gap-1"
+                          >
+                            <span>🌐</span>
+                            <span>Alle Abteilungen</span>
+                          </span>
+                        ) : (
+                          <span 
+                            title={`Fachspezifisch für ${item.audit?.department?.name || 'Fachbereich'}`}
+                            className="px-2 py-0.5 text-[10px] bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded border border-blue-200 dark:border-blue-800/60 font-semibold inline-flex items-center gap-1"
+                          >
+                            <span>🏢</span>
+                            <span>Spezifisch</span>
+                          </span>
+                        )}
                       </div>
                       <div className="text-xs text-slate-500 font-normal truncate max-w-[200px] mt-0.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {item.requirement?.title}
@@ -618,13 +833,24 @@ export default function AuditsClient({
             {/* 1. NORMVORGABE & NORMTEXT (Direkt über der Bewertung) */}
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-1 text-xs font-mono font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 rounded-lg">
                     Kapitel {selectedItem.requirement?.chapter}
                   </span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">
                     Abteilung: <strong className="text-blue-600 dark:text-blue-400">{selectedItem.audit?.department?.name || 'QM'}</strong>
                   </span>
+                  {isRequirementGeneral(selectedItem.requirement?.departments) ? (
+                    <span className="px-2 py-0.5 text-[11px] bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 rounded-md border border-purple-200 dark:border-purple-800/60 font-semibold inline-flex items-center gap-1">
+                      <span>🌐</span>
+                      <span>Bereichsübergreifend (Alle Abteilungen)</span>
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 text-[11px] bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800/60 font-semibold inline-flex items-center gap-1">
+                      <span>🏢</span>
+                      <span>Spezifische Fachanforderung</span>
+                    </span>
+                  )}
                 </div>
                 {selectedItem.requirement?.category && (
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">

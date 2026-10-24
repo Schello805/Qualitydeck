@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 34 (94da24b)](https://github.com/Schello805/Qualitydeck/commit/94da24b14a2c0219c30bc5f6eea8007243a276cc) • Zuletzt aktualisiert: 24.10.2026 13:18:23
+**Aktueller Stand:** [Rev. 35 (0952318)](https://github.com/Schello805/Qualitydeck/commit/095231824d773337774068db6b67bfcf0ca85f0f) • Zuletzt aktualisiert: 24.10.2026 13:23:57
 
 ---
 
-### [Rev. 34] - 24.10.2026, 13:18 (`94da24b`)
+### [Rev. 35] - 24.10.2026, 13:23 (`0952318`)
+* **✨ Neu:** Add optional checkbox and quick-switch for general ('Alle Abteilungen') vs specific audit scope
+* *Commit:* [`0952318`](https://github.com/Schello805/Qualitydeck/commit/095231824d773337774068db6b67bfcf0ca85f0f)
+
+### [Rev. 34] - 24.10.2026, 13:18 (`a345557`)
 * **🐛 Behoben:** Fix department filter synchronization and ensure all department audits are populated
-* *Commit:* [`94da24b`](https://github.com/Schello805/Qualitydeck/commit/94da24b14a2c0219c30bc5f6eea8007243a276cc)
+* *Commit:* [`a345557`](https://github.com/Schello805/Qualitydeck/commit/a345557196a05d7902d999db4dfa92c8d77c4bf9)
 
 ### [Rev. 33] - 24.10.2026, 13:06 (`49ba5a0`)
 * **🐛 Behoben:** Remove invalid --quiet flag from prisma generate

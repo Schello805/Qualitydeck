@@ -1,9 +1,20 @@
 [
   {
+    "revision": 35,
+    "revisionDisplay": "Rev. 35",
+    "commit": "0952318",
+    "fullCommit": "095231824d773337774068db6b67bfcf0ca85f0f",
+    "date": "2026-10-24T13:23:57+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Add optional checkbox and quick-switch for general ('Alle Abteilungen') vs specific audit scope",
+    "rawMessage": "feat(audits): Add optional checkbox and quick-switch for general ('Alle Abteilungen') vs specific audit scope"
+  },
+  {
     "revision": 34,
     "revisionDisplay": "Rev. 34",
-    "commit": "94da24b",
-    "fullCommit": "94da24b14a2c0219c30bc5f6eea8007243a276cc",
+    "commit": "a345557",
+    "fullCommit": "a345557196a05d7902d999db4dfa92c8d77c4bf9",
     "date": "2026-10-24T13:18:23+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",
