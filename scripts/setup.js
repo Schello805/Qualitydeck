@@ -73,11 +73,41 @@ async function main() {
           name: 'Qualitätsmanager (QMB)',
           email: 'qmb@qualitydeck.local',
           role: 'QMB',
-          department: 'Qualitätsmanagement'
+          department: 'QM'
         }
       });
       console.log('✅ Standard-Benutzer erstellt.');
     }
+
+    // Ensure 19 standard departments from ISO Matrix exist
+    const defaultDepts = [
+      { name: 'Plant Management', manager: 'Geschäftsführung / Werksleitung', processType: 'management', order: 1 },
+      { name: 'QM', manager: 'Qualitätsmanagement', processType: 'management', order: 2 },
+      { name: 'QS', manager: 'Qualitätssicherung', processType: 'core', order: 3 },
+      { name: 'LSS (Lean Management)', manager: 'Lean Six Sigma & KVP', processType: 'support', order: 4 },
+      { name: 'IE-PDM', manager: 'Industrial Engineering - Product Data Mgmt', processType: 'core', order: 5 },
+      { name: 'IE-NPI/Prod.Mgmt.', manager: 'New Product Introduction / Prod. Mgmt', processType: 'core', order: 6 },
+      { name: 'Manufacturing Engineering', manager: 'Fertigungstechnik & Industrial Engineering', processType: 'core', order: 7 },
+      { name: 'PM', manager: 'Projekt- & Produktmanagement', processType: 'core', order: 8 },
+      { name: 'Planung', manager: 'Produktionsplanung & Steuerung', processType: 'core', order: 9 },
+      { name: 'HR', manager: 'Personalabteilung & Human Resources', processType: 'support', order: 10 },
+      { name: 'Produktion', manager: 'Fertigung & Montage', processType: 'core', order: 11 },
+      { name: 'Wareneingang', manager: 'Wareneingang & Wareneingangsprüfung', processType: 'core', order: 12 },
+      { name: 'Versand', manager: 'Logistik & Warenausgang', processType: 'core', order: 13 },
+      { name: 'Imp/Exp', manager: 'Zoll, Import & Export', processType: 'support', order: 14 },
+      { name: 'Einkauf', manager: 'Strategischer & Operativer Einkauf', processType: 'support', order: 15 },
+      { name: 'Kalibrierung', manager: 'Prüfmittelüberwachung & Kalibrierung', processType: 'support', order: 16 },
+      { name: 'Instandhaltung', manager: 'Maintenance & Technische Anlagen', processType: 'support', order: 17 },
+      { name: 'IT', manager: 'Informationstechnologie & Systeme', processType: 'support', order: 18 },
+      { name: 'Facility', manager: 'Facility Management & Gebäude', processType: 'support', order: 19 },
+    ];
+    for (const d of defaultDepts) {
+      const exists = await prisma.department.findFirst({ where: { name: d.name } });
+      if (!exists) {
+        await prisma.department.create({ data: d });
+      }
+    }
+    console.log('✅ Standard-Abteilungen aus Excel-Matrix verifiziert.');
 
     // Ensure default settings exist
     const settings = await prisma.setting.count();

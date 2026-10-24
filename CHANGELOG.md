@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 30 (c4cc99e)](https://github.com/Schello805/Qualitydeck/commit/c4cc99ef47e086be92dea94c56617a3c17fe9412) • Zuletzt aktualisiert: 24.10.2026 11:36:42
+**Aktueller Stand:** [Rev. 31 (49247ed)](https://github.com/Schello805/Qualitydeck/commit/49247eda53d3513b5ce85acc423a28dd5ab49c8e) • Zuletzt aktualisiert: 24.10.2026 12:47:50
 
 ---
 
-### [Rev. 30] - 24.10.2026, 11:36 (`c4cc99e`)
+### [Rev. 31] - 24.10.2026, 12:47 (`49247ed`)
+* **✨ Neu:** Sync all 19 Excel departments into database and audit filters with 1-click starter
+* *Commit:* [`49247ed`](https://github.com/Schello805/Qualitydeck/commit/49247eda53d3513b5ce85acc423a28dd5ab49c8e)
+
+### [Rev. 30] - 24.10.2026, 11:36 (`e15aa27`)
 * **🚀 Update:** perf(quality): Add database indexes, parallelize queries, batch audit creation and clean linter warnings
-* *Commit:* [`c4cc99e`](https://github.com/Schello805/Qualitydeck/commit/c4cc99ef47e086be92dea94c56617a3c17fe9412)
+* *Commit:* [`e15aa27`](https://github.com/Schello805/Qualitydeck/commit/e15aa2768b0f94d6beedf30504ee06b1017cba2b)
 
 ### [Rev. 29] - 24.10.2026, 11:28 (`722bc4d`)
 * **✨ Neu:** Redirect root page directly to /dashboard

@@ -1,9 +1,20 @@
 [
   {
+    "revision": 31,
+    "revisionDisplay": "Rev. 31",
+    "commit": "49247ed",
+    "fullCommit": "49247eda53d3513b5ce85acc423a28dd5ab49c8e",
+    "date": "2026-10-24T12:47:50+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Sync all 19 Excel departments into database and audit filters with 1-click starter",
+    "rawMessage": "feat(departments): Sync all 19 Excel departments into database and audit filters with 1-click starter"
+  },
+  {
     "revision": 30,
     "revisionDisplay": "Rev. 30",
-    "commit": "c4cc99e",
-    "fullCommit": "c4cc99ef47e086be92dea94c56617a3c17fe9412",
+    "commit": "e15aa27",
+    "fullCommit": "e15aa2768b0f94d6beedf30504ee06b1017cba2b",
     "date": "2026-10-24T11:36:42+02:00",
     "type": "update",
     "badge": "🚀 Update",

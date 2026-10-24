@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { updateAuditReportItem, deleteAuditItem } from '@/actions/audits';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { updateAuditReportItem, deleteAuditItem, startNewAudit } from '@/actions/audits';
 
 function renderTextWithLinks(text?: string | null) {
   if (!text) return null;
@@ -31,15 +31,19 @@ function renderTextWithLinks(text?: string | null) {
 export default function AuditsClient({ 
   initialItems = [], 
   initialUsers = [],
+  allDepartments = [],
   items: itemsProp 
 }: { 
   initialItems?: any[]; 
   initialUsers?: any[];
+  allDepartments?: any[];
   items?: any[];
 }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [items, setItems] = useState<any[]>(initialItems.length ? initialItems : (itemsProp || []));
   const [users] = useState<any[]>(initialUsers || []);
+  const [isStartingAudit, setIsStartingAudit] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'open' | 'fulfilled' | 'not_fulfilled'>('ALL');
   const [deptFilter, setDeptFilter] = useState('ALL');
@@ -96,14 +100,36 @@ export default function AuditsClient({
     }
   };
 
-  // Departments
+  // Departments: combine registered departments from database + any active in audit items
   const departments = useMemo(() => {
     const set = new Set<string>();
+    if (allDepartments && allDepartments.length > 0) {
+      allDepartments.forEach((d: any) => {
+        if (d.name && d.name !== 'Alle Bereiche') set.add(d.name);
+      });
+    }
     items.forEach(i => {
       if (i.audit?.department?.name) set.add(i.audit.department.name);
     });
     return Array.from(set).sort();
-  }, [items]);
+  }, [items, allDepartments]);
+
+  const currentDeptObj = useMemo(() => {
+    return allDepartments.find((d: any) => d.name === deptFilter);
+  }, [allDepartments, deptFilter]);
+
+  const handleStartAuditForFilteredDept = async () => {
+    if (!currentDeptObj) return;
+    setIsStartingAudit(true);
+    const res = await startNewAudit(currentDeptObj.id);
+    setIsStartingAudit(false);
+    if (res.success) {
+      router.refresh();
+      window.location.reload();
+    } else {
+      alert(res.error || 'Fehler beim Starten des Audits.');
+    }
+  };
 
   // Overall stats
   const openCount = items.filter(i => i.status === 'open').length;
@@ -428,7 +454,27 @@ export default function AuditsClient({
               {filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
-                    Keine Auditpunkte entsprechen den aktuellen Filterkriterien.
+                    {deptFilter !== 'ALL' && currentDeptObj ? (
+                      <div className="max-w-md mx-auto space-y-3">
+                        <div className="text-3xl">🏢</div>
+                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
+                          Noch keine Auditpunkte für &ldquo;{deptFilter}&rdquo; erfasst
+                        </h3>
+                        <p className="text-sm text-slate-500">
+                          Bereite das Audit für diese Abteilung vor. Die passenden Normanforderungen laut Excel-Normmatrix werden automatisch zugeordnet.
+                        </p>
+                        <button
+                          type="button"
+                          disabled={isStartingAudit}
+                          onClick={handleStartAuditForFilteredDept}
+                          className="mt-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-semibold shadow-md transition-all inline-flex items-center gap-2 cursor-pointer"
+                        >
+                          {isStartingAudit ? 'Bereite vor...' : `🚀 Audit für "${deptFilter}" jetzt starten`}
+                        </button>
+                      </div>
+                    ) : (
+                      'Keine Auditpunkte entsprechen den aktuellen Filterkriterien.'
+                    )}
                   </td>
                 </tr>
               ) : (
