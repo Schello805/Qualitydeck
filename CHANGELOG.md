@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 44 (11cc38a)](https://github.com/Schello805/Qualitydeck/commit/11cc38a48e309993ffef1ae23f920447945086f5) • Zuletzt aktualisiert: 24.10.2026 21:50:40
+**Aktueller Stand:** [Rev. 45 (290e66c)](https://github.com/Schello805/Qualitydeck/commit/290e66cd66fe65b3c6e675e48894108fac295202) • Zuletzt aktualisiert: 24.10.2026 21:59:41
 
 ---
 
-### [Rev. 44] - 24.10.2026, 21:50 (`11cc38a`)
+### [Rev. 45] - 24.10.2026, 21:59 (`290e66c`)
+* **✨ Neu:** Add animated notification bell, legacy department remapping, and unassigned process indicators
+* *Commit:* [`290e66c`](https://github.com/Schello805/Qualitydeck/commit/290e66cd66fe65b3c6e675e48894108fac295202)
+
+### [Rev. 44] - 24.10.2026, 21:50 (`08dfac8`)
 * **🚀 Update:** perf: Drastically streamline update.sh with smart caching and fast exit
-* *Commit:* [`11cc38a`](https://github.com/Schello805/Qualitydeck/commit/11cc38a48e309993ffef1ae23f920447945086f5)
+* *Commit:* [`08dfac8`](https://github.com/Schello805/Qualitydeck/commit/08dfac8ca3d3e2dae04808348f34de642f02b3fc)
 
 ### [Rev. 43] - 24.10.2026, 21:48 (`5de37e0`)
 * **🚀 Update:** style: Slenderize requirements, compact department list, scale down process map, reset matrix font size

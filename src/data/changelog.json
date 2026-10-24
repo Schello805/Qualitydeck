@@ -1,9 +1,20 @@
 [
   {
+    "revision": 45,
+    "revisionDisplay": "Rev. 45",
+    "commit": "290e66c",
+    "fullCommit": "290e66cd66fe65b3c6e675e48894108fac295202",
+    "date": "2026-10-24T21:59:41+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Add animated notification bell, legacy department remapping, and unassigned process indicators",
+    "rawMessage": "feat: Add animated notification bell, legacy department remapping, and unassigned process indicators"
+  },
+  {
     "revision": 44,
     "revisionDisplay": "Rev. 44",
-    "commit": "11cc38a",
-    "fullCommit": "11cc38a48e309993ffef1ae23f920447945086f5",
+    "commit": "08dfac8",
+    "fullCommit": "08dfac8ca3d3e2dae04808348f34de642f02b3fc",
     "date": "2026-10-24T21:50:40+02:00",
     "type": "update",
     "badge": "🚀 Update",

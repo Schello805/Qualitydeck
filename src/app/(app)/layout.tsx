@@ -4,8 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useState, useEffect } from "react";
 import { getNavCounts } from "@/actions/complaints";
+import { getSystemAlerts, SystemAlerts } from "@/actions/alerts";
+import { getDepartments } from "@/actions/departments";
 import HeaderProfile from "@/components/HeaderProfile";
 import FooterVersion from "@/components/FooterVersion";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -27,6 +30,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     openComplaints: 0,
     openActions: 0,
   });
+
+  // System alerts for unassigned items
+  const [alerts, setAlerts] = useState<SystemAlerts>({
+    totalIssues: 0,
+    unassignedProcessDepts: [],
+    legacyRequirementDepts: []
+  });
+  const [departments, setDepartments] = useState<any[]>([]);
 
   // Dark mode init
   useEffect(() => {
@@ -53,22 +64,36 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  // Nav counts fetching
+  // Nav counts & Alerts fetching
   useEffect(() => {
-    const loadCounts = async () => {
+    const loadData = async () => {
       try {
-        const res = await getNavCounts();
-        if (res) {
+        const [resCounts, resAlerts, resDepts] = await Promise.all([
+          getNavCounts(),
+          getSystemAlerts(),
+          getDepartments()
+        ]);
+        if (resCounts) {
           setCounts({
-            openComplaints: res.openComplaints || 0,
-            openActions: res.openActions || 0,
+            openComplaints: resCounts.openComplaints || 0,
+            openActions: resCounts.openActions || 0,
           });
         }
+        if (resAlerts) {
+          setAlerts(resAlerts);
+        }
+        if (resDepts) {
+          setDepartments(resDepts);
+        }
       } catch (err) {
-        console.error('Failed to load nav counts', err);
+        console.error('Failed to load nav counts or alerts', err);
       }
     };
-    loadCounts();
+    loadData();
+
+    const handleAlertsUpdated = () => loadData();
+    window.addEventListener('alerts-updated', handleAlertsUpdated);
+    return () => window.removeEventListener('alerts-updated', handleAlertsUpdated);
   }, [pathname]);
 
   useEffect(() => {
@@ -100,9 +125,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     {
       title: "Planung & Organisation",
       items: [
-        { href: "/process-map", label: "Prozesslandkarte (4.4)", icon: "🗺️" },
+        { 
+          href: "/process-map", 
+          label: "Prozesslandkarte (4.4)", 
+          icon: "🗺️",
+          badge: alerts.unassignedProcessDepts.length > 0 ? `${alerts.unassignedProcessDepts.length}!` : null,
+          badgeColor: 'bg-amber-500 text-white'
+        },
         { href: "/departments", label: "Abteilungen & Bereiche (5.3)", icon: "🏢" },
-        { href: "/matrix", label: "Normmatrix & Zuordnung", icon: "🗂️" },
+        { 
+          href: "/matrix", 
+          label: "Normmatrix & Zuordnung", 
+          icon: "🗂️",
+          badge: alerts.legacyRequirementDepts.length > 0 ? `${alerts.legacyRequirementDepts.length}!` : null,
+          badgeColor: 'bg-amber-500 text-white'
+        },
         { href: "/requirements", label: "ISO 9001 Normkatalog", icon: "📋" },
       ]
     },
@@ -247,6 +284,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* System Alerts & Notification Bell */}
+            <NotificationBell initialAlerts={alerts} departments={departments} />
+
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}

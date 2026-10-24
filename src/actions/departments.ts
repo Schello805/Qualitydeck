@@ -17,7 +17,7 @@ export async function getDepartments() {
   }
 }
 
-export async function createDepartmentDirect(data: { name: string; manager?: string; processType?: string }) {
+export async function createDepartmentDirect(data: { name: string; manager?: string; processType?: string | null }) {
   const name = data.name.trim();
   if (!name) return { error: 'Abteilungsname darf nicht leer sein.' };
 
@@ -33,11 +33,12 @@ export async function createDepartmentDirect(data: { name: string; manager?: str
       data: {
         name,
         manager: data.manager?.trim() || null,
-        processType: data.processType || 'core'
+        processType: data.processType !== undefined ? (data.processType || null) : null
       }
     });
 
     revalidatePath('/departments');
+    revalidatePath('/process-map');
     revalidatePath('/users');
     revalidatePath('/action-log');
     return { success: true, department };
@@ -50,12 +51,13 @@ export async function createDepartmentDirect(data: { name: string; manager?: str
 export async function createDepartment(formData: FormData): Promise<void> {
   const name = formData.get('name') as string;
   const manager = formData.get('manager') as string;
+  const processType = formData.get('processType') as string | null;
 
   if (!name) return;
-  await createDepartmentDirect({ name, manager });
+  await createDepartmentDirect({ name, manager, processType: processType || null });
 }
 
-export async function updateDepartment(id: string, data: { name: string; manager?: string; processType?: string }) {
+export async function updateDepartment(id: string, data: { name: string; manager?: string; processType?: string | null }) {
   const name = data.name.trim();
   if (!name) return { error: 'Abteilungsname darf nicht leer sein.' };
 
@@ -65,11 +67,12 @@ export async function updateDepartment(id: string, data: { name: string; manager
       data: {
         name,
         manager: data.manager?.trim() || null,
-        ...(data.processType ? { processType: data.processType } : {})
+        ...(data.processType !== undefined ? { processType: data.processType || null } : {})
       }
     });
 
     revalidatePath('/departments');
+    revalidatePath('/process-map');
     revalidatePath('/audits');
     revalidatePath('/requirements');
     revalidatePath('/users');

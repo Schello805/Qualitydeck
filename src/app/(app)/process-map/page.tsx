@@ -72,6 +72,11 @@ export default function ProcessMapPage() {
       // Save to database
       updateProcessMapOrder(ordered.map(d => ({ id: d.id, processType: d.processType, order: d.order || 0 })));
 
+      // Notify system alerts & navigation
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('alerts-updated'));
+      }
+
       return ordered;
     });
   };
@@ -248,6 +253,53 @@ export default function ProcessMapPage() {
           🖼️ Als PNG speichern
         </button>
       </div>
+
+      {/* Unassigned Process Departments Alert Banner */}
+      {unassigned.length > 0 && (
+        <div className="p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-800 shadow-sm space-y-2.5 animate-in fade-in print:hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-bold text-xs text-orange-900 dark:text-orange-200">
+              <span className="text-base">⚠️</span>
+              <span>Handlungsbedarf: {unassigned.length} Abteilung(en) noch keinem Prozesstyp zugewiesen</span>
+            </div>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-200 dark:bg-orange-900 text-orange-900 dark:text-orange-200">
+              {unassigned.length} unzugeordnet
+            </span>
+          </div>
+          <p className="text-xs text-orange-800 dark:text-orange-300">
+            Diese Abteilungen sind noch keiner Prozessgruppe zugeordnet. Weise sie mit einem Klick zu oder ziehe sie per Drag & Drop in die passende Prozessgruppe:
+          </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {unassigned.map(d => (
+              <div key={d.id} className="flex items-center gap-2 p-1.5 px-3 rounded-xl bg-white dark:bg-slate-800 border border-orange-300 dark:border-slate-700 text-xs shadow-xs">
+                <span className="font-bold text-slate-900 dark:text-white">🏢 {d.name}</span>
+                <span className="text-[10px] text-slate-400">➔</span>
+                <button
+                  type="button"
+                  onClick={() => reorderDepartments(d.id, null, 'management')}
+                  className="px-2 py-0.5 bg-rose-100 hover:bg-rose-200 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200 rounded text-[10px] font-bold cursor-pointer transition-colors"
+                >
+                  Führung
+                </button>
+                <button
+                  type="button"
+                  onClick={() => reorderDepartments(d.id, null, 'core')}
+                  className="px-2 py-0.5 bg-rose-100 hover:bg-rose-200 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200 rounded text-[10px] font-bold cursor-pointer transition-colors"
+                >
+                  Kern
+                </button>
+                <button
+                  type="button"
+                  onClick={() => reorderDepartments(d.id, null, 'support')}
+                  className="px-2 py-0.5 bg-rose-100 hover:bg-rose-200 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200 rounded text-[10px] font-bold cursor-pointer transition-colors"
+                >
+                  Support
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div ref={mapRef} className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-3 lg:p-4 flex flex-col lg:flex-row gap-2.5 relative overflow-x-auto min-w-max lg:min-w-0 print:border-none print:shadow-none print:p-0 print:overflow-visible">
         

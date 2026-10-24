@@ -7,6 +7,7 @@ import {
   toggleRequirementAllDepartments,
   batchSetDepartmentChapters
 } from '@/actions/requirements';
+import { remapLegacyDepartment } from '@/actions/alerts';
 
 function parseDeptList(raw: string | null | undefined): string[] {
   if (!raw || raw === 'all') return ['Alle Bereiche'];
@@ -44,6 +45,34 @@ export default function MatrixClient({
     });
     return map;
   }, [requirements]);
+
+  // Set of active department names
+  const knownDeptNames = useMemo(() => new Set(departments.map(d => d.name)), [departments]);
+
+  // Legacy / unassigned departments found in requirements
+  const legacyDeptsSummary = useMemo(() => {
+    const map = new Map<string, { count: number; reqIds: string[] }>();
+    requirements.forEach(req => {
+      const list = parseDeptList(req.departments);
+      list.forEach(item => {
+        if (item !== 'Alle Bereiche' && item !== 'all' && !knownDeptNames.has(item)) {
+          if (!map.has(item)) map.set(item, { count: 0, reqIds: [] });
+          const entry = map.get(item)!;
+          entry.count += 1;
+          entry.reqIds.push(req.id);
+        }
+      });
+    });
+    return Array.from(map.entries()).map(([name, data]) => ({ name, ...data }));
+  }, [requirements, knownDeptNames]);
+
+  // Helper: get legacy departments for a single requirement
+  const getReqLegacyDepts = (reqId: string) => {
+    const req = requirements.find(r => r.id === reqId);
+    if (!req) return [];
+    const list = parseDeptList(req.departments);
+    return list.filter(item => item !== 'Alle Bereiche' && item !== 'all' && !knownDeptNames.has(item));
+  };
 
   // Compute active counts per department
   const deptCounts = useMemo(() => {
@@ -99,14 +128,47 @@ export default function MatrixClient({
 
       // Focus dept
       if (focusDept !== 'ALL') {
-        const activeDepts = reqMap.get(req.id) || new Set();
-        const isAssigned = activeDepts.has('Alle Bereiche') || activeDepts.has(focusDept);
-        if (!isAssigned) return false;
+        if (focusDept === '__UNASSIGNED__') {
+          const activeDepts = reqMap.get(req.id) || new Set();
+          let hasLegacy = false;
+          activeDepts.forEach(d => {
+            if (d !== 'Alle Bereiche' && d !== 'all' && !knownDeptNames.has(d)) hasLegacy = true;
+          });
+          if (!hasLegacy) return false;
+        } else {
+          const activeDepts = reqMap.get(req.id) || new Set();
+          const isAssigned = activeDepts.has('Alle Bereiche') || activeDepts.has(focusDept);
+          if (!isAssigned) return false;
+        }
       }
 
       return true;
     });
-  }, [requirements, selectedMainChapter, searchTerm, focusDept, reqMap]);
+  }, [requirements, selectedMainChapter, searchTerm, focusDept, reqMap, knownDeptNames]);
+
+  // Bulk remap or remove legacy department
+  const handleRemapLegacy = async (legacyName: string, targetName: string | null) => {
+    setRequirements(prev => prev.map(req => {
+      const list = parseDeptList(req.departments);
+      if (!list.includes(legacyName)) return req;
+      let next = list.filter(d => d !== legacyName);
+      if (targetName && targetName.trim() && !next.includes(targetName.trim())) {
+        next.push(targetName.trim());
+      }
+      return { ...req, departments: JSON.stringify(next) };
+    }));
+
+    startTransition(async () => {
+      const res = await remapLegacyDepartment(legacyName, targetName);
+      if (res?.error) {
+        setToastMessage(`Fehler: ${res.error}`);
+      } else {
+        setToastMessage(targetName ? `"${legacyName}" erfolgreich auf "${targetName}" übertragen.` : `"${legacyName}" entfernt.`);
+        window.dispatchEvent(new CustomEvent('alerts-updated'));
+        setTimeout(() => setToastMessage(null), 3000);
+      }
+    });
+  };
 
   // Toggle single cell
   const handleToggleCell = (reqId: string, deptName: string) => {
@@ -234,6 +296,76 @@ export default function MatrixClient({
         </div>
       )}
 
+      {/* Legacy / Unassigned Departments Banner */}
+      {legacyDeptsSummary.length > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 shadow-sm space-y-2.5 animate-in fade-in">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-bold text-xs text-amber-900 dark:text-amber-200">
+              <span className="text-base">⚠️</span>
+              <span>Frühere / Nicht zugewiesene Abteilungen in Normanforderungen gefunden</span>
+            </div>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200">
+              {legacyDeptsSummary.length} Altdaten-Bezeichnungen
+            </span>
+          </div>
+          <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+            Folgende Bezeichnungen stammen aus früheren Datensätzen und entsprechen keiner deiner aktiven Abteilungen. 
+            Übertrage sie mit 1 Klick auf die passende Abteilung oder entferne sie:
+          </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {legacyDeptsSummary.map(item => {
+              let suggested = '';
+              const l = item.name.toLowerCase();
+              if (l.includes('personal') || l === 'hr') suggested = 'HR';
+              else if (l.includes('lean') || l.includes('lss')) suggested = 'LSS (Lean Management)';
+              else if (l.includes('geschäft') || l.includes('blatt')) suggested = 'Geschäftsführung';
+
+              return (
+                <div key={item.name} className="flex items-center gap-2 p-1.5 px-3 rounded-xl bg-white dark:bg-slate-800 border border-amber-300 dark:border-slate-700 text-xs shadow-xs">
+                  <span className="font-bold text-amber-900 dark:text-amber-200 font-mono text-[11px]">{item.name}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">({item.count} Kap.)</span>
+                  
+                  {suggested && (
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => handleRemapLegacy(item.name, suggested)}
+                      className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                    >
+                      <span>⚡</span> Auf &quot;{suggested}&quot; übertragen
+                    </button>
+                  )}
+
+                  <select
+                    defaultValue=""
+                    disabled={isPending}
+                    onChange={(e) => {
+                      if (e.target.value) handleRemapLegacy(item.name, e.target.value);
+                    }}
+                    className="px-2 py-1 text-[10px] rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium"
+                  >
+                    <option value="" disabled>Zuweisen zu...</option>
+                    {departments.map(d => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => handleRemapLegacy(item.name, null)}
+                    className="text-rose-600 hover:text-rose-800 dark:text-rose-400 text-[10px] font-bold px-1.5 py-0.5 cursor-pointer ml-1"
+                    title="Diese Altdaten-Bezeichnung aus allen Anforderungen entfernen"
+                  >
+                    ✕ Entfernen
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Filter and Controls Bar */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -277,6 +409,11 @@ export default function MatrixClient({
               className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="ALL">🏢 Alle Spalten anzeigen</option>
+              {legacyDeptsSummary.length > 0 && (
+                <option value="__UNASSIGNED__" className="text-amber-600 font-bold">
+                  ⚠️ Nicht zugewiesen ({legacyDeptsSummary.reduce((acc, x) => acc + x.count, 0)} Altdaten)
+                </option>
+              )}
               {departments.map(d => (
                 <option key={d.id} value={d.name}>
                   {d.name} ({deptCounts[d.name]?.total || 0} Kap. / {deptCounts[d.name]?.specific || 0} spez.)
@@ -370,6 +507,18 @@ export default function MatrixClient({
                     </span>
                   </div>
                 </th>
+
+                {/* Column: Nicht zugewiesen / Altdaten */}
+                {legacyDeptsSummary.length > 0 && (
+                  <th className="px-3 py-3 text-center min-w-[140px] bg-amber-50/90 dark:bg-amber-950/60 border-r border-amber-200 dark:border-amber-800/80">
+                    <div className="flex flex-col items-center">
+                      <span className="text-amber-900 dark:text-amber-200 text-[11px] font-black">⚠️ Nicht zugewiesen</span>
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 font-bold mt-0.5">
+                        {legacyDeptsSummary.reduce((acc, x) => acc + x.count, 0)} Altdaten-Tags
+                      </span>
+                    </div>
+                  </th>
+                )}
 
                 {/* Department Columns */}
                 {departments
@@ -487,6 +636,39 @@ export default function MatrixClient({
                           />
                         </label>
                       </td>
+
+                      {/* Cell: Nicht zugewiesen / Altdaten */}
+                      {legacyDeptsSummary.length > 0 && (
+                        <td className="px-3 py-2 text-center bg-amber-50/30 dark:bg-amber-950/20 border-r border-amber-200 dark:border-amber-800/60">
+                          {(() => {
+                            const legacy = getReqLegacyDepts(req.id);
+                            if (legacy.length === 0) {
+                              return <span className="text-slate-300 dark:text-slate-600 text-[11px]">-</span>;
+                            }
+                            return (
+                              <div className="flex flex-col items-center gap-1">
+                                {legacy.map(oldName => (
+                                  <span 
+                                    key={oldName} 
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 shadow-2xs"
+                                    title={`Frühere Bezeichnung: "${oldName}". Klicke auf '✕' zum Entfernen.`}
+                                  >
+                                    <span>{oldName}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleCell(req.id, oldName)}
+                                      className="text-amber-700 hover:text-red-600 dark:text-amber-400 font-black cursor-pointer ml-0.5"
+                                      title="Diese Zuordnung entfernen"
+                                    >
+                                      ✕
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            );
+                          })()}
+                        </td>
+                      )}
 
                       {/* Department Checkboxes */}
                       {departments

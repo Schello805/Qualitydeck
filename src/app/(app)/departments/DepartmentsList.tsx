@@ -20,7 +20,7 @@ export default function DepartmentsList({
 }) {
   const [departments, setDepartments] = useState<Department[]>(initialDepartments);
   const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'ALL' | 'management' | 'core' | 'support'>('ALL');
+  const [typeFilter, setTypeFilter] = useState<'ALL' | 'management' | 'core' | 'support' | 'unassigned'>('ALL');
   
   // Create state
   const [isCreating, setIsCreating] = useState(false);
@@ -40,9 +40,17 @@ export default function DepartmentsList({
 
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
 
+  const unassignedCount = useMemo(() => {
+    return departments.filter(d => !d.processType || d.processType === 'none').length;
+  }, [departments]);
+
   const filtered = useMemo(() => {
     return departments.filter(d => {
-      if (typeFilter !== 'ALL' && d.processType !== typeFilter) return false;
+      if (typeFilter === 'unassigned') {
+        if (d.processType && d.processType !== 'none') return false;
+      } else if (typeFilter !== 'ALL' && d.processType !== typeFilter) {
+        return false;
+      }
       if (search.trim()) {
         const q = search.toLowerCase();
         const matchName = d.name.toLowerCase().includes(q);
@@ -149,8 +157,8 @@ export default function DepartmentsList({
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-50 text-slate-500 border border-slate-200 dark:border-slate-800">
-            Bereich
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700">
+            ⚠️ Nicht zugewiesen
           </span>
         );
     }
@@ -174,6 +182,11 @@ export default function DepartmentsList({
             className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">Alle Prozesstypen</option>
+            {unassignedCount > 0 && (
+              <option value="unassigned" className="text-amber-600 font-bold">
+                ⚠️ Nicht zugewiesen ({unassignedCount})
+              </option>
+            )}
             <option value="management">Führung / Management</option>
             <option value="core">Kernprozesse</option>
             <option value="support">Unterstützungsprozesse</option>
