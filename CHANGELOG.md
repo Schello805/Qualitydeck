@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 37 (ba3ea00)](https://github.com/Schello805/Qualitydeck/commit/ba3ea0097e9e9492cff4f4523b326e016d061d8a) • Zuletzt aktualisiert: 24.10.2026 14:03:53
+**Aktueller Stand:** [Rev. 38 (d35d111)](https://github.com/Schello805/Qualitydeck/commit/d35d1118cc78f8e51559dc664c56bb63a71c1293) • Zuletzt aktualisiert: 24.10.2026 14:11:41
 
 ---
 
-### [Rev. 37] - 24.10.2026, 14:03 (`ba3ea00`)
+### [Rev. 38] - 24.10.2026, 14:11 (`d35d111`)
+* **✨ Neu:** Prefill ISO 9001 assignments for all 22 departments & rename Plant Management to Geschäftsführung
+* *Commit:* [`d35d111`](https://github.com/Schello805/Qualitydeck/commit/d35d1118cc78f8e51559dc664c56bb63a71c1293)
+
+### [Rev. 37] - 24.10.2026, 14:03 (`9d3245a`)
 * **🐛 Behoben:** Fix dropdown filter state race condition and enable natural chapter sorting
-* *Commit:* [`ba3ea00`](https://github.com/Schello805/Qualitydeck/commit/ba3ea0097e9e9492cff4f4523b326e016d061d8a)
+* *Commit:* [`9d3245a`](https://github.com/Schello805/Qualitydeck/commit/9d3245af231beb95d0507fafe8d0daafa63f6d21)
 
 ### [Rev. 36] - 24.10.2026, 13:46 (`9779614`)
 * **✨ Neu:** Add interactive ISO 9001 Norm-Zuordnungsmatrix and self-healing audit synchronization

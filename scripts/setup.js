@@ -84,9 +84,19 @@ async function main() {
       console.log('✅ Standard-Benutzer erstellt.');
     }
 
-    // Ensure 19 standard departments from ISO Matrix exist
+    // Migrate legacy "Plant Management" to "Geschäftsführung" if present
+    const legacyPM = await prisma.department.findFirst({ where: { name: 'Plant Management' } });
+    if (legacyPM) {
+      await prisma.department.update({
+        where: { id: legacyPM.id },
+        data: { name: 'Geschäftsführung' }
+      });
+      console.log('🔄 "Plant Management" zu "Geschäftsführung" migriert.');
+    }
+
+    // Ensure all 22 standard departments exist
     const defaultDepts = [
-      { name: 'Plant Management', manager: 'Geschäftsführung / Werksleitung', processType: 'management', order: 1 },
+      { name: 'Geschäftsführung', manager: 'Geschäftsführung / Werksleitung', processType: 'management', order: 1 },
       { name: 'QM', manager: 'Qualitätsmanagement', processType: 'management', order: 2 },
       { name: 'QS', manager: 'Qualitätssicherung', processType: 'core', order: 3 },
       { name: 'LSS (Lean Management)', manager: 'Lean Six Sigma & KVP', processType: 'support', order: 4 },
@@ -105,6 +115,9 @@ async function main() {
       { name: 'Instandhaltung', manager: 'Maintenance & Technische Anlagen', processType: 'support', order: 17 },
       { name: 'IT', manager: 'Informationstechnologie & Systeme', processType: 'support', order: 18 },
       { name: 'Facility', manager: 'Facility Management & Gebäude', processType: 'support', order: 19 },
+      { name: 'Entwicklung', manager: 'Forschung & Entwicklung (R&D)', processType: 'core', order: 20 },
+      { name: 'Verkauf', manager: 'Vertrieb & Kundenbetreuung', processType: 'core', order: 21 },
+      { name: 'Service', manager: 'Kundendienst & After Sales', processType: 'core', order: 22 },
     ];
     for (const d of defaultDepts) {
       const exists = await prisma.department.findFirst({ where: { name: d.name } });
