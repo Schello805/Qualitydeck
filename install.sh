@@ -20,18 +20,49 @@ echo -e "${BLUE}${BOLD}=========================================================
 echo -e "${CYAN}${BOLD}       🚀 Quality Deck - DIN EN ISO 9001 Installation           ${NC}"
 echo -e "${BLUE}${BOLD}=================================================================${NC}\n"
 
-# 1. Systemvoraussetzungen prüfen
+# 1. Systemvoraussetzungen prüfen & ggf. automatisch installieren
 echo -e "${CYAN}🔍 [1/5] Prüfe Systemvoraussetzungen...${NC}"
 
+# Automatische Installation von Node.js 20 LTS, falls nicht vorhanden
 if ! command -v node >/dev/null 2>&1; then
-  echo -e "${RED}❌ Node.js ist nicht installiert.${NC}"
-  echo -e "${YELLOW}Bitte installiere Node.js 20+ (z.B. via https://nodejs.org oder 'nvm install 20').${NC}"
-  exit 1
+  echo -e "${YELLOW}⚠️  Node.js ist noch nicht auf diesem Server installiert.${NC}"
+  echo -e "${CYAN}Starte automatische Installation von Node.js 20 LTS...${NC}"
+
+  if command -v apt-get >/dev/null 2>&1; then
+    echo -e "${BLUE}  • Richte NodeSource Repository für Ubuntu/Debian ein...${NC}"
+    if ! command -v curl >/dev/null 2>&1; then
+      apt-get update -y && apt-get install -y curl
+    fi
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+  elif command -v dnf >/dev/null 2>&1; then
+    echo -e "${BLUE}  • Richte NodeSource Repository für Fedora/RHEL/AlmaLinux ein...${NC}"
+    curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+    dnf install -y nodejs
+  elif command -v yum >/dev/null 2>&1; then
+    curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+    yum install -y nodejs
+  elif command -v brew >/dev/null 2>&1; then
+    echo -e "${BLUE}  • Installiere Node.js via Homebrew...${NC}"
+    brew install node@20
+  else
+    echo -e "${RED}❌ Automatische Installation nicht möglich. Bitte installiere Node.js 20+ manuell (z.B. via https://nodejs.org).${NC}"
+    exit 1
+  fi
 fi
 
-NODE_MAJOR=$(node -v | cut -d'.' -f1 | tr -d 'v')
+NODE_MAJOR=$(node -v 2>/dev/null | cut -d'.' -f1 | tr -d 'v' || echo "0")
 if [ "$NODE_MAJOR" -lt 18 ]; then
-  echo -e "${RED}❌ Mindestens Node.js Version 18 erforderlich (aktuell: $(node -v)).${NC}"
+  echo -e "${YELLOW}⚠️  Installierte Node.js-Version ($NODE_MAJOR) ist zu alt. Mindestens Node.js 18 (empfohlen 20) erforderlich.${NC}"
+  if command -v apt-get >/dev/null 2>&1; then
+    echo -e "${CYAN}Aktualisiere auf Node.js 20 LTS...${NC}"
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+  fi
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  echo -e "${RED}❌ Node.js konnte nicht gefunden werden.${NC}"
   exit 1
 fi
 echo -e "${GREEN}  ✓ Node.js Version: $(node -v)${NC}"

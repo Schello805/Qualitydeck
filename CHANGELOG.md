@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 24 (ce24034)](https://github.com/Schello805/Qualitydeck/commit/ce24034fb01bbd5b3519c98c0ee8db662af1b7ce) • Zuletzt aktualisiert: 24.10.2026 08:57:41
+**Aktueller Stand:** [Rev. 25 (0e2cb91)](https://github.com/Schello805/Qualitydeck/commit/0e2cb9131ebb0d8ee7f017c39457b97643bf8eb4) • Zuletzt aktualisiert: 24.10.2026 08:58:34
 
 ---
 
-### [Rev. 24] - 24.10.2026, 08:57 (`ce24034`)
+### [Rev. 25] - 24.10.2026, 08:58 (`0e2cb91`)
+* **✨ Neu:** automatically install Node.js 20 LTS on Ubuntu/Debian/RHEL if missing
+* *Commit:* [`0e2cb91`](https://github.com/Schello805/Qualitydeck/commit/0e2cb9131ebb0d8ee7f017c39457b97643bf8eb4)
+
+### [Rev. 24] - 24.10.2026, 08:57 (`17d7aa9`)
 * **🐛 Behoben:** Avoid new Date() in prerendered server component page.tsx
-* *Commit:* [`ce24034`](https://github.com/Schello805/Qualitydeck/commit/ce24034fb01bbd5b3519c98c0ee8db662af1b7ce)
+* *Commit:* [`17d7aa9`](https://github.com/Schello805/Qualitydeck/commit/17d7aa94840e07b6b682fc305c4c6f5871a12925)
 
 ### [Rev. 23] - 24.10.2026, 08:56 (`4697c70`)
 * **🐛 Behoben:** Use stable webpack bundler for dev script to prevent Turbopack loader panics
