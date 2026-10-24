@@ -4,8 +4,6 @@ import { getUsers } from '@/actions/users';
 import { getDepartments } from '@/actions/departments';
 import AuditsClient from './AuditsClient';
 
-export const instant = false;
-
 export default async function AuditsPage() {
   const [items, users, departments] = await Promise.all([
     getAllAuditItems(),

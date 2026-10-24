@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { updateAuditReportItem, deleteAuditItem, startNewAudit } from '@/actions/audits';
 
 function renderTextWithLinks(text?: string | null) {
@@ -51,25 +51,43 @@ export default function AuditsClient({
   items?: any[];
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [items, setItems] = useState<any[]>(initialItems.length ? initialItems : (itemsProp || []));
   const [users] = useState<any[]>(initialUsers || []);
   const [isStartingAudit, setIsStartingAudit] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'open' | 'fulfilled' | 'not_fulfilled'>('ALL');
   
-  // Initialize deptFilter & scope from URL once on mount
-  const urlDept = searchParams.get('dept');
-  const urlScope = searchParams.get('scope');
-
-  const [deptFilter, setDeptFilter] = useState<string>(() => urlDept || 'ALL');
+  // Independent pure React state for filters
+  const [deptFilter, setDeptFilter] = useState<string>('ALL');
   const [chapterFilter, setChapterFilter] = useState('ALL');
   const [sortField, setSortField] = useState<'chapter' | 'status' | 'department' | 'date'>('chapter');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Scope Filter: Spezifisch vs. Allgemein ("Alle Abteilungen")
-  const [includeSpecific, setIncludeSpecific] = useState<boolean>(() => urlScope !== 'general');
-  const [includeGeneral, setIncludeGeneral] = useState<boolean>(() => urlScope !== 'specific');
+  const [includeSpecific, setIncludeSpecific] = useState<boolean>(true);
+  const [includeGeneral, setIncludeGeneral] = useState<boolean>(true);
+
+  // Read URL params once on client mount without triggering router re-renders
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlDept = params.get('dept');
+      if (urlDept) {
+        setDeptFilter(urlDept);
+      }
+      const urlScope = params.get('scope');
+      if (urlScope === 'specific') {
+        setIncludeSpecific(true);
+        setIncludeGeneral(false);
+      } else if (urlScope === 'general') {
+        setIncludeSpecific(false);
+        setIncludeGeneral(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
     if (initialItems && initialItems.length > 0) {
@@ -79,24 +97,28 @@ export default function AuditsClient({
 
   const updateBrowserUrl = (newDept: string, newSpecific: boolean, newGeneral: boolean) => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    if (newDept === 'ALL') {
-      params.delete('dept');
-    } else {
-      params.set('dept', newDept);
-    }
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (newDept === 'ALL') {
+        params.delete('dept');
+      } else {
+        params.set('dept', newDept);
+      }
 
-    if (newSpecific && !newGeneral) {
-      params.set('scope', 'specific');
-    } else if (!newSpecific && newGeneral) {
-      params.set('scope', 'general');
-    } else {
-      params.delete('scope');
-    }
+      if (newSpecific && !newGeneral) {
+        params.set('scope', 'specific');
+      } else if (!newSpecific && newGeneral) {
+        params.set('scope', 'general');
+      } else {
+        params.delete('scope');
+      }
 
-    const query = params.toString();
-    const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
-    window.history.replaceState(null, '', newUrl);
+      const query = params.toString();
+      const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+      window.history.replaceState(null, '', newUrl);
+    } catch (e) {
+      // ignore
+    }
   };
 
   const handleDeptFilterChange = (val: string) => {

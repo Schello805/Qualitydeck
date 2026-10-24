@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 38 (d35d111)](https://github.com/Schello805/Qualitydeck/commit/d35d1118cc78f8e51559dc664c56bb63a71c1293) • Zuletzt aktualisiert: 24.10.2026 14:11:41
+**Aktueller Stand:** [Rev. 39 (7a04f6a)](https://github.com/Schello805/Qualitydeck/commit/7a04f6a7ae901d8c180d57286a4547dfc1b032bb) • Zuletzt aktualisiert: 24.10.2026 15:29:12
 
 ---
 
-### [Rev. 38] - 24.10.2026, 14:11 (`d35d111`)
+### [Rev. 39] - 24.10.2026, 15:29 (`7a04f6a`)
+* **🐛 Behoben:** Ensure immediate client-side filtering on department dropdown without router re-renders
+* *Commit:* [`7a04f6a`](https://github.com/Schello805/Qualitydeck/commit/7a04f6a7ae901d8c180d57286a4547dfc1b032bb)
+
+### [Rev. 38] - 24.10.2026, 14:11 (`1eb84f8`)
 * **✨ Neu:** Prefill ISO 9001 assignments for all 22 departments & rename Plant Management to Geschäftsführung
-* *Commit:* [`d35d111`](https://github.com/Schello805/Qualitydeck/commit/d35d1118cc78f8e51559dc664c56bb63a71c1293)
+* *Commit:* [`1eb84f8`](https://github.com/Schello805/Qualitydeck/commit/1eb84f85a7e6dac237227ff18fa2712b05e19142)
 
 ### [Rev. 37] - 24.10.2026, 14:03 (`9d3245a`)
 * **🐛 Behoben:** Fix dropdown filter state race condition and enable natural chapter sorting

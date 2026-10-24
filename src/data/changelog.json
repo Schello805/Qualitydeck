@@ -1,9 +1,20 @@
 [
   {
+    "revision": 39,
+    "revisionDisplay": "Rev. 39",
+    "commit": "7a04f6a",
+    "fullCommit": "7a04f6a7ae901d8c180d57286a4547dfc1b032bb",
+    "date": "2026-10-24T15:29:12+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Ensure immediate client-side filtering on department dropdown without router re-renders",
+    "rawMessage": "fix(audits): Ensure immediate client-side filtering on department dropdown without router re-renders"
+  },
+  {
     "revision": 38,
     "revisionDisplay": "Rev. 38",
-    "commit": "d35d111",
-    "fullCommit": "d35d1118cc78f8e51559dc664c56bb63a71c1293",
+    "commit": "1eb84f8",
+    "fullCommit": "1eb84f85a7e6dac237227ff18fa2712b05e19142",
     "date": "2026-10-24T14:11:40+02:00",
     "type": "feature",
     "badge": "✨ Neu",
