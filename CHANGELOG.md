@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 43 (ba1a45b)](https://github.com/Schello805/Qualitydeck/commit/ba1a45bc5f6841cb135085c447d90c8eb5de05f1) • Zuletzt aktualisiert: 24.10.2026 21:48:14
+**Aktueller Stand:** [Rev. 44 (11cc38a)](https://github.com/Schello805/Qualitydeck/commit/11cc38a48e309993ffef1ae23f920447945086f5) • Zuletzt aktualisiert: 24.10.2026 21:50:40
 
 ---
 
-### [Rev. 43] - 24.10.2026, 21:48 (`ba1a45b`)
+### [Rev. 44] - 24.10.2026, 21:50 (`11cc38a`)
+* **🚀 Update:** perf: Drastically streamline update.sh with smart caching and fast exit
+* *Commit:* [`11cc38a`](https://github.com/Schello805/Qualitydeck/commit/11cc38a48e309993ffef1ae23f920447945086f5)
+
+### [Rev. 43] - 24.10.2026, 21:48 (`5de37e0`)
 * **🚀 Update:** style: Slenderize requirements, compact department list, scale down process map, reset matrix font size
-* *Commit:* [`ba1a45b`](https://github.com/Schello805/Qualitydeck/commit/ba1a45bc5f6841cb135085c447d90c8eb5de05f1)
+* *Commit:* [`5de37e0`](https://github.com/Schello805/Qualitydeck/commit/5de37e05feeb6b26a45668e80b4677a31f6e3bcd)
 
 ### [Rev. 42] - 24.10.2026, 21:36 (`4104a3e`)
 * **🚀 Update:** style: Fine-tune root font size to 13.5px for ultra-crisp compact enterprise UI

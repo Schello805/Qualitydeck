@@ -1,9 +1,20 @@
 [
   {
+    "revision": 44,
+    "revisionDisplay": "Rev. 44",
+    "commit": "11cc38a",
+    "fullCommit": "11cc38a48e309993ffef1ae23f920447945086f5",
+    "date": "2026-10-24T21:50:40+02:00",
+    "type": "update",
+    "badge": "🚀 Update",
+    "title": "perf: Drastically streamline update.sh with smart caching and fast exit",
+    "rawMessage": "perf: Drastically streamline update.sh with smart caching and fast exit"
+  },
+  {
     "revision": 43,
     "revisionDisplay": "Rev. 43",
-    "commit": "ba1a45b",
-    "fullCommit": "ba1a45bc5f6841cb135085c447d90c8eb5de05f1",
+    "commit": "5de37e0",
+    "fullCommit": "5de37e05feeb6b26a45668e80b4677a31f6e3bcd",
     "date": "2026-10-24T21:48:14+02:00",
     "type": "update",
     "badge": "🚀 Update",
