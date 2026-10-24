@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { getTransporter, formatSmtpError, getAppBaseUrl, escapeHtml } from '@/lib/email';
+
+function safeCompare(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const forceSend = searchParams.get('force') === 'true' || searchParams.get('force') === '1';
 
-    // Optional secret check
+    // Secret & Authorization check
     const authHeader = req.headers.get('authorization');
     const tokenQuery = searchParams.get('token') || searchParams.get('secret');
-    const providedSecret = authHeader ? authHeader.replace(/^Bearer\s+/i, '') : tokenQuery;
+    const providedSecret = authHeader ? authHeader.replace(/^Bearer\s+/i, '').trim() : (tokenQuery?.trim() || '');
 
     // 1. Get SMTP transporter & settings
     let transporterObj;
@@ -26,12 +35,26 @@ export async function GET(req: NextRequest) {
 
     const { transporter, settings } = transporterObj;
 
-    const configuredSecret = settings.cronSecret || process.env.CRON_SECRET;
-    if (configuredSecret && providedSecret !== configuredSecret) {
-      return NextResponse.json({
-        success: false,
-        error: 'Nicht autorisierter Aufruf. Ungültiger oder fehlender Cron-Sicherheitstoken.'
-      }, { status: 401 });
+    const configuredSecret = (settings.cronSecret || process.env.CRON_SECRET || '').trim();
+    
+    // In production or when configured, enforce authentication
+    if (configuredSecret) {
+      if (!providedSecret || !safeCompare(providedSecret, configuredSecret)) {
+        return NextResponse.json({
+          success: false,
+          error: 'Nicht autorisierter Aufruf. Ungültiger oder fehlender Cron-Sicherheitstoken.'
+        }, { status: 401 });
+      }
+    } else {
+      // If no secret configured at all, only allow calls from local loopback (127.0.0.1 / ::1 / localhost)
+      const host = req.headers.get('host') || '';
+      const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1') || host.startsWith('::1');
+      if (!isLocalhost && process.env.NODE_ENV === 'production') {
+        return NextResponse.json({
+          success: false,
+          error: 'Cron-Sicherheitstoken ist nicht konfiguriert. Bitte hinterlege CRON_SECRET in den Einstellungen oder in der .env Datei.'
+        }, { status: 403 });
+      }
     }
     const reminderDays = parseInt(settings.reminderDays || '3', 10);
     const now = new Date();

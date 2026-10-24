@@ -7,6 +7,14 @@ export async function getSmtpConfig() {
   for (const s of settingsList) {
     settings[s.key] = s.value;
   }
+
+  // Allow environment variables (.env) to securely override credentials
+  if (process.env.SMTP_HOST) settings.smtpHost = process.env.SMTP_HOST;
+  if (process.env.SMTP_PORT) settings.smtpPort = process.env.SMTP_PORT;
+  if (process.env.SMTP_USER) settings.smtpUser = process.env.SMTP_USER;
+  if (process.env.SMTP_PASS) settings.smtpPass = process.env.SMTP_PASS;
+  if (process.env.SMTP_FROM) settings.smtpFrom = process.env.SMTP_FROM;
+
   return settings;
 }
 
@@ -19,6 +27,7 @@ export async function getTransporter() {
 
   const port = parseInt(settings.smtpPort || '465', 10);
   const secure = port === 465;
+  const rejectUnauthorized = settings.smtpRejectUnauthorized === 'false' ? false : true;
 
   const transporter = nodemailer.createTransport({
     host: settings.smtpHost.trim(),
@@ -29,7 +38,7 @@ export async function getTransporter() {
       pass: settings.smtpPass.trim(),
     },
     tls: {
-      rejectUnauthorized: false
+      rejectUnauthorized
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,

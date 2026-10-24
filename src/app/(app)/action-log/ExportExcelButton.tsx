@@ -1,11 +1,27 @@
 'use client';
 
-import * as XLSX from 'xlsx';
+import writeXlsxFile from 'write-excel-file/browser';
 
 export default function ExportExcelButton({ items }: { items: any[] }) {
-  const handleExport = () => {
-    // Transform items to a flat array of objects suitable for Excel
-    const data = items.map(item => {
+  const handleExport = async () => {
+    const HEADER_ROW = [
+      { value: 'Quelle', fontWeight: 'bold' },
+      { value: 'Vorgang / Referenz', fontWeight: 'bold' },
+      { value: 'Abteilung / Bereich', fontWeight: 'bold' },
+      { value: 'PDCA-Phase', fontWeight: 'bold' },
+      { value: '1. Sofortmaßnahme (SLA: 3T)', fontWeight: 'bold' },
+      { value: 'Zieldatum Sofort', fontWeight: 'bold' },
+      { value: '2. Korrekturmaßnahme (SLA: 10T)', fontWeight: 'bold' },
+      { value: 'Zieldatum Korrektur', fontWeight: 'bold' },
+      { value: '3. Abstellmaßnahme (SLA: 30T)', fontWeight: 'bold' },
+      { value: 'Zieldatum Abstellung', fontWeight: 'bold' },
+      { value: 'Verantwortlich', fontWeight: 'bold' },
+      { value: 'E-Mail', fontWeight: 'bold' },
+      { value: 'Fristverlängerungen (dokumentiert)', fontWeight: 'bold' },
+      { value: 'Status', fontWeight: 'bold' }
+    ];
+
+    const DATA_ROWS = items.map(item => {
       let extCount = 0;
       try {
         if (item.extensionHistory) {
@@ -14,31 +30,27 @@ export default function ExportExcelButton({ items }: { items: any[] }) {
         }
       } catch (e) {}
 
-      return {
-        'Quelle': item.originBadge || (item.originType === 'complaint' ? '🚨 Reklamation' : '📋 Audit'),
-        'Vorgang / Referenz': item.originTitle || item.requirement?.title || '',
-        'Abteilung / Bereich': item.departmentName || item.audit?.department?.name || '',
-        'PDCA-Phase': item.pdcaPhase ? item.pdcaPhase.toUpperCase() : 'DO',
-        '1. Sofortmaßnahme (SLA: 3T)': item.immediateAction || '-',
-        'Zieldatum Sofort': item.immediatePlannedDate ? new Date(item.immediatePlannedDate).toLocaleDateString('de-DE') : '-',
-        '2. Korrekturmaßnahme (SLA: 10T)': item.implementationNotes || '-',
-        'Zieldatum Korrektur': item.plannedDate ? new Date(item.plannedDate).toLocaleDateString('de-DE') : '-',
-        '3. Abstellmaßnahme (SLA: 30T)': item.preventiveAction || '-',
-        'Zieldatum Abstellung': item.preventivePlannedDate ? new Date(item.preventivePlannedDate).toLocaleDateString('de-DE') : '-',
-        'Verantwortlich': item.responsible || 'Nicht zugewiesen',
-        'E-Mail': item.responsibleEmail || '-',
-        'Fristverlängerungen (dokumentiert)': extCount > 0 ? `${extCount}x verlängert` : '0',
-        'Status': item.status === 'fulfilled' ? 'Erledigt' : item.status === 'partially' ? 'In Bearbeitung' : 'Offen'
-      };
+      return [
+        { type: String, value: String(item.originBadge || (item.originType === 'complaint' ? '🚨 Reklamation' : '📋 Audit')) },
+        { type: String, value: String(item.originTitle || item.requirement?.title || '') },
+        { type: String, value: String(item.departmentName || item.audit?.department?.name || '') },
+        { type: String, value: String(item.pdcaPhase ? item.pdcaPhase.toUpperCase() : 'DO') },
+        { type: String, value: String(item.immediateAction || '-') },
+        { type: String, value: item.immediatePlannedDate ? new Date(item.immediatePlannedDate).toLocaleDateString('de-DE') : '-' },
+        { type: String, value: String(item.implementationNotes || '-') },
+        { type: String, value: item.plannedDate ? new Date(item.plannedDate).toLocaleDateString('de-DE') : '-' },
+        { type: String, value: String(item.preventiveAction || '-') },
+        { type: String, value: item.preventivePlannedDate ? new Date(item.preventivePlannedDate).toLocaleDateString('de-DE') : '-' },
+        { type: String, value: String(item.responsible || 'Nicht zugewiesen') },
+        { type: String, value: String(item.responsibleEmail || '-') },
+        { type: String, value: extCount > 0 ? `${extCount}x verlängert` : '0' },
+        { type: String, value: item.status === 'fulfilled' ? 'Erledigt' : item.status === 'partially' ? 'In Bearbeitung' : 'Offen' }
+      ];
     });
 
-    // Create a new workbook and add a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Maßnahmenplan');
-
-    // Generate Excel file and trigger download
-    XLSX.writeFile(workbook, 'Massnahmenplan.xlsx');
+    await (writeXlsxFile as any)([HEADER_ROW, ...DATA_ROWS], {
+      sheet: 'Maßnahmenplan'
+    }).toFile('Massnahmenplan.xlsx');
   };
 
   return (

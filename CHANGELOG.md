@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 27 (44c7608)](https://github.com/Schello805/Qualitydeck/commit/44c76085e8ca380400c83eae48542c8b3cf013da) • Zuletzt aktualisiert: 24.10.2026 09:46:13
+**Aktueller Stand:** [Rev. 28 (ee3d642)](https://github.com/Schello805/Qualitydeck/commit/ee3d64291178298b1d6b7833d8a04c444861a022) • Zuletzt aktualisiert: 24.10.2026 11:25:49
 
 ---
 
-### [Rev. 27] - 24.10.2026, 09:46 (`44c7608`)
+### [Rev. 28] - 24.10.2026, 11:25 (`ee3d642`)
+* **🐛 Behoben:** Patch vulnerabilities, enforce security headers, sanitize upload, protect cron and mask credentials
+* *Commit:* [`ee3d642`](https://github.com/Schello805/Qualitydeck/commit/ee3d64291178298b1d6b7833d8a04c444861a022)
+
+### [Rev. 27] - 24.10.2026, 09:46 (`ee8126a`)
 * **🐛 Behoben:** Add @tailwindcss/postcss and postcss.config.mjs for complete CSS compilation
-* *Commit:* [`44c7608`](https://github.com/Schello805/Qualitydeck/commit/44c76085e8ca380400c83eae48542c8b3cf013da)
+* *Commit:* [`ee8126a`](https://github.com/Schello805/Qualitydeck/commit/ee8126aa22f29ac729eddaccb0b6cdfa07ce2af2)
 
 ### [Rev. 26] - 24.10.2026, 09:36 (`e015b22`)
 * **🐛 Behoben:** Bind Next.js dev and start to 0.0.0.0 for external network access

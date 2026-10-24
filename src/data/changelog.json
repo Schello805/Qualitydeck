@@ -1,9 +1,20 @@
 [
   {
+    "revision": 28,
+    "revisionDisplay": "Rev. 28",
+    "commit": "ee3d642",
+    "fullCommit": "ee3d64291178298b1d6b7833d8a04c444861a022",
+    "date": "2026-10-24T11:25:49+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Patch vulnerabilities, enforce security headers, sanitize upload, protect cron and mask credentials",
+    "rawMessage": "fix(security): Patch vulnerabilities, enforce security headers, sanitize upload, protect cron and mask credentials"
+  },
+  {
     "revision": 27,
     "revisionDisplay": "Rev. 27",
-    "commit": "44c7608",
-    "fullCommit": "44c76085e8ca380400c83eae48542c8b3cf013da",
+    "commit": "ee8126a",
+    "fullCommit": "ee8126aa22f29ac729eddaccb0b6cdfa07ce2af2",
     "date": "2026-10-24T09:46:12+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",

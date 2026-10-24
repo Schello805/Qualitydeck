@@ -21,12 +21,12 @@
     "@types/nodemailer": "^8.0.2",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
-    "next": "16.4.0",
-    "nodemailer": "^10.0.16",
+    "next": "^16.4.3",
+    "nodemailer": "^10.2.1",
     "postcss": "^8.5.31",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "xlsx": "^0.18.5"
+    "write-excel-file": "^4.1.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
@@ -34,7 +34,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.0",
+    "eslint-config-next": "^16.4.3",
     "pdf-parse": "^2.4.5",
     "prisma": "5.22.0",
     "tailwindcss": "^4",

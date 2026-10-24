@@ -8,6 +8,20 @@ import { escapeHtml, formatSmtpError } from '@/lib/email';
 const ALLOWED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp'];
 const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
+function isValidImageSignature(buffer: Buffer, ext: string): boolean {
+  if (buffer.length < 8) return false;
+  if (ext === 'png') {
+    return buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+  }
+  if (ext === 'jpg' || ext === 'jpeg') {
+    return buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+  }
+  if (ext === 'webp') {
+    return buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP';
+  }
+  return false;
+}
+
 export async function uploadLogo(formData: FormData) {
   const file = formData.get('logo') as File;
   
@@ -29,6 +43,13 @@ export async function uploadLogo(formData: FormData) {
       };
     }
 
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    if (!isValidImageSignature(buffer, ext)) {
+      return { error: 'Ungültige Bilddatei: Dateiinhalte stimmen nicht mit der Dateierweiterung überein.' };
+    }
+
     const publicDir = join(process.cwd(), 'public');
     
     // Delete existing logo files
@@ -37,9 +58,6 @@ export async function uploadLogo(formData: FormData) {
     for (const f of existingLogos) {
       await unlink(join(publicDir, f));
     }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
 
     // Save with safe validated extension
     const path = join(publicDir, `logo.${ext}`);
@@ -55,11 +73,22 @@ export async function uploadLogo(formData: FormData) {
 
 import { prisma } from '@/lib/prisma';
 
+const ALLOWED_SETTING_KEYS = new Set([
+  'smtpHost', 'smtpPort', 'smtpUser', 'smtpPass', 'smtpFrom', 
+  'reminderDays', 'cronSecret', 'appUrl', 'companyName', 'smtpSecure', 'smtpRejectUnauthorized'
+]);
+
 export async function getSettings() {
   const settings = await prisma.setting.findMany();
   const obj: Record<string, string> = {};
   for (const s of settings) {
     obj[s.key] = s.value;
+  }
+  // Mask password so it is never exposed in plain text to the browser
+  if (obj.smtpPass && obj.smtpPass.length > 0) {
+    obj.smtpPass = '••••••••';
+  } else if (process.env.SMTP_PASS) {
+    obj.smtpPass = '•••••••• (via ENV)';
   }
   return obj;
 }
@@ -67,10 +96,17 @@ export async function getSettings() {
 export async function saveSettings(data: Record<string, string>) {
   try {
     for (const [key, value] of Object.entries(data)) {
+      if (!ALLOWED_SETTING_KEYS.has(key)) continue;
+      // Do not overwrite existing password if user left it blank or as the masked placeholder
+      if (key === 'smtpPass' && (value === '••••••••' || value.startsWith('••••••••') || !value.trim())) {
+        continue;
+      }
+      // Sanitize key and limit value length to avoid memory bloat
+      const sanitizedVal = typeof value === 'string' ? value.slice(0, 1000) : '';
       await prisma.setting.upsert({
         where: { key },
-        update: { value },
-        create: { key, value },
+        update: { value: sanitizedVal },
+        create: { key, value: sanitizedVal },
       });
     }
     return { success: true };
@@ -87,9 +123,16 @@ export async function testSmtpConnection(settings: any, testRecipient?: string) 
     const host = (settings.smtpHost || '').trim();
     const port = parseInt(settings.smtpPort || '465', 10);
     const user = (settings.smtpUser || '').trim();
-    const pass = (settings.smtpPass || '').trim();
+    let pass = (settings.smtpPass || '').trim();
     const from = (settings.smtpFrom || '').trim();
     const to = (testRecipient || from).trim();
+    const rejectUnauthorized = settings.smtpRejectUnauthorized === 'false' ? false : true;
+
+    // If password is the masked placeholder, use stored password from DB or env
+    if (!pass || pass === '••••••••' || pass.startsWith('••••••••')) {
+      const stored = await prisma.setting.findUnique({ where: { key: 'smtpPass' } });
+      pass = stored?.value || process.env.SMTP_PASS || '';
+    }
 
     if (!host || !user || !pass || !from) {
       return { error: 'Bitte fülle alle SMTP-Pflichtfelder (Host, Port, Benutzer, Passwort, Absender) aus.' };
@@ -108,7 +151,7 @@ export async function testSmtpConnection(settings: any, testRecipient?: string) 
         pass,
       },
       tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized
       },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
