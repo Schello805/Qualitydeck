@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 40 (047ae68)](https://github.com/Schello805/Qualitydeck/commit/047ae689827e8867cf269f20ebee565ba79fa8ae) • Zuletzt aktualisiert: 24.10.2026 20:09:15
+**Aktueller Stand:** [Rev. 41 (942474c)](https://github.com/Schello805/Qualitydeck/commit/942474cee361e993d464a09e23b6c95d2e99e6b7) • Zuletzt aktualisiert: 24.10.2026 21:33:23
 
 ---
 
-### [Rev. 40] - 24.10.2026, 20:09 (`047ae68`)
+### [Rev. 41] - 24.10.2026, 21:33 (`942474c`)
+* **🚀 Update:** style: Optimize base typography, reduce root font size to 14.5px for compact clean view
+* *Commit:* [`942474c`](https://github.com/Schello805/Qualitydeck/commit/942474cee361e993d464a09e23b6c95d2e99e6b7)
+
+### [Rev. 40] - 24.10.2026, 20:09 (`ac05af9`)
 * **🐛 Behoben:** Remove window history replaceState and ensure update.sh compiles fresh production build
-* *Commit:* [`047ae68`](https://github.com/Schello805/Qualitydeck/commit/047ae689827e8867cf269f20ebee565ba79fa8ae)
+* *Commit:* [`ac05af9`](https://github.com/Schello805/Qualitydeck/commit/ac05af9755b77ca1cfb216fd6e2e252535c8b1bd)
 
 ### [Rev. 39] - 24.10.2026, 15:29 (`d756179`)
 * **🐛 Behoben:** Ensure immediate client-side filtering on department dropdown without router re-renders

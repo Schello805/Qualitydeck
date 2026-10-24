@@ -1,9 +1,20 @@
 [
   {
+    "revision": 41,
+    "revisionDisplay": "Rev. 41",
+    "commit": "942474c",
+    "fullCommit": "942474cee361e993d464a09e23b6c95d2e99e6b7",
+    "date": "2026-10-24T21:33:23+02:00",
+    "type": "update",
+    "badge": "🚀 Update",
+    "title": "style: Optimize base typography, reduce root font size to 14.5px for compact clean view",
+    "rawMessage": "style: Optimize base typography, reduce root font size to 14.5px for compact clean view"
+  },
+  {
     "revision": 40,
     "revisionDisplay": "Rev. 40",
-    "commit": "047ae68",
-    "fullCommit": "047ae689827e8867cf269f20ebee565ba79fa8ae",
+    "commit": "ac05af9",
+    "fullCommit": "ac05af9755b77ca1cfb216fd6e2e252535c8b1bd",
     "date": "2026-10-24T20:09:15+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",
