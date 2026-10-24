@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 22 (e6c9a18)](https://github.com/Schello805/Qualitydeck/commit/e6c9a1870d7fef974fa2c95c878c456a88720aea) • Zuletzt aktualisiert: 24.10.2026 08:44:50
+**Aktueller Stand:** [Rev. 23 (c6de82a)](https://github.com/Schello805/Qualitydeck/commit/c6de82aced152b7cc11d0d2e74a3a95da1aebfeb) • Zuletzt aktualisiert: 24.10.2026 08:56:41
 
 ---
 
-### [Rev. 22] - 24.10.2026, 08:44 (`e6c9a18`)
+### [Rev. 23] - 24.10.2026, 08:56 (`c6de82a`)
+* **🐛 Behoben:** Use stable webpack bundler for dev script to prevent Turbopack loader panics
+* *Commit:* [`c6de82a`](https://github.com/Schello805/Qualitydeck/commit/c6de82aced152b7cc11d0d2e74a3a95da1aebfeb)
+
+### [Rev. 22] - 24.10.2026, 08:44 (`66f6f51`)
 * **🐛 Behoben:** Remove dynamic export in check-update API for Next.js 16 cacheComponents compatibility
-* *Commit:* [`e6c9a18`](https://github.com/Schello805/Qualitydeck/commit/e6c9a1870d7fef974fa2c95c878c456a88720aea)
+* *Commit:* [`66f6f51`](https://github.com/Schello805/Qualitydeck/commit/66f6f51556f53b896288766a28dcd19139a8d0dc)
 
 ### [Rev. 21] - 24.10.2026, 08:39 (`1f550f2`)
 * **✨ Neu:** Complete automated push script, changelog modal, and update checker

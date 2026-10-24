@@ -1,9 +1,20 @@
 [
   {
+    "revision": 23,
+    "revisionDisplay": "Rev. 23",
+    "commit": "c6de82a",
+    "fullCommit": "c6de82aced152b7cc11d0d2e74a3a95da1aebfeb",
+    "date": "2026-10-24T08:56:41+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Use stable webpack bundler for dev script to prevent Turbopack loader panics",
+    "rawMessage": "fix: Use stable webpack bundler for dev script to prevent Turbopack loader panics"
+  },
+  {
     "revision": 22,
     "revisionDisplay": "Rev. 22",
-    "commit": "e6c9a18",
-    "fullCommit": "e6c9a1870d7fef974fa2c95c878c456a88720aea",
+    "commit": "66f6f51",
+    "fullCommit": "66f6f51556f53b896288766a28dcd19139a8d0dc",
     "date": "2026-10-24T08:44:50+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",
