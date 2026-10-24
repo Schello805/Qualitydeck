@@ -1,9 +1,20 @@
 [
   {
+    "revision": 33,
+    "revisionDisplay": "Rev. 33",
+    "commit": "5a21151",
+    "fullCommit": "5a21151bd52d20ead073ca164f8b8fd33531958f",
+    "date": "2026-10-24T13:06:50+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Remove invalid --quiet flag from prisma generate",
+    "rawMessage": "fix(update): Remove invalid --quiet flag from prisma generate"
+  },
+  {
     "revision": 32,
     "revisionDisplay": "Rev. 32",
-    "commit": "a2dfe20",
-    "fullCommit": "a2dfe2049197c5d6b51279c4741d15256282f73e",
+    "commit": "48a33d9",
+    "fullCommit": "48a33d941bf6bd84d07ecb6b443790a3fb29ba5c",
     "date": "2026-10-24T12:52:06+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",

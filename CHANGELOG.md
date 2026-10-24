@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 32 (a2dfe20)](https://github.com/Schello805/Qualitydeck/commit/a2dfe2049197c5d6b51279c4741d15256282f73e) • Zuletzt aktualisiert: 24.10.2026 12:52:07
+**Aktueller Stand:** [Rev. 33 (5a21151)](https://github.com/Schello805/Qualitydeck/commit/5a21151bd52d20ead073ca164f8b8fd33531958f) • Zuletzt aktualisiert: 24.10.2026 13:06:50
 
 ---
 
-### [Rev. 32] - 24.10.2026, 12:52 (`a2dfe20`)
+### [Rev. 33] - 24.10.2026, 13:06 (`5a21151`)
+* **🐛 Behoben:** Remove invalid --quiet flag from prisma generate
+* *Commit:* [`5a21151`](https://github.com/Schello805/Qualitydeck/commit/5a21151bd52d20ead073ca164f8b8fd33531958f)
+
+### [Rev. 32] - 24.10.2026, 12:52 (`48a33d9`)
 * **🐛 Behoben:** Auto-discard generated local files before git pull in update.sh
-* *Commit:* [`a2dfe20`](https://github.com/Schello805/Qualitydeck/commit/a2dfe2049197c5d6b51279c4741d15256282f73e)
+* *Commit:* [`48a33d9`](https://github.com/Schello805/Qualitydeck/commit/48a33d941bf6bd84d07ecb6b443790a3fb29ba5c)
 
 ### [Rev. 31] - 24.10.2026, 12:47 (`82584de`)
 * **✨ Neu:** Sync all 19 Excel departments into database and audit filters with 1-click starter

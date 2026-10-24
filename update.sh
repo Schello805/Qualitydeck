@@ -73,7 +73,7 @@ echo -e "${GREEN}  ✓ NPM-Pakete sind aktuell.${NC}"
 
 # 4. Prisma & Datenbank aktualisieren
 echo -e "\n${CYAN}🗄️  [4/6] Aktualisiere Prisma Client & Datenbank-Schema...${NC}"
-npx prisma generate --quiet
+npx prisma generate
 npx prisma db push --skip-generate --accept-data-loss || npx prisma db push
 echo -e "${GREEN}  ✓ Datenbank-Schema erfolgreich synchronisiert.${NC}"
 
