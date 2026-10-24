@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 26 (122b9de)](https://github.com/Schello805/Qualitydeck/commit/122b9de4e2a83a265e279242af3a117d4744e52b) • Zuletzt aktualisiert: 24.10.2026 09:36:47
+**Aktueller Stand:** [Rev. 27 (44c7608)](https://github.com/Schello805/Qualitydeck/commit/44c76085e8ca380400c83eae48542c8b3cf013da) • Zuletzt aktualisiert: 24.10.2026 09:46:13
 
 ---
 
-### [Rev. 26] - 24.10.2026, 09:36 (`122b9de`)
+### [Rev. 27] - 24.10.2026, 09:46 (`44c7608`)
+* **🐛 Behoben:** Add @tailwindcss/postcss and postcss.config.mjs for complete CSS compilation
+* *Commit:* [`44c7608`](https://github.com/Schello805/Qualitydeck/commit/44c76085e8ca380400c83eae48542c8b3cf013da)
+
+### [Rev. 26] - 24.10.2026, 09:36 (`e015b22`)
 * **🐛 Behoben:** Bind Next.js dev and start to 0.0.0.0 for external network access
-* *Commit:* [`122b9de`](https://github.com/Schello805/Qualitydeck/commit/122b9de4e2a83a265e279242af3a117d4744e52b)
+* *Commit:* [`e015b22`](https://github.com/Schello805/Qualitydeck/commit/e015b22276aa79e49d6895ea7d5577921e88e804)
 
 ### [Rev. 25] - 24.10.2026, 08:58 (`e297a4c`)
 * **✨ Neu:** automatically install Node.js 20 LTS on Ubuntu/Debian/RHEL if missing

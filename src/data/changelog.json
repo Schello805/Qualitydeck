@@ -1,9 +1,20 @@
 [
   {
+    "revision": 27,
+    "revisionDisplay": "Rev. 27",
+    "commit": "44c7608",
+    "fullCommit": "44c76085e8ca380400c83eae48542c8b3cf013da",
+    "date": "2026-10-24T09:46:12+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Add @tailwindcss/postcss and postcss.config.mjs for complete CSS compilation",
+    "rawMessage": "fix: Add @tailwindcss/postcss and postcss.config.mjs for complete CSS compilation"
+  },
+  {
     "revision": 26,
     "revisionDisplay": "Rev. 26",
-    "commit": "122b9de",
-    "fullCommit": "122b9de4e2a83a265e279242af3a117d4744e52b",
+    "commit": "e015b22",
+    "fullCommit": "e015b22276aa79e49d6895ea7d5577921e88e804",
     "date": "2026-10-24T09:36:47+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",
