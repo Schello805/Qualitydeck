@@ -82,6 +82,7 @@ if [ ! -f .env ]; then
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="$(openssl rand -hex 32 2>/dev/null || echo "qualitydeck-secret-key-$(date +%s)")"
+HOSTNAME="0.0.0.0"
 PORT=3000
 EOT
   echo -e "${GREEN}  ✓ .env Datei erfolgreich angelegt.${NC}"

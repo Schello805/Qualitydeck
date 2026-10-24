@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 25 (0e2cb91)](https://github.com/Schello805/Qualitydeck/commit/0e2cb9131ebb0d8ee7f017c39457b97643bf8eb4) • Zuletzt aktualisiert: 24.10.2026 08:58:34
+**Aktueller Stand:** [Rev. 26 (122b9de)](https://github.com/Schello805/Qualitydeck/commit/122b9de4e2a83a265e279242af3a117d4744e52b) • Zuletzt aktualisiert: 24.10.2026 09:36:47
 
 ---
 
-### [Rev. 25] - 24.10.2026, 08:58 (`0e2cb91`)
+### [Rev. 26] - 24.10.2026, 09:36 (`122b9de`)
+* **🐛 Behoben:** Bind Next.js dev and start to 0.0.0.0 for external network access
+* *Commit:* [`122b9de`](https://github.com/Schello805/Qualitydeck/commit/122b9de4e2a83a265e279242af3a117d4744e52b)
+
+### [Rev. 25] - 24.10.2026, 08:58 (`e297a4c`)
 * **✨ Neu:** automatically install Node.js 20 LTS on Ubuntu/Debian/RHEL if missing
-* *Commit:* [`0e2cb91`](https://github.com/Schello805/Qualitydeck/commit/0e2cb9131ebb0d8ee7f017c39457b97643bf8eb4)
+* *Commit:* [`e297a4c`](https://github.com/Schello805/Qualitydeck/commit/e297a4c75535c4daecd7fbc2294935cc1c0d7c28)
 
 ### [Rev. 24] - 24.10.2026, 08:57 (`17d7aa9`)
 * **🐛 Behoben:** Avoid new Date() in prerendered server component page.tsx
