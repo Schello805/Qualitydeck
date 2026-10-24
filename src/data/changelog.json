@@ -1,9 +1,20 @@
 [
   {
+    "revision": 29,
+    "revisionDisplay": "Rev. 29",
+    "commit": "f9b60fa",
+    "fullCommit": "f9b60faeb4740ae43ec8bec58c0f618c25ba0fb2",
+    "date": "2026-10-24T11:28:12+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Redirect root page directly to /dashboard",
+    "rawMessage": "feat: Redirect root page directly to /dashboard"
+  },
+  {
     "revision": 28,
     "revisionDisplay": "Rev. 28",
-    "commit": "ee3d642",
-    "fullCommit": "ee3d64291178298b1d6b7833d8a04c444861a022",
+    "commit": "e794003",
+    "fullCommit": "e7940030b61dce9feba16d2469f9a69f5e1f755d",
     "date": "2026-10-24T11:25:49+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",

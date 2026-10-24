@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 28 (ee3d642)](https://github.com/Schello805/Qualitydeck/commit/ee3d64291178298b1d6b7833d8a04c444861a022) • Zuletzt aktualisiert: 24.10.2026 11:25:49
+**Aktueller Stand:** [Rev. 29 (f9b60fa)](https://github.com/Schello805/Qualitydeck/commit/f9b60faeb4740ae43ec8bec58c0f618c25ba0fb2) • Zuletzt aktualisiert: 24.10.2026 11:28:12
 
 ---
 
-### [Rev. 28] - 24.10.2026, 11:25 (`ee3d642`)
+### [Rev. 29] - 24.10.2026, 11:28 (`f9b60fa`)
+* **✨ Neu:** Redirect root page directly to /dashboard
+* *Commit:* [`f9b60fa`](https://github.com/Schello805/Qualitydeck/commit/f9b60faeb4740ae43ec8bec58c0f618c25ba0fb2)
+
+### [Rev. 28] - 24.10.2026, 11:25 (`e794003`)
 * **🐛 Behoben:** Patch vulnerabilities, enforce security headers, sanitize upload, protect cron and mask credentials
-* *Commit:* [`ee3d642`](https://github.com/Schello805/Qualitydeck/commit/ee3d64291178298b1d6b7833d8a04c444861a022)
+* *Commit:* [`e794003`](https://github.com/Schello805/Qualitydeck/commit/e7940030b61dce9feba16d2469f9a69f5e1f755d)
 
 ### [Rev. 27] - 24.10.2026, 09:46 (`ee8126a`)
 * **🐛 Behoben:** Add @tailwindcss/postcss and postcss.config.mjs for complete CSS compilation
