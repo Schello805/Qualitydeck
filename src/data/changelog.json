@@ -1,5 +1,16 @@
 [
   {
+    "revision": 18,
+    "revisionDisplay": "Rev. 18",
+    "commit": "9974dfe",
+    "fullCommit": "9974dfe0ba359555464c6ad3d0eef65bf1e49016",
+    "date": "2026-10-24T08:36:52+02:00",
+    "type": "chore",
+    "badge": "🔧 Wartung",
+    "title": "bump revision number and update changelog",
+    "rawMessage": "chore(release): bump revision number and update changelog"
+  },
+  {
     "revision": 17,
     "revisionDisplay": "Rev. 17",
     "commit": "4541590",

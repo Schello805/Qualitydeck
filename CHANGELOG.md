@@ -2,9 +2,13 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 17 (4541590)](https://github.com/Schello805/Qualitydeck/commit/4541590f245e500fd4752cd8ad0e29029f700d82) • Zuletzt aktualisiert: 24.10.2026 08:36:52
+**Aktueller Stand:** [Rev. 18 (9974dfe)](https://github.com/Schello805/Qualitydeck/commit/9974dfe0ba359555464c6ad3d0eef65bf1e49016) • Zuletzt aktualisiert: 24.10.2026 08:37:06
 
 ---
+
+### [Rev. 18] - 24.10.2026, 08:36 (`9974dfe`)
+* **🔧 Wartung:** bump revision number and update changelog
+* *Commit:* [`9974dfe`](https://github.com/Schello805/Qualitydeck/commit/9974dfe0ba359555464c6ad3d0eef65bf1e49016)
 
 ### [Rev. 17] - 24.10.2026, 08:36 (`4541590`)
 * **✨ Neu:** Add full installer, updater, automated revision counter, changelog and update checker in footer
