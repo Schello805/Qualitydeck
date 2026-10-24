@@ -102,6 +102,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       items: [
         { href: "/process-map", label: "Prozesslandkarte (4.4)", icon: "🗺️" },
         { href: "/departments", label: "Abteilungen & Bereiche (5.3)", icon: "🏢" },
+        { href: "/matrix", label: "Normmatrix & Zuordnung", icon: "🗂️" },
         { href: "/requirements", label: "ISO 9001 Normkatalog", icon: "📋" },
       ]
     },

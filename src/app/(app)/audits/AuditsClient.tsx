@@ -440,6 +440,13 @@ export default function AuditsClient({
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href="/matrix"
+            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors print:hidden flex items-center gap-1.5 shadow-sm"
+            title="Öffnet die interaktive DIN EN ISO 9001 Norm-Zuordnungsmatrix"
+          >
+            <span>🗂️</span> Zuordnungsmatrix
+          </Link>
           <button
             onClick={() => window.print()}
             className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors print:hidden flex items-center gap-1.5 shadow-sm"

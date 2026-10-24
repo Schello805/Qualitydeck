@@ -179,6 +179,67 @@ export async function startNewAudit(departmentId: string, auditor?: string) {
 
 export async function getAllAuditItems() {
   try {
+    // 1. Ensure all standard departments exist and have their audit items created
+    const allDepartments = await prisma.department.findMany({
+      where: { name: { not: 'Alle Bereiche' } }
+    });
+    const allRequirements = await prisma.requirement.findMany({
+      orderBy: { chapter: 'asc' }
+    });
+
+    if (allDepartments.length > 0 && allRequirements.length > 0) {
+      const auditDateStr = new Date().toISOString().split('T')[0];
+
+      for (const dept of allDepartments) {
+        let audit = await prisma.audit.findFirst({
+          where: {
+            departmentId: dept.id,
+            status: { in: ['open', 'in_progress'] }
+          },
+          include: { items: true }
+        });
+
+        if (!audit) {
+          audit = await prisma.audit.create({
+            data: {
+              departmentId: dept.id,
+              auditor: 'Intern / QMB',
+              status: 'in_progress',
+              date: new Date()
+            },
+            include: { items: true }
+          });
+        }
+
+        const existingReqIds = new Set((audit.items || []).map(i => i.requirementId));
+        const reqsToCreate = allRequirements.filter(req => {
+          if (existingReqIds.has(req.id)) return false;
+          if (!req.departments || req.departments === 'all') return true;
+          try {
+            const depts = JSON.parse(req.departments);
+            if (Array.isArray(depts)) {
+              return depts.includes(dept.name) || depts.includes('Alle Bereiche');
+            }
+          } catch {
+            return req.departments.includes(dept.name) || req.departments.includes('Alle Bereiche');
+          }
+          return true;
+        });
+
+        if (reqsToCreate.length > 0) {
+          await prisma.auditItem.createMany({
+            data: reqsToCreate.map(req => ({
+              auditId: audit!.id,
+              requirementId: req.id,
+              status: 'open',
+              auditDate: auditDateStr,
+              auditee: dept.manager || undefined
+            }))
+          });
+        }
+      }
+    }
+
     const items = await prisma.auditItem.findMany({
       include: {
         requirement: true,

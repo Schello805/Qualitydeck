@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { getDepartments } from '@/actions/departments';
 import { saveAuditItem } from '@/actions/audits';
 import { getRequirements, updateRequirement, createRequirement, deleteRequirement } from '@/actions/requirements';
@@ -583,24 +584,30 @@ export default function RequirementsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Normkatalog (Kapitel 5-10)</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Normkatalog (Kapitel 4-10)</h1>
           <p className="text-slate-500 mt-2">Die Vorgaben der DIN EN ISO 9001:2015, die in Audits geprüft werden.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <Link 
+            href="/matrix"
+            className="px-4 py-2.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 text-blue-700 dark:text-blue-300 rounded-xl font-medium shadow-sm transition-colors flex items-center gap-2"
+          >
+            <span>🗂️</span> Normmatrix & Zuordnung
+          </Link>
           <a 
             href="/din-en-iso-9001-2015.pdf" 
             target="_blank"
             download
-            className="px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-medium shadow-sm transition-colors flex items-center gap-2"
+            className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-medium shadow-sm transition-colors flex items-center gap-2"
           >
-            <span>📄</span> Norm herunterladen
+            <span>📄</span> Norm PDF
           </a>
           <button 
             onClick={() => {
               setIsCreating(true);
               setCreateError(null);
             }}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-md transition-colors flex items-center gap-2"
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-md transition-colors flex items-center gap-2"
           >
             <span>+</span> Vorgabe hinzufügen
           </button>

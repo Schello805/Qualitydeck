@@ -1,9 +1,20 @@
 [
   {
+    "revision": 36,
+    "revisionDisplay": "Rev. 36",
+    "commit": "a03121d",
+    "fullCommit": "a03121d8e760ba60202b63eb3497802684ceecda",
+    "date": "2026-10-24T13:46:26+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Add interactive ISO 9001 Norm-Zuordnungsmatrix and self-healing audit synchronization",
+    "rawMessage": "feat: Add interactive ISO 9001 Norm-Zuordnungsmatrix and self-healing audit synchronization"
+  },
+  {
     "revision": 35,
     "revisionDisplay": "Rev. 35",
-    "commit": "0952318",
-    "fullCommit": "095231824d773337774068db6b67bfcf0ca85f0f",
+    "commit": "72947d6",
+    "fullCommit": "72947d6f6856c832e8e9f7c7bff8e2ba8a142d1f",
     "date": "2026-10-24T13:23:57+02:00",
     "type": "feature",
     "badge": "✨ Neu",

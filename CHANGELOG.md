@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 35 (0952318)](https://github.com/Schello805/Qualitydeck/commit/095231824d773337774068db6b67bfcf0ca85f0f) • Zuletzt aktualisiert: 24.10.2026 13:23:57
+**Aktueller Stand:** [Rev. 36 (a03121d)](https://github.com/Schello805/Qualitydeck/commit/a03121d8e760ba60202b63eb3497802684ceecda) • Zuletzt aktualisiert: 24.10.2026 13:46:26
 
 ---
 
-### [Rev. 35] - 24.10.2026, 13:23 (`0952318`)
+### [Rev. 36] - 24.10.2026, 13:46 (`a03121d`)
+* **✨ Neu:** Add interactive ISO 9001 Norm-Zuordnungsmatrix and self-healing audit synchronization
+* *Commit:* [`a03121d`](https://github.com/Schello805/Qualitydeck/commit/a03121d8e760ba60202b63eb3497802684ceecda)
+
+### [Rev. 35] - 24.10.2026, 13:23 (`72947d6`)
 * **✨ Neu:** Add optional checkbox and quick-switch for general ('Alle Abteilungen') vs specific audit scope
-* *Commit:* [`0952318`](https://github.com/Schello805/Qualitydeck/commit/095231824d773337774068db6b67bfcf0ca85f0f)
+* *Commit:* [`72947d6`](https://github.com/Schello805/Qualitydeck/commit/72947d6f6856c832e8e9f7c7bff8e2ba8a142d1f)
 
 ### [Rev. 34] - 24.10.2026, 13:18 (`a345557`)
 * **🐛 Behoben:** Fix department filter synchronization and ensure all department audits are populated
