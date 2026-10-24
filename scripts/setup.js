@@ -91,6 +91,12 @@ async function main() {
       console.log('✅ Standard-Systemeinstellungen hinterlegt.');
     }
 
+    // Generate revision & changelog
+    const updateChangelog = path.join(ROOT_DIR, 'scripts', 'update-changelog.js');
+    if (fs.existsSync(updateChangelog)) {
+      run(`node "${updateChangelog}"`, 'Revisionsnummer & Changelog initialisieren');
+    }
+
   } catch (dbErr) {
     console.error('Fehler bei der Datenbank-Initialisierung:', dbErr);
   } finally {

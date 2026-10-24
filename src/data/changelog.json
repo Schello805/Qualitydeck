@@ -1,0 +1,189 @@
+[
+  {
+    "revision": 17,
+    "revisionDisplay": "Rev. 17",
+    "commit": "fa14966",
+    "fullCommit": "fa149665c2a06529e8752474dbb17a2e38258e13",
+    "date": "2026-10-24T08:36:50+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Add full installer, updater, automated revision counter, changelog and update checker in footer",
+    "rawMessage": "feat: Add full installer, updater, automated revision counter, changelog and update checker in footer"
+  },
+  {
+    "revision": 16,
+    "revisionDisplay": "Rev. 16",
+    "commit": "e44e4a4",
+    "fullCommit": "e44e4a4f572492d1d545ef51efdb1011eb71386b",
+    "date": "2026-10-23T20:54:13+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Display ISO 9001 standard text directly above audit assessment",
+    "rawMessage": "feat: Display ISO 9001 standard text directly above audit assessment"
+  },
+  {
+    "revision": 15,
+    "revisionDisplay": "Rev. 15",
+    "commit": "e3315a1",
+    "fullCommit": "e3315a120858bd8ae4c806f69749dc650d31bbdd",
+    "date": "2026-10-23T20:52:13+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Do not preselect status, enlarge notes textarea and add multi-link support",
+    "rawMessage": "feat: Do not preselect status, enlarge notes textarea and add multi-link support"
+  },
+  {
+    "revision": 14,
+    "revisionDisplay": "Rev. 14",
+    "commit": "a3f2711",
+    "fullCommit": "a3f2711acf85bf130e72ee2a8ee470ea654a8a66",
+    "date": "2026-10-23T19:41:10+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Default audit review status to fulfilled and show 3-stage action plan only on nicht erfüllt",
+    "rawMessage": "fix: Default audit review status to fulfilled and show 3-stage action plan only on nicht erfüllt"
+  },
+  {
+    "revision": 13,
+    "revisionDisplay": "Rev. 13",
+    "commit": "fb12893",
+    "fullCommit": "fb12893a7c95a63247f74e6bb5ab63f055e4e6f3",
+    "date": "2026-10-23T19:28:19+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Include general requirements in department audit checklist generation",
+    "rawMessage": "fix: Include general requirements in department audit checklist generation"
+  },
+  {
+    "revision": 12,
+    "revisionDisplay": "Rev. 12",
+    "commit": "6ce548b",
+    "fullCommit": "6ce548b27a6fa4cfac9b4a126d56a1232f1eb7e6",
+    "date": "2026-10-23T19:25:51+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Map Excel audit matrix departments to ISO 9001 requirements",
+    "rawMessage": "feat: Map Excel audit matrix departments to ISO 9001 requirements"
+  },
+  {
+    "revision": 11,
+    "revisionDisplay": "Rev. 11",
+    "commit": "1be9f31",
+    "fullCommit": "1be9f312635beb00337147f72e466fb3e33e3ddf",
+    "date": "2026-10-23T19:19:55+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Add department edit modal, audit deletion, and custom requirement creation/deletion",
+    "rawMessage": "feat: Add department edit modal, audit deletion, and custom requirement creation/deletion"
+  },
+  {
+    "revision": 10,
+    "revisionDisplay": "Rev. 10",
+    "commit": "98d2365",
+    "fullCommit": "98d2365f19706e83b5200dc713d657316ed723a1",
+    "date": "2026-10-23T19:12:04+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "implement StartAuditButton with automated ISO 9001 checklist generation and navigation",
+    "rawMessage": "feat(audits): implement StartAuditButton with automated ISO 9001 checklist generation and navigation"
+  },
+  {
+    "revision": 9,
+    "revisionDisplay": "Rev. 9",
+    "commit": "966d851",
+    "fullCommit": "966d8510a7bf6db9f4d49c0e7c6e7edb7716bf84",
+    "date": "2026-10-23T19:02:12+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "resolve all ESLint errors, ensure React 19 purity and effect hygiene",
+    "rawMessage": "fix(quality): resolve all ESLint errors, ensure React 19 purity and effect hygiene"
+  },
+  {
+    "revision": 8,
+    "revisionDisplay": "Rev. 8",
+    "commit": "002e73f",
+    "fullCommit": "002e73f4ded6cbe6704fa295319cf4e6b93c5328",
+    "date": "2026-10-23T18:29:23+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "enable full drag-and-drop reordering within and across process groups with persistent order",
+    "rawMessage": "feat(process-map): enable full drag-and-drop reordering within and across process groups with persistent order"
+  },
+  {
+    "revision": 7,
+    "revisionDisplay": "Rev. 7",
+    "commit": "6f3fd4d",
+    "fullCommit": "6f3fd4dd9b7cd7ba49dea077a570f34987df000d",
+    "date": "2026-10-23T18:14:38+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "remove triple-line drag handle icon from process map cards",
+    "rawMessage": "fix(ui): remove triple-line drag handle icon from process map cards"
+  },
+  {
+    "revision": 6,
+    "revisionDisplay": "Rev. 6",
+    "commit": "88a8bfa",
+    "fullCommit": "88a8bfa6f80f86f116cbd642d858d254ba6e1329",
+    "date": "2026-10-23T18:10:51+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "widen sidebar to 320px (w-80) and prevent text wrapping and horizontal scrollbar",
+    "rawMessage": "fix(ui): widen sidebar to 320px (w-80) and prevent text wrapping and horizontal scrollbar"
+  },
+  {
+    "revision": 5,
+    "revisionDisplay": "Rev. 5",
+    "commit": "881b119",
+    "fullCommit": "881b1196225b7cc45d7978dbbffa1c94591ebedc",
+    "date": "2026-10-23T18:08:57+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "mount profile edit modal to body via createPortal to escape header containing block",
+    "rawMessage": "fix(ui): mount profile edit modal to body via createPortal to escape header containing block"
+  },
+  {
+    "revision": 4,
+    "revisionDisplay": "Rev. 4",
+    "commit": "53ac269",
+    "fullCommit": "53ac26959ade22fecc9415cfabfbd2aa118bbe5d",
+    "date": "2026-10-23T17:54:59+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "complete DIN EN ISO 9001 QM suite with 8D complaints, CAPA SLAs, security hardening and installer",
+    "rawMessage": "feat: complete DIN EN ISO 9001 QM suite with 8D complaints, CAPA SLAs, security hardening and installer"
+  },
+  {
+    "revision": 3,
+    "revisionDisplay": "Rev. 3",
+    "commit": "b0ada2a",
+    "fullCommit": "b0ada2aa26ed8bc3cca692a9c4d791d91578d6b5",
+    "date": "2026-10-09T10:44:06+02:00",
+    "type": "update",
+    "badge": "🚀 Update",
+    "title": "Fix prisma imports and client instantiation",
+    "rawMessage": "Fix prisma imports and client instantiation"
+  },
+  {
+    "revision": 2,
+    "revisionDisplay": "Rev. 2",
+    "commit": "8be931f",
+    "fullCommit": "8be931f563a038f60f0e412a2d786c4ccf349edf",
+    "date": "2026-10-09T10:38:57+02:00",
+    "type": "update",
+    "badge": "🚀 Update",
+    "title": "Initial commit of Quality Deck",
+    "rawMessage": "Initial commit of Quality Deck"
+  },
+  {
+    "revision": 1,
+    "revisionDisplay": "Rev. 1",
+    "commit": "5a500bf",
+    "fullCommit": "5a500bf6f440d0f5538a2aa6871278c85ee8e825",
+    "date": "2026-10-08T18:38:25+02:00",
+    "type": "update",
+    "badge": "🚀 Update",
+    "title": "Initial commit from Create Next App",
+    "rawMessage": "Initial commit from Create Next App"
+  }
+]

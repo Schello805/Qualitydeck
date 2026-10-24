@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Git pre-push hook: Automatically updates revision number & changelog
+# ==============================================================================
+
+set -e
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$ROOT_DIR"
+
+if [ -f scripts/update-changelog.js ]; then
+  node scripts/update-changelog.js
+  
+  # If version.json or changelog.json was modified, include it in the push
+  if git status --porcelain | grep -q "src/data/"; then
+    git add src/data/version.json src/data/changelog.json CHANGELOG.md 2>/dev/null || true
+    git commit -m "chore(release): bump revision number and update changelog" --no-verify 2>/dev/null || true
+  fi
+fi
+
+exit 0

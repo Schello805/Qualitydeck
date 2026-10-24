@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "setup": "node scripts/setup.js",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "update": "./update.sh",
+    "version:bump": "node scripts/update-changelog.js",
+    "push": "node scripts/update-changelog.js && git add src/data/version.json src/data/changelog.json CHANGELOG.md && (git commit -m 'chore(release): bump revision and changelog' || true) && git push origin main"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

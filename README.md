@@ -94,6 +94,25 @@ npm run dev
 
 Die Anwendung ist anschließend unter **[http://localhost:3000](http://localhost:3000)** erreichbar.
 
+### 🔄 Updates durchführen
+
+Das System verfügt über ein automatisiertes Update-Skript, das den neuesten Code von GitHub zieht, Prisma & SQLite synchronisiert, die Revisionsnummer hochzählt und das Changelog aktualisiert:
+
+```bash
+# System aktualisieren:
+./update.sh
+```
+
+*Alternativ über npm:*
+```bash
+npm run update
+```
+
+Im Footer der Web-App wird automatisch angezeigt:
+* Die aktuelle **Revisionsnummer** (z. B. `Rev. 17`)
+* Ein Statusindikator (**🟢 Aktuell** oder **🚀 Update verfügbar!**)
+* Ein interaktives **Changelog-Modal** mit allen bisherigen Änderungen und Commits.
+
 ---
 
 ## ⚙️ Cronjob für E-Mail-Erinnerungen
