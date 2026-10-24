@@ -242,19 +242,19 @@ export default function RequirementsPage() {
             }
           }
         }}
-        className={`p-6 rounded-2xl border shadow-sm transition-all flex flex-col md:flex-row gap-6 
+        className={`p-4 rounded-xl border shadow-xs transition-all flex flex-col md:flex-row gap-4 
           ${isLevel3 
-            ? 'ml-4 md:ml-12 border-l-4 border-l-indigo-500 bg-white dark:bg-slate-900 border-y-slate-200 border-r-slate-200 dark:border-y-slate-800 dark:border-r-slate-800' 
+            ? 'ml-3 md:ml-8 border-l-4 border-l-indigo-500 bg-white dark:bg-slate-900 border-y-slate-200 border-r-slate-200 dark:border-y-slate-800 dark:border-r-slate-800' 
             : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800'}
           ${onToggle && editingId !== req.id && auditingId !== req.id ? 'cursor-pointer hover:border-blue-300 dark:hover:border-blue-700' : ''}
         `}
       >
-        <div className="md:w-32 shrink-0">
-          <span className={`inline-flex items-center justify-center font-bold px-3 py-1 rounded-lg ${isLevel3 ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-sm' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
+        <div className="md:w-24 shrink-0">
+          <span className={`inline-flex items-center justify-center font-bold px-2 py-0.5 rounded-md text-xs ${isLevel3 ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
             Kap. {req.chapter}
           </span>
           {!isLevel3 && (
-            <div className="mt-2 text-xs text-slate-500 font-medium uppercase tracking-wider">
+            <div className="mt-1 text-[10px] text-slate-400 font-medium uppercase tracking-wider">
               Hauptpunkt
             </div>
           )}
@@ -450,54 +450,54 @@ export default function RequirementsPage() {
             </div>
           ) : (
             <>
-              <div className="flex items-start justify-between gap-4">
-                <h3 className={`font-bold text-slate-900 dark:text-slate-100 mb-2 ${isLevel3 ? 'text-lg' : 'text-xl'}`}>{req.title}</h3>
+              <div className="flex items-start justify-between gap-3">
+                <h3 className={`font-bold text-slate-900 dark:text-slate-100 mb-1.5 ${isLevel3 ? 'text-xs md:text-sm' : 'text-sm md:text-base'}`}>{req.title}</h3>
                 {hasChildren && (
-                  <div className="text-slate-400 bg-white dark:bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+                  <div className="text-slate-400 bg-white dark:bg-slate-800 rounded-full w-6 h-6 text-xs flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
                     {isExpanded ? '▼' : '▶'}
                   </div>
                 )}
               </div>
               
               {/* Tags Display */}
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-1.5 mb-2">
                 {(() => {
                   const depts = parseDepartments(req.departments);
                   if (depts === 'all' || (Array.isArray(depts) && depts.length === 0)) {
                     return (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-[11px] font-semibold">
                         <span>🏢</span> Alle Abteilungen
                       </span>
                     );
                   }
                   return (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-xs font-semibold">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-[11px] font-semibold">
                       <span>🎯</span> {depts.join(', ')}
                     </span>
                   );
                 })()}
                 
                 {req.roles === 'all' ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-[11px] font-semibold">
                     <span>👥</span> Alle Mitarbeiter
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[11px] font-semibold">
                     <span>👑</span> Nur Führungskräfte
                   </span>
                 )}
               </div>
 
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm mb-4">
+              <p className="text-slate-600 dark:text-slate-400 leading-normal text-xs mb-2">
                 {req.description}
               </p>
               {req.originalText && (
-                <details className="mt-2 group">
-                  <summary className="cursor-pointer text-sm font-semibold uppercase text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 list-none flex items-center gap-2 select-none">
-                    <span className="inline-block transition-transform group-open:rotate-90">▶</span>
+                <details className="mt-1 group">
+                  <summary className="cursor-pointer text-xs font-semibold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 list-none flex items-center gap-1.5 select-none">
+                    <span className="inline-block transition-transform group-open:rotate-90 text-[10px]">▶</span>
                     Originaltext DIN ISO 9001 anzeigen
                   </summary>
-                  <blockquote className="border-l-4 border-blue-200 dark:border-blue-900 pl-4 py-2 mt-3 text-sm italic text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/50 rounded-r-lg whitespace-pre-wrap">
+                  <blockquote className="border-l-2 border-blue-200 dark:border-blue-900 pl-3 py-1.5 mt-2 text-xs italic text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/50 rounded-r-lg whitespace-pre-wrap">
                     {req.originalText}
                   </blockquote>
                 </details>
@@ -650,32 +650,32 @@ export default function RequirementsPage() {
             const isMainExpanded = expanded.includes(mainChapterNum);
 
             return (
-              <div key={mainChapterNum} className="mb-8">
+              <div key={mainChapterNum} className="mb-3">
                 <button 
                   onClick={() => toggleExpand(mainChapterNum)}
-                  className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors text-left"
+                  className="w-full flex items-center justify-between py-2.5 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs hover:border-blue-400 dark:hover:border-blue-600 transition-colors text-left group cursor-pointer"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl font-black shadow-md shadow-blue-600/20 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-xs shrink-0">
                       {mainChapterNum}
                     </div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {group.category}
                     </h2>
                   </div>
-                  <div className={`text-slate-400 transition-transform ${isMainExpanded ? 'rotate-180' : ''}`}>
+                  <div className={`text-slate-400 text-xs transition-transform ${isMainExpanded ? 'rotate-180' : ''}`}>
                     ▼
                   </div>
                 </button>
                 
                 {isMainExpanded && (
-                  <div className="mt-4 space-y-4 ml-2 md:ml-6 pl-4 border-l-2 border-slate-200 dark:border-slate-800">
+                  <div className="mt-2.5 space-y-2.5 ml-1 md:ml-4 pl-3 border-l-2 border-slate-200 dark:border-slate-800">
                     {Object.keys(group.items).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(subChapterNum => {
                       const subGroup = group.items[subChapterNum];
                       const isSubExpanded = expanded.includes(subChapterNum);
                       
                       return (
-                        <div key={subChapterNum} className="space-y-4">
+                        <div key={subChapterNum} className="space-y-2.5">
                           <div className="flex-1">
                             {renderReqCard(
                               subGroup.req, 

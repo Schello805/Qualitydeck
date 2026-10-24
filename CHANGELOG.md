@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 42 (78a65d1)](https://github.com/Schello805/Qualitydeck/commit/78a65d1e35eac3d42653fd448c71a27afce68612) • Zuletzt aktualisiert: 24.10.2026 21:36:13
+**Aktueller Stand:** [Rev. 43 (ba1a45b)](https://github.com/Schello805/Qualitydeck/commit/ba1a45bc5f6841cb135085c447d90c8eb5de05f1) • Zuletzt aktualisiert: 24.10.2026 21:48:14
 
 ---
 
-### [Rev. 42] - 24.10.2026, 21:36 (`78a65d1`)
+### [Rev. 43] - 24.10.2026, 21:48 (`ba1a45b`)
+* **🚀 Update:** style: Slenderize requirements, compact department list, scale down process map, reset matrix font size
+* *Commit:* [`ba1a45b`](https://github.com/Schello805/Qualitydeck/commit/ba1a45bc5f6841cb135085c447d90c8eb5de05f1)
+
+### [Rev. 42] - 24.10.2026, 21:36 (`4104a3e`)
 * **🚀 Update:** style: Fine-tune root font size to 13.5px for ultra-crisp compact enterprise UI
-* *Commit:* [`78a65d1`](https://github.com/Schello805/Qualitydeck/commit/78a65d1e35eac3d42653fd448c71a27afce68612)
+* *Commit:* [`4104a3e`](https://github.com/Schello805/Qualitydeck/commit/4104a3e3f87d9d3c4fc25c86d5475fecf3ed18a2)
 
 ### [Rev. 41] - 24.10.2026, 21:33 (`6e39978`)
 * **🚀 Update:** style: Optimize base typography, reduce root font size to 14.5px for compact clean view

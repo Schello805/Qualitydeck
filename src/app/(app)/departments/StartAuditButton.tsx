@@ -41,17 +41,17 @@ export default function StartAuditButton({
     <button 
       onClick={handleStart}
       disabled={loading}
-      className="w-full py-2.5 px-4 bg-slate-100 hover:bg-blue-600 dark:bg-slate-800 dark:hover:bg-blue-600 text-slate-700 hover:text-white dark:text-slate-300 dark:hover:text-white rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 group disabled:opacity-60 cursor-pointer"
+      className="py-1.5 px-3 bg-slate-100 hover:bg-blue-600 dark:bg-slate-800 dark:hover:bg-blue-600 text-slate-700 hover:text-white dark:text-slate-300 dark:hover:text-white rounded-lg text-xs font-semibold transition-all shadow-xs flex items-center justify-center gap-1.5 group disabled:opacity-60 cursor-pointer whitespace-nowrap"
     >
       {loading ? (
         <>
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-          <span>Audit wird vorbereitet...</span>
+          <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+          <span>Vorbereiten...</span>
         </>
       ) : (
         <>
           <span className="opacity-70 group-hover:opacity-100 transition-opacity">📋</span>
-          <span>Neues Audit starten</span>
+          <span>Audit durchführen</span>
         </>
       )}
     </button>

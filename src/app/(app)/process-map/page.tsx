@@ -186,15 +186,15 @@ export default function ProcessMapPage() {
             reorderDepartments(sourceId, d.id, d.processType);
           }
         }}
-        className={`cursor-grab active:cursor-grabbing bg-white dark:bg-slate-800 border rounded-lg px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 transition-all flex items-center select-none ${
+        className={`cursor-grab active:cursor-grabbing bg-white dark:bg-slate-800 border rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 transition-all flex items-center select-none ${
           isBeingDragged 
             ? 'opacity-30 scale-95 border-dashed border-blue-400 dark:border-blue-500 shadow-inner' 
             : isDragOver
-              ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/30 scale-102 shadow-lg bg-blue-50/50 dark:bg-blue-950/40'
-              : 'border-slate-200 dark:border-slate-700 shadow-sm hover:border-blue-400 hover:shadow-md'
+              ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/30 scale-102 shadow-md bg-blue-50/50 dark:bg-blue-950/40'
+              : 'border-slate-200 dark:border-slate-700 shadow-xs hover:border-blue-400 hover:shadow-sm'
         }`}
       >
-        <span>{d.name}</span>
+        <span className="truncate">{d.name}</span>
       </div>
     );
   };
@@ -249,46 +249,46 @@ export default function ProcessMapPage() {
         </button>
       </div>
 
-      <div ref={mapRef} className="bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 lg:p-8 flex flex-col lg:flex-row gap-4 relative overflow-x-auto min-w-max lg:min-w-0 print:border-none print:shadow-none print:p-0 print:overflow-visible">
+      <div ref={mapRef} className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-3 lg:p-4 flex flex-col lg:flex-row gap-2.5 relative overflow-x-auto min-w-max lg:min-w-0 print:border-none print:shadow-none print:p-0 print:overflow-visible">
         
         {/* Far Left: Stakeholders */}
-        <div className="flex flex-col gap-3 justify-center w-48 shrink-0 z-10">
+        <div className="flex flex-col gap-1.5 justify-center w-32 shrink-0 z-10">
           {stakeholders.map((s, i) => (
-            <div key={i} className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded shadow-sm p-3 text-xs font-semibold text-indigo-900 dark:text-indigo-200 text-center flex items-center justify-center h-12 relative print:border-indigo-300 print:bg-indigo-100">
+            <div key={i} className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded shadow-xs px-2 py-0.5 text-[11px] font-semibold text-indigo-900 dark:text-indigo-200 text-center flex items-center justify-center h-7 relative print:border-indigo-300 print:bg-indigo-100">
               <span 
                 contentEditable 
                 suppressContentEditableWarning
                 onBlur={(e) => updateStakeholder(i, e.currentTarget.textContent || '')}
-                className="outline-none focus:bg-white dark:focus:bg-slate-800 px-1 rounded min-w-[50px] print:text-black"
+                className="outline-none focus:bg-white dark:focus:bg-slate-800 px-1 rounded truncate max-w-full print:text-black"
               >
                 {s}
               </span>
-              <div className="absolute -right-3 top-1/2 -translate-y-1/2 text-indigo-300 print:text-indigo-400">→</div>
+              <div className="absolute -right-2 top-1/2 -translate-y-1/2 text-indigo-300 print:text-indigo-400 text-[10px]">→</div>
             </div>
           ))}
         </div>
 
         {/* Vertical Bar: Anforderungen */}
-        <div className="w-12 bg-orange-200 dark:bg-orange-900/40 border border-orange-300 dark:border-orange-800 rounded-lg flex items-center justify-center shrink-0 z-10 shadow-sm print:bg-orange-200 print:border-orange-400">
-          <div className="writing-vertical text-orange-900 dark:text-orange-200 font-bold tracking-[0.3em] uppercase text-sm rotate-180 print:text-black" style={{ writingMode: 'vertical-rl' }}>
+        <div className="w-7 bg-orange-200 dark:bg-orange-900/40 border border-orange-300 dark:border-orange-800 rounded-md flex items-center justify-center shrink-0 z-10 shadow-xs print:bg-orange-200 print:border-orange-400">
+          <div className="writing-vertical text-orange-900 dark:text-orange-200 font-bold tracking-[0.2em] uppercase text-[11px] rotate-180 print:text-black" style={{ writingMode: 'vertical-rl' }}>
             <span contentEditable suppressContentEditableWarning className="outline-none">Anforderungen</span>
           </div>
         </div>
 
         {/* Center: The 3 Lanes */}
-        <div className="flex-1 flex flex-col gap-4 z-10 min-w-[300px]">
+        <div className="flex-1 flex flex-col gap-2.5 z-10 min-w-[280px]">
           {/* Management */}
           <div 
-            className="flex-1 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm transition-colors print:bg-rose-100 print:border-rose-300"
+            className="flex-1 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-2.5 flex flex-col shadow-xs transition-colors print:bg-rose-100 print:border-rose-300"
             onDragOver={handleDragOver}
             onDrop={(e) => handleLaneDrop(e, 'management')}
           >
-            <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-3 text-sm flex items-center gap-2 print:text-black">
+            <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-1.5 text-xs flex items-center gap-1.5 print:text-black">
               <span contentEditable suppressContentEditableWarning className="outline-none">Managementprozesse</span>
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 min-h-[60px]">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5 min-h-[40px]">
               {management.length === 0 ? (
-                <div className="col-span-full flex items-center justify-center text-xs text-rose-400/70 border border-dashed border-rose-300 dark:border-rose-800/50 rounded bg-white/50 dark:bg-slate-900/50 p-2 print:hidden">
+                <div className="col-span-full flex items-center justify-center text-[11px] text-rose-400/70 border border-dashed border-rose-300 dark:border-rose-800/50 rounded bg-white/50 dark:bg-slate-900/50 p-1.5 print:hidden">
                   Abteilungen hier ablegen
                 </div>
               ) : management.map(renderDraggableDept)}
@@ -297,20 +297,20 @@ export default function ProcessMapPage() {
 
           {/* Core */}
           <div 
-            className="flex-1 relative rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm transition-colors print:bg-rose-100 print:border-rose-300"
+            className="flex-1 relative rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-2.5 flex flex-col shadow-xs transition-colors print:bg-rose-100 print:border-rose-300"
             onDragOver={handleDragOver}
             onDrop={(e) => handleLaneDrop(e, 'core')}
           >
             {/* Arrow shape approximation for Core processes */}
-            <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[40px] border-y-transparent border-l-[16px] border-l-rose-200 dark:border-l-rose-900/50 z-0 hidden lg:block print:border-l-rose-300"></div>
-            <div className="absolute -right-[15px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-[38px] border-y-transparent border-l-[15px] border-l-rose-50 dark:border-l-slate-900 z-10 hidden lg:block print:border-l-rose-100"></div>
+            <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[28px] border-y-transparent border-l-[12px] border-l-rose-200 dark:border-l-rose-900/50 z-0 hidden lg:block print:border-l-rose-300"></div>
+            <div className="absolute -right-[11px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-[26px] border-y-transparent border-l-[11px] border-l-rose-50 dark:border-l-slate-900 z-10 hidden lg:block print:border-l-rose-100"></div>
 
-            <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-3 text-sm flex items-center gap-2 relative z-20 print:text-black">
+            <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-1.5 text-xs flex items-center gap-1.5 relative z-20 print:text-black">
               <span contentEditable suppressContentEditableWarning className="outline-none">Kernprozesse</span>
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 min-h-[60px] relative z-20">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5 min-h-[40px] relative z-20">
               {core.length === 0 ? (
-                <div className="col-span-full flex items-center justify-center text-xs text-rose-400/70 border border-dashed border-rose-300 dark:border-rose-800/50 rounded bg-white/50 dark:bg-slate-900/50 p-2 print:hidden">
+                <div className="col-span-full flex items-center justify-center text-[11px] text-rose-400/70 border border-dashed border-rose-300 dark:border-rose-800/50 rounded bg-white/50 dark:bg-slate-900/50 p-1.5 print:hidden">
                   Abteilungen hier ablegen
                 </div>
               ) : core.map(renderDraggableDept)}
@@ -319,16 +319,16 @@ export default function ProcessMapPage() {
 
           {/* Support */}
           <div 
-            className="flex-1 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-4 flex flex-col shadow-sm transition-colors print:bg-rose-100 print:border-rose-300"
+            className="flex-1 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-900/10 p-2.5 flex flex-col shadow-xs transition-colors print:bg-rose-100 print:border-rose-300"
             onDragOver={handleDragOver}
             onDrop={(e) => handleLaneDrop(e, 'support')}
           >
-            <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-3 text-sm flex items-center gap-2 print:text-black">
+            <h3 className="text-rose-900 dark:text-rose-300 font-bold mb-1.5 text-xs flex items-center gap-1.5 print:text-black">
               <span contentEditable suppressContentEditableWarning className="outline-none">Unterstützungsprozesse</span>
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 min-h-[60px]">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5 min-h-[40px]">
               {support.length === 0 ? (
-                <div className="col-span-full flex items-center justify-center text-xs text-rose-400/70 border border-dashed border-rose-300 dark:border-rose-800/50 rounded bg-white/50 dark:bg-slate-900/50 p-2 print:hidden">
+                <div className="col-span-full flex items-center justify-center text-[11px] text-rose-400/70 border border-dashed border-rose-300 dark:border-rose-800/50 rounded bg-white/50 dark:bg-slate-900/50 p-1.5 print:hidden">
                   Abteilungen hier ablegen
                 </div>
               ) : support.map(renderDraggableDept)}
@@ -337,22 +337,22 @@ export default function ProcessMapPage() {
         </div>
 
         {/* Vertical Bar: Zufriedenheit */}
-        <div className="w-12 bg-cyan-200 dark:bg-cyan-900/40 border border-cyan-300 dark:border-cyan-800 rounded-lg flex items-center justify-center shrink-0 z-10 shadow-sm ml-0 lg:ml-4 print:bg-cyan-200 print:border-cyan-400">
-          <div className="writing-vertical text-cyan-900 dark:text-cyan-200 font-bold tracking-[0.3em] uppercase text-sm rotate-180 print:text-black" style={{ writingMode: 'vertical-rl' }}>
+        <div className="w-7 bg-cyan-200 dark:bg-cyan-900/40 border border-cyan-300 dark:border-cyan-800 rounded-md flex items-center justify-center shrink-0 z-10 shadow-xs ml-0 lg:ml-2 print:bg-cyan-200 print:border-cyan-400">
+          <div className="writing-vertical text-cyan-900 dark:text-cyan-200 font-bold tracking-[0.2em] uppercase text-[11px] rotate-180 print:text-black" style={{ writingMode: 'vertical-rl' }}>
             <span contentEditable suppressContentEditableWarning className="outline-none">Zufriedenheit</span>
           </div>
         </div>
 
         {/* Far Right: Outputs */}
-        <div className="flex flex-col gap-3 justify-center w-48 shrink-0 z-10">
+        <div className="flex flex-col gap-1.5 justify-center w-32 shrink-0 z-10">
           {outcomes.map((o, i) => (
-            <div key={i} className="bg-sky-100 dark:bg-sky-900/30 border border-sky-300 dark:border-sky-800/50 rounded shadow-sm p-3 text-xs font-semibold text-sky-900 dark:text-sky-200 text-center flex items-center justify-center h-12 relative print:bg-sky-100 print:border-sky-300">
-              <div className="absolute -left-3 top-1/2 -translate-y-1/2 text-sky-400 print:text-sky-500">→</div>
+            <div key={i} className="bg-sky-100 dark:bg-sky-900/30 border border-sky-300 dark:border-sky-800/50 rounded shadow-xs px-2 py-0.5 text-[11px] font-semibold text-sky-900 dark:text-sky-200 text-center flex items-center justify-center h-7 relative print:bg-sky-100 print:border-sky-300">
+              <div className="absolute -left-2 top-1/2 -translate-y-1/2 text-sky-400 print:text-sky-500 text-[10px]">→</div>
               <span 
                 contentEditable 
                 suppressContentEditableWarning
                 onBlur={(e) => updateOutcome(i, e.currentTarget.textContent || '')}
-                className="outline-none focus:bg-white dark:focus:bg-slate-800 px-1 rounded min-w-[50px] print:text-black"
+                className="outline-none focus:bg-white dark:focus:bg-slate-800 px-1 rounded truncate max-w-full print:text-black"
               >
                 {o}
               </span>
