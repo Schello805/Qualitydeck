@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 33 (5a21151)](https://github.com/Schello805/Qualitydeck/commit/5a21151bd52d20ead073ca164f8b8fd33531958f) • Zuletzt aktualisiert: 24.10.2026 13:06:50
+**Aktueller Stand:** [Rev. 34 (94da24b)](https://github.com/Schello805/Qualitydeck/commit/94da24b14a2c0219c30bc5f6eea8007243a276cc) • Zuletzt aktualisiert: 24.10.2026 13:18:23
 
 ---
 
-### [Rev. 33] - 24.10.2026, 13:06 (`5a21151`)
+### [Rev. 34] - 24.10.2026, 13:18 (`94da24b`)
+* **🐛 Behoben:** Fix department filter synchronization and ensure all department audits are populated
+* *Commit:* [`94da24b`](https://github.com/Schello805/Qualitydeck/commit/94da24b14a2c0219c30bc5f6eea8007243a276cc)
+
+### [Rev. 33] - 24.10.2026, 13:06 (`49ba5a0`)
 * **🐛 Behoben:** Remove invalid --quiet flag from prisma generate
-* *Commit:* [`5a21151`](https://github.com/Schello805/Qualitydeck/commit/5a21151bd52d20ead073ca164f8b8fd33531958f)
+* *Commit:* [`49ba5a0`](https://github.com/Schello805/Qualitydeck/commit/49ba5a0ada88447a9438c05df1d9900d5873f602)
 
 ### [Rev. 32] - 24.10.2026, 12:52 (`48a33d9`)
 * **🐛 Behoben:** Auto-discard generated local files before git pull in update.sh

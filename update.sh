@@ -75,7 +75,8 @@ echo -e "${GREEN}  ✓ NPM-Pakete sind aktuell.${NC}"
 echo -e "\n${CYAN}🗄️  [4/6] Aktualisiere Prisma Client & Datenbank-Schema...${NC}"
 npx prisma generate
 npx prisma db push --skip-generate --accept-data-loss || npx prisma db push
-echo -e "${GREEN}  ✓ Datenbank-Schema erfolgreich synchronisiert.${NC}"
+node scripts/setup.js --quick
+echo -e "${GREEN}  ✓ Datenbank-Schema und Audit-Daten erfolgreich synchronisiert.${NC}"
 
 # 5. Revisionsnummer & Changelog aktualisieren
 echo -e "\n${CYAN}📜 [5/6] Aktualisiere Revisionsnummer und Changelog...${NC}"

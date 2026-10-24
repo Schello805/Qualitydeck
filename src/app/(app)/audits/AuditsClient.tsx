@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { updateAuditReportItem, deleteAuditItem, startNewAudit } from '@/actions/audits';
@@ -46,17 +46,41 @@ export default function AuditsClient({
   const [isStartingAudit, setIsStartingAudit] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'open' | 'fulfilled' | 'not_fulfilled'>('ALL');
-  const [deptFilter, setDeptFilter] = useState('ALL');
+  // Initialize deptFilter from URL if present
+  const urlDept = searchParams.get('dept');
+  const [deptFilter, setDeptFilter] = useState<string>(() => urlDept || 'ALL');
   const [chapterFilter, setChapterFilter] = useState('ALL');
   const [sortField, setSortField] = useState<'chapter' | 'status' | 'department' | 'date'>('chapter');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
+  const prevDeptParamRef = useRef<string | null>(urlDept);
+
   useEffect(() => {
-    const deptParam = searchParams.get('dept');
-    if (deptParam) {
-      Promise.resolve().then(() => setDeptFilter(deptParam));
+    const currentParam = searchParams.get('dept');
+    if (currentParam !== prevDeptParamRef.current) {
+      prevDeptParamRef.current = currentParam;
+      setDeptFilter(currentParam || 'ALL');
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (initialItems && initialItems.length > 0) {
+      setItems(initialItems);
+    }
+  }, [initialItems]);
+
+  const handleDeptFilterChange = (val: string) => {
+    setDeptFilter(val);
+    prevDeptParamRef.current = val === 'ALL' ? null : val;
+    const params = new URLSearchParams(window.location.search);
+    if (val === 'ALL') {
+      params.delete('dept');
+    } else {
+      params.set('dept', val);
+    }
+    const query = params.toString();
+    router.replace(query ? `/audits?${query}` : '/audits', { scroll: false });
+  };
 
   // Modal State for Reading & Updating Audit Items
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
@@ -115,7 +139,7 @@ export default function AuditsClient({
   }, [items, allDepartments]);
 
   const currentDeptObj = useMemo(() => {
-    return allDepartments.find((d: any) => d.name === deptFilter);
+    return allDepartments.find((d: any) => (d.name || '').trim().toLowerCase() === deptFilter.trim().toLowerCase());
   }, [allDepartments, deptFilter]);
 
   const handleStartAuditForFilteredDept = async () => {
@@ -154,7 +178,11 @@ export default function AuditsClient({
         if (statusFilter !== 'ALL' && item.status !== statusFilter) return false;
 
         // Dept
-        if (deptFilter !== 'ALL' && item.audit?.department?.name !== deptFilter) return false;
+        if (deptFilter !== 'ALL') {
+          const itemDept = (item.audit?.department?.name || '').trim().toLowerCase();
+          const targetDept = deptFilter.trim().toLowerCase();
+          if (itemDept !== targetDept) return false;
+        }
 
         // Chapter
         if (chapterFilter !== 'ALL') {
@@ -364,7 +392,7 @@ export default function AuditsClient({
           <div>
             <select
               value={deptFilter}
-              onChange={(e) => setDeptFilter(e.target.value)}
+              onChange={(e) => handleDeptFilterChange(e.target.value)}
               className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="ALL">🏢 Alle Abteilungen</option>
@@ -394,8 +422,8 @@ export default function AuditsClient({
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
             <span>Gefiltert: <strong>{filteredItems.length}</strong> von {items.length} Auditpunkten</span>
             <button 
-              onClick={() => { setSearch(''); setStatusFilter('ALL'); setDeptFilter('ALL'); setChapterFilter('ALL'); }}
-              className="text-blue-600 hover:underline font-medium"
+              onClick={() => { setSearch(''); setStatusFilter('ALL'); handleDeptFilterChange('ALL'); setChapterFilter('ALL'); }}
+              className="text-blue-600 hover:underline font-medium cursor-pointer"
             >
               Filter zurücksetzen
             </button>

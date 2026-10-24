@@ -32,20 +32,25 @@ async function main() {
     console.error(`❌ Node.js Version 18+ erforderlich (aktuell: ${process.version}).`);
     process.exit(1);
   }
-  console.log(`✅ Node.js Version: ${process.version}`);
 
-  // 2. Install dependencies if node_modules is missing
-  if (!fs.existsSync(path.join(ROOT_DIR, 'node_modules'))) {
-    run('npm install', 'NPM Abhängigkeiten installieren');
-  } else {
-    console.log('✅ node_modules vorhanden.');
+  const isQuick = process.argv.includes('--quick') || process.argv.includes('--seed-only');
+
+  if (!isQuick) {
+    console.log(`✅ Node.js Version: ${process.version}`);
+
+    // 2. Install dependencies if node_modules is missing
+    if (!fs.existsSync(path.join(ROOT_DIR, 'node_modules'))) {
+      run('npm install', 'NPM Abhängigkeiten installieren');
+    } else {
+      console.log('✅ node_modules vorhanden.');
+    }
+
+    // 3. Generate Prisma Client
+    run('npx prisma generate', 'Prisma Client generieren');
+
+    // 4. Synchronize Database Schema (SQLite)
+    run('npx prisma db push', 'SQLite Datenbank-Schema synchronisieren');
   }
-
-  // 3. Generate Prisma Client
-  run('npx prisma generate', 'Prisma Client generieren');
-
-  // 4. Synchronize Database Schema (SQLite)
-  run('npx prisma db push', 'SQLite Datenbank-Schema synchronisieren');
 
   // 5. Seed Database with ISO 9001 Requirements
   console.log('\n⏳ Prüfe & initialisiere Norm-Daten...');
@@ -109,6 +114,63 @@ async function main() {
     }
     console.log('✅ Standard-Abteilungen aus Excel-Matrix verifiziert.');
 
+    // Ensure all departments have an initial audit with their respective ISO requirements
+    const allDepartments = await prisma.department.findMany();
+    const allRequirements = await prisma.requirement.findMany({ orderBy: { chapter: 'asc' } });
+    const auditDateStr = new Date().toISOString().split('T')[0];
+
+    for (const dept of allDepartments) {
+      if (dept.name === 'Alle Bereiche') continue;
+      
+      let audit = await prisma.audit.findFirst({
+        where: {
+          departmentId: dept.id,
+          status: { in: ['open', 'in_progress'] }
+        },
+        include: { items: true }
+      });
+
+      if (!audit) {
+        audit = await prisma.audit.create({
+          data: {
+            departmentId: dept.id,
+            auditor: 'Intern / QMB',
+            status: 'in_progress',
+            date: new Date()
+          },
+          include: { items: true }
+        });
+      }
+
+      const existingReqIds = new Set((audit.items || []).map(i => i.requirementId));
+      const reqsToCreate = allRequirements.filter(req => {
+        if (existingReqIds.has(req.id)) return false;
+        if (!req.departments || req.departments === 'all') return true;
+        try {
+          const depts = JSON.parse(req.departments);
+          if (Array.isArray(depts)) {
+            return depts.includes(dept.name) || depts.includes('Alle Bereiche');
+          }
+        } catch {
+          return req.departments.includes(dept.name) || req.departments.includes('Alle Bereiche');
+        }
+        return true;
+      });
+
+      if (reqsToCreate.length > 0) {
+        await prisma.auditItem.createMany({
+          data: reqsToCreate.map(req => ({
+            auditId: audit.id,
+            requirementId: req.id,
+            status: 'open',
+            auditDate: auditDateStr,
+            auditee: dept.manager || undefined
+          }))
+        });
+      }
+    }
+    console.log('✅ Audit-Kataloge für alle Abteilungen initialisiert & verifiziert.');
+
     // Ensure default settings exist
     const settings = await prisma.setting.count();
     if (settings === 0) {
@@ -122,9 +184,12 @@ async function main() {
     }
 
     // Generate revision & changelog
-    const updateChangelog = path.join(ROOT_DIR, 'scripts', 'update-changelog.js');
-    if (fs.existsSync(updateChangelog)) {
-      run(`node "${updateChangelog}"`, 'Revisionsnummer & Changelog initialisieren');
+    if (!isQuick) {
+      try {
+        require('./update-changelog.js');
+      } catch (e) {
+        // ignored if already handled
+      }
     }
 
   } catch (dbErr) {

@@ -1,9 +1,20 @@
 [
   {
+    "revision": 34,
+    "revisionDisplay": "Rev. 34",
+    "commit": "94da24b",
+    "fullCommit": "94da24b14a2c0219c30bc5f6eea8007243a276cc",
+    "date": "2026-10-24T13:18:23+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Fix department filter synchronization and ensure all department audits are populated",
+    "rawMessage": "fix(audits): Fix department filter synchronization and ensure all department audits are populated"
+  },
+  {
     "revision": 33,
     "revisionDisplay": "Rev. 33",
-    "commit": "5a21151",
-    "fullCommit": "5a21151bd52d20ead073ca164f8b8fd33531958f",
+    "commit": "49ba5a0",
+    "fullCommit": "49ba5a0ada88447a9438c05df1d9900d5873f602",
     "date": "2026-10-24T13:06:50+02:00",
     "type": "fix",
     "badge": "🐛 Behoben",
