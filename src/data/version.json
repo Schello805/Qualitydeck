@@ -1,10 +1,10 @@
 {
-  "version": "1.2.31",
-  "revision": 31,
-  "revisionDisplay": "Rev. 31",
-  "commit": "49247ed",
-  "fullCommit": "49247eda53d3513b5ce85acc423a28dd5ab49c8e",
+  "version": "1.2.32",
+  "revision": 32,
+  "revisionDisplay": "Rev. 32",
+  "commit": "a2dfe20",
+  "fullCommit": "a2dfe2049197c5d6b51279c4741d15256282f73e",
   "branch": "main",
-  "lastUpdated": "2026-10-24T12:47:50+02:00",
+  "lastUpdated": "2026-10-24T12:52:06+02:00",
   "githubRepo": "https://github.com/Schello805/Qualitydeck"
 }

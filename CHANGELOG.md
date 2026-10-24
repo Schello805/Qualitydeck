@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 31 (49247ed)](https://github.com/Schello805/Qualitydeck/commit/49247eda53d3513b5ce85acc423a28dd5ab49c8e) • Zuletzt aktualisiert: 24.10.2026 12:47:50
+**Aktueller Stand:** [Rev. 32 (a2dfe20)](https://github.com/Schello805/Qualitydeck/commit/a2dfe2049197c5d6b51279c4741d15256282f73e) • Zuletzt aktualisiert: 24.10.2026 12:52:07
 
 ---
 
-### [Rev. 31] - 24.10.2026, 12:47 (`49247ed`)
+### [Rev. 32] - 24.10.2026, 12:52 (`a2dfe20`)
+* **🐛 Behoben:** Auto-discard generated local files before git pull in update.sh
+* *Commit:* [`a2dfe20`](https://github.com/Schello805/Qualitydeck/commit/a2dfe2049197c5d6b51279c4741d15256282f73e)
+
+### [Rev. 31] - 24.10.2026, 12:47 (`82584de`)
 * **✨ Neu:** Sync all 19 Excel departments into database and audit filters with 1-click starter
-* *Commit:* [`49247ed`](https://github.com/Schello805/Qualitydeck/commit/49247eda53d3513b5ce85acc423a28dd5ab49c8e)
+* *Commit:* [`82584de`](https://github.com/Schello805/Qualitydeck/commit/82584dee485df8b33999d706b053656f6df17a21)
 
 ### [Rev. 30] - 24.10.2026, 11:36 (`e15aa27`)
 * **🚀 Update:** perf(quality): Add database indexes, parallelize queries, batch audit creation and clean linter warnings

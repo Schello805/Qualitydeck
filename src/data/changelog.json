@@ -1,9 +1,20 @@
 [
   {
+    "revision": 32,
+    "revisionDisplay": "Rev. 32",
+    "commit": "a2dfe20",
+    "fullCommit": "a2dfe2049197c5d6b51279c4741d15256282f73e",
+    "date": "2026-10-24T12:52:06+02:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Auto-discard generated local files before git pull in update.sh",
+    "rawMessage": "fix(update): Auto-discard generated local files before git pull in update.sh"
+  },
+  {
     "revision": 31,
     "revisionDisplay": "Rev. 31",
-    "commit": "49247ed",
-    "fullCommit": "49247eda53d3513b5ce85acc423a28dd5ab49c8e",
+    "commit": "82584de",
+    "fullCommit": "82584dee485df8b33999d706b053656f6df17a21",
     "date": "2026-10-24T12:47:50+02:00",
     "type": "feature",
     "badge": "✨ Neu",

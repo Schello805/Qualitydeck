@@ -61,6 +61,8 @@ if [ "$LOCAL" = "$REMOTE" ]; then
   echo -e "${YELLOW}    Führe Wartungsschritte (Prisma, Changelog-Sync) trotzdem durch...${NC}"
 else
   echo -e "${GREEN}  🚀 Neue Commits gefunden! Aktualisiere Codebase...${NC}"
+  # Lokale Änderungen an automatisch generierten Build- & Changelog-Dateien verwerfen
+  git checkout -- CHANGELOG.md package-lock.json src/data/changelog.json src/data/version.json 2>/dev/null || true
   git pull origin main
 fi
 
