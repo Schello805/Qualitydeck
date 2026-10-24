@@ -1,18 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Git pre-commit hook: Automatically updates revision number & changelog
-# ==============================================================================
-
+# Git hook: ensure version and changelog are in sync
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$ROOT_DIR"
-
-if [ -f scripts/update-changelog.js ]; then
-  # Avoid infinite loop if invoked internally
-  if [ -z "$GIT_REVISION_HOOK_RUNNING" ]; then
-    export GIT_REVISION_HOOK_RUNNING=1
-    node scripts/update-changelog.js >/dev/null 2>&1 || true
-    git add src/data/version.json src/data/changelog.json CHANGELOG.md 2>/dev/null || true
-  fi
-fi
-
 exit 0

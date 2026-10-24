@@ -1,5 +1,27 @@
 [
   {
+    "revision": 21,
+    "revisionDisplay": "Rev. 21",
+    "commit": "b5d5592",
+    "fullCommit": "b5d55927835ff73635e2423ba69d776b21943295",
+    "date": "2026-10-24T08:39:24+02:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Complete automated push script, changelog modal, and update checker",
+    "rawMessage": "feat: Complete automated push script, changelog modal, and update checker"
+  },
+  {
+    "revision": 20,
+    "revisionDisplay": "Rev. 20",
+    "commit": "a329375",
+    "fullCommit": "a329375eec5b30c7504fac4daf77129ebbcea7b4",
+    "date": "2026-10-24T08:37:49+02:00",
+    "type": "chore",
+    "badge": "🔧 Wartung",
+    "title": "Configure automated git hooks for pre-commit and pre-push",
+    "rawMessage": "chore: Configure automated git hooks for pre-commit and pre-push"
+  },
+  {
     "revision": 19,
     "revisionDisplay": "Rev. 19",
     "commit": "c5614b7",

@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Git pre-push hook: Ensure changelog and revision are updated
-# ==============================================================================
-
+# Git hook: pre-push
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$ROOT_DIR"
-
-if [ -f scripts/update-changelog.js ]; then
-  node scripts/update-changelog.js >/dev/null 2>&1 || true
-fi
-
 exit 0
