@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 46 (6c1d75d)](https://github.com/Schello805/Qualitydeck/commit/6c1d75d608b0d2328f7f1df139e2b2c08c730eae) • Zuletzt aktualisiert: 25.10.2026 15:00:38
+**Aktueller Stand:** [Rev. 47 (78e80be)](https://github.com/Schello805/Qualitydeck/commit/78e80be47f1d1701ddb222e7e744115f2afc38f1) • Zuletzt aktualisiert: 25.10.2026 15:26:14
 
 ---
 
-### [Rev. 46] - 25.10.2026, 15:00 (`6c1d75d`)
+### [Rev. 47] - 25.10.2026, 15:26 (`78e80be`)
+* **✨ Neu:** Dialog zum Abteilungsloeschen mit Audit-Verwerfen/Uebertragen und Alarm-Glocke fuer unauditierte Kapitel
+* *Commit:* [`78e80be`](https://github.com/Schello805/Qualitydeck/commit/78e80be47f1d1701ddb222e7e744115f2afc38f1)
+
+### [Rev. 46] - 25.10.2026, 15:00 (`4a287ad`)
 * **✨ Neu:** Add complete DIN ISO 9001 norm texts and practical audit guidance for all 72 chapters
-* *Commit:* [`6c1d75d`](https://github.com/Schello805/Qualitydeck/commit/6c1d75d608b0d2328f7f1df139e2b2c08c730eae)
+* *Commit:* [`4a287ad`](https://github.com/Schello805/Qualitydeck/commit/4a287ad896fd9d72e5c54412b9bf3dea970b2f94)
 
 ### [Rev. 45] - 24.10.2026, 21:59 (`2c164cd`)
 * **✨ Neu:** Add animated notification bell, legacy department remapping, and unassigned process indicators

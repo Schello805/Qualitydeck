@@ -9,10 +9,18 @@ export interface LegacyDeptInfo {
   chapters: string[];
 }
 
+export interface UnauditedChapterInfo {
+  requirementId: string;
+  chapter: string;
+  title: string;
+  category: string | null;
+}
+
 export interface SystemAlerts {
   totalIssues: number;
   unassignedProcessDepts: { id: string; name: string }[];
   legacyRequirementDepts: LegacyDeptInfo[];
+  unauditedChapters: UnauditedChapterInfo[];
 }
 
 export async function getSystemAlerts(): Promise<SystemAlerts> {
@@ -23,25 +31,37 @@ export async function getSystemAlerts(): Promise<SystemAlerts> {
         orderBy: { name: 'asc' }
       }),
       prisma.requirement.findMany({
-        select: { id: true, chapter: true, title: true, departments: true }
+        select: { id: true, chapter: true, title: true, category: true, departments: true },
+        orderBy: { chapter: 'asc' }
       })
     ]);
 
     // 1. Departments without processType in Prozesslandkarte
-    // Exclude 'Alle Bereiche' from needing a specific lane if desired, or include if empty
     const unassignedProcessDepts = departments
       .filter(d => d.name !== 'Alle Bereiche' && (!d.processType || d.processType === 'none' || d.processType.trim() === ''))
       .map(d => ({ id: d.id, name: d.name }));
 
-    // 2. Legacy / unassigned departments found in requirements
+    // 2. Active department names lookup
     const activeDeptNames = new Set(departments.map(d => d.name));
     activeDeptNames.add('Alle Bereiche');
     activeDeptNames.add('all');
 
     const legacyMap = new Map<string, { count: number; chapters: string[] }>();
+    const unauditedChapters: UnauditedChapterInfo[] = [];
 
     for (const req of requirements) {
-      if (!req.departments || req.departments === 'all') continue;
+      // Check for orphan / unaudited chapters (0 valid departments)
+      if (!req.departments || req.departments.trim() === '' || req.departments === '[]') {
+        unauditedChapters.push({
+          requirementId: req.id,
+          chapter: req.chapter,
+          title: req.title,
+          category: req.category
+        });
+        continue;
+      }
+
+      if (req.departments === 'all') continue;
 
       let depts: string[] = [];
       try {
@@ -52,6 +72,7 @@ export async function getSystemAlerts(): Promise<SystemAlerts> {
         depts = req.departments.split(',').map(s => s.trim()).filter(Boolean);
       }
 
+      // Check for legacy names in this requirement
       for (const d of depts) {
         if (!activeDeptNames.has(d)) {
           if (!legacyMap.has(d)) {
@@ -64,6 +85,17 @@ export async function getSystemAlerts(): Promise<SystemAlerts> {
           }
         }
       }
+
+      // Check if this requirement has 0 active departments
+      const validAssigned = depts.filter(d => activeDeptNames.has(d));
+      if (validAssigned.length === 0) {
+        unauditedChapters.push({
+          requirementId: req.id,
+          chapter: req.chapter,
+          title: req.title,
+          category: req.category
+        });
+      }
     }
 
     const legacyRequirementDepts: LegacyDeptInfo[] = Array.from(legacyMap.entries()).map(
@@ -74,19 +106,21 @@ export async function getSystemAlerts(): Promise<SystemAlerts> {
       })
     );
 
-    const totalIssues = unassignedProcessDepts.length + legacyRequirementDepts.length;
+    const totalIssues = unassignedProcessDepts.length + legacyRequirementDepts.length + unauditedChapters.length;
 
     return {
       totalIssues,
       unassignedProcessDepts,
-      legacyRequirementDepts
+      legacyRequirementDepts,
+      unauditedChapters
     };
   } catch (error) {
     console.error('Error fetching system alerts:', error);
     return {
       totalIssues: 0,
       unassignedProcessDepts: [],
-      legacyRequirementDepts: []
+      legacyRequirementDepts: [],
+      unauditedChapters: []
     };
   }
 }
@@ -162,5 +196,103 @@ export async function assignDepartmentProcess(departmentId: string, processType:
   } catch (error: any) {
     console.error('Error assigning process type:', error);
     return { error: error.message || 'Fehler beim Zuweisen des Prozesstyps.' };
+  }
+}
+
+/**
+ * Assign a requirement to one or more departments
+ */
+export async function assignRequirementDepartments(requirementId: string, departmentNames: string[]) {
+  try {
+    const req = await prisma.requirement.findUnique({
+      where: { id: requirementId }
+    });
+    if (!req) return { error: 'Anforderung nicht gefunden.' };
+
+    const cleanDepts = Array.from(new Set(departmentNames.filter(Boolean)));
+    const deptsStr = cleanDepts.length > 0 ? JSON.stringify(cleanDepts) : '[]';
+
+    await prisma.requirement.update({
+      where: { id: requirementId },
+      data: { departments: deptsStr }
+    });
+
+    // Synchronize open audits for newly assigned departments
+    const auditDateStr = new Date().toISOString().split('T')[0];
+    const depts = await prisma.department.findMany({
+      where: { name: { in: cleanDepts.filter(d => d !== 'Alle Bereiche') } }
+    });
+
+    for (const dept of depts) {
+      const openAudit = await prisma.audit.findFirst({
+        where: {
+          departmentId: dept.id,
+          status: { in: ['open', 'in_progress'] }
+        }
+      });
+      if (openAudit) {
+        const existingItem = await prisma.auditItem.findFirst({
+          where: { auditId: openAudit.id, requirementId: req.id }
+        });
+        if (!existingItem) {
+          await prisma.auditItem.create({
+            data: {
+              auditId: openAudit.id,
+              requirementId: req.id,
+              status: 'open',
+              auditDate: auditDateStr,
+              auditee: dept.manager || undefined
+            }
+          });
+        }
+      }
+    }
+
+    revalidatePath('/matrix');
+    revalidatePath('/audits');
+    revalidatePath('/requirements');
+    revalidatePath('/dashboard');
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error assigning requirement departments:', error);
+    return { error: error.message || 'Fehler beim Zuweisen der Abteilungen.' };
+  }
+}
+
+/**
+ * Convenience: Assign an unaudited requirement to "Alle Bereiche"
+ */
+export async function assignRequirementToAllAreas(requirementId: string) {
+  try {
+    const req = await prisma.requirement.findUnique({ where: { id: requirementId } });
+    if (!req) return { error: 'Anforderung nicht gefunden.' };
+
+    let current: string[] = [];
+    try {
+      const p = JSON.parse(req.departments || '[]');
+      if (Array.isArray(p)) current = p;
+      else if (req.departments && req.departments !== 'all') current = [req.departments];
+    } catch {
+      current = (req.departments || '').split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    if (!current.includes('Alle Bereiche')) {
+      current.push('Alle Bereiche');
+    }
+
+    await prisma.requirement.update({
+      where: { id: requirementId },
+      data: { departments: JSON.stringify(current) }
+    });
+
+    revalidatePath('/matrix');
+    revalidatePath('/audits');
+    revalidatePath('/requirements');
+    revalidatePath('/dashboard');
+
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message };
   }
 }

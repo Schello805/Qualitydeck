@@ -49,6 +49,15 @@ export default function MatrixClient({
   // Set of active department names
   const knownDeptNames = useMemo(() => new Set(departments.map(d => d.name)), [departments]);
 
+  // Unaudited / orphan chapters (0 active departments assigned and not "Alle Bereiche")
+  const unauditedReqs = useMemo(() => {
+    return requirements.filter(req => {
+      const depts = parseDeptList(req.departments);
+      const active = depts.filter(d => d === 'Alle Bereiche' || d === 'all' || knownDeptNames.has(d));
+      return active.length === 0;
+    });
+  }, [requirements, knownDeptNames]);
+
   // Legacy / unassigned departments found in requirements
   const legacyDeptsSummary = useMemo(() => {
     const map = new Map<string, { count: number; reqIds: string[] }>();
@@ -128,7 +137,11 @@ export default function MatrixClient({
 
       // Focus dept
       if (focusDept !== 'ALL') {
-        if (focusDept === '__UNASSIGNED__') {
+        if (focusDept === '__UNAUDITED__') {
+          const depts = parseDeptList(req.departments);
+          const active = depts.filter(d => d === 'Alle Bereiche' || d === 'all' || knownDeptNames.has(d));
+          if (active.length > 0) return false;
+        } else if (focusDept === '__UNASSIGNED__') {
           const activeDepts = reqMap.get(req.id) || new Set();
           let hasLegacy = false;
           activeDepts.forEach(d => {
@@ -296,6 +309,51 @@ export default function MatrixClient({
         </div>
       )}
 
+      {/* Unaudited Chapters Alert Banner */}
+      {unauditedReqs.length > 0 && (
+        <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800/80 shadow-sm space-y-2.5 animate-in fade-in">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-bold text-xs text-rose-900 dark:text-rose-200">
+              <span className="text-base animate-pulse">🚨</span>
+              <span>Kritisch: {unauditedReqs.length} Normkapitel ohne Abteilungszuordnung!</span>
+            </div>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-200 dark:bg-rose-900 text-rose-900 dark:text-rose-200">
+              {unauditedReqs.length} unauditiert
+            </span>
+          </div>
+          <p className="text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
+            Folgende Kapitel sind aktuell <strong>keiner aktiven Abteilung</strong> und auch nicht <em>&quot;Alle Bereiche&quot;</em> zugeordnet. 
+            Gemäß ISO 9001 muss jedes Normkapitel mindestens einem Bereich zugewiesen sein, um im internen Audit geprüft zu werden:
+          </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {unauditedReqs.slice(0, 10).map(req => (
+              <div key={req.id} className="flex items-center gap-1.5 p-1 px-2 rounded-lg bg-white dark:bg-slate-800 border border-rose-200 dark:border-slate-700 text-xs shadow-2xs">
+                <span className="font-mono font-bold text-rose-700 dark:text-rose-300">Kap. {req.chapter}</span>
+                <span className="text-slate-600 dark:text-slate-400 truncate max-w-[130px] text-[11px]">{req.title}</span>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleToggleAllAreas(req.id)}
+                  className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-bold transition-colors cursor-pointer ml-1"
+                  title="Diesem Kapitel 'Alle Bereiche' zuweisen"
+                >
+                  🌐 Alle Bereiche
+                </button>
+              </div>
+            ))}
+            {unauditedReqs.length > 10 && (
+              <button
+                type="button"
+                onClick={() => setFocusDept('__UNAUDITED__')}
+                className="text-xs font-bold text-rose-600 hover:underline px-2 py-1"
+              >
+                + {unauditedReqs.length - 10} weitere Kapitel filtern...
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Legacy / Unassigned Departments Banner */}
       {legacyDeptsSummary.length > 0 && (
         <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 shadow-sm space-y-2.5 animate-in fade-in">
@@ -409,6 +467,11 @@ export default function MatrixClient({
               className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="ALL">🏢 Alle Spalten anzeigen</option>
+              {unauditedReqs.length > 0 && (
+                <option value="__UNAUDITED__" className="text-rose-600 font-bold">
+                  🚨 Unauditiert ({unauditedReqs.length} Kapitel)
+                </option>
+              )}
               {legacyDeptsSummary.length > 0 && (
                 <option value="__UNASSIGNED__" className="text-amber-600 font-bold">
                   ⚠️ Nicht zugewiesen ({legacyDeptsSummary.reduce((acc, x) => acc + x.count, 0)} Altdaten)
@@ -600,23 +663,40 @@ export default function MatrixClient({
                 filteredRequirements.map(req => {
                   const activeSet = reqMap.get(req.id) || new Set();
                   const isGeneral = activeSet.has('Alle Bereiche');
+                  const activeCount = Array.from(activeSet).filter(d => d === 'Alle Bereiche' || d === 'all' || knownDeptNames.has(d)).length;
+                  const isUnaudited = activeCount === 0;
 
                   return (
                     <tr 
                       key={req.id} 
-                      className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 transition-colors group"
+                      className={`transition-colors group ${
+                        isUnaudited 
+                          ? 'bg-rose-50/20 dark:bg-rose-950/20 hover:bg-rose-50/40 dark:hover:bg-rose-950/40' 
+                          : 'hover:bg-blue-50/40 dark:hover:bg-slate-800/50'
+                      }`}
                     >
                       {/* Sticky: Kapitel */}
                       <td className="px-4 py-2.5 font-bold font-mono text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-blue-50/40 dark:group-hover:bg-slate-800/50 z-20 border-r border-slate-200 dark:border-slate-800 whitespace-nowrap">
-                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded text-xs font-bold">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                          isUnaudited 
+                            ? 'bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 border border-rose-300' 
+                            : 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300'
+                        }`}>
                           Kap. {req.chapter}
                         </span>
                       </td>
 
                       {/* Sticky: Titel */}
                       <td className="px-4 py-2.5 text-slate-800 dark:text-slate-200 sticky left-24 bg-white dark:bg-slate-900 group-hover:bg-blue-50/40 dark:group-hover:bg-slate-800/50 z-20 border-r border-slate-200 dark:border-slate-800 min-w-[260px] max-w-[320px]">
-                        <div className="font-semibold truncate" title={req.title}>
-                          {req.title}
+                        <div className="flex items-center gap-1.5">
+                          <div className="font-semibold truncate" title={req.title}>
+                            {req.title}
+                          </div>
+                          {isUnaudited && (
+                            <span className="shrink-0 px-1.5 py-0.2 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-[9px] font-black border border-rose-300 dark:border-rose-800" title="Keine aktive Abteilung zugeordnet!">
+                              🚨 Unauditiert
+                            </span>
+                          )}
                         </div>
                         {req.category && (
                           <div className="text-[10px] text-slate-400 font-normal">

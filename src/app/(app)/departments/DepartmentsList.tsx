@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { updateDepartment, deleteDepartment, createDepartment } from '@/actions/departments';
+import { updateDepartment, deleteDepartment, createDepartment, getDepartmentAuditStats } from '@/actions/departments';
 import StartAuditButton from './StartAuditButton';
 
 interface Department {
@@ -39,6 +39,14 @@ export default function DepartmentsList({
   const [editError, setEditError] = useState<string | null>(null);
 
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+
+  // Delete modal state
+  const [deletingDept, setDeletingDept] = useState<Department | null>(null);
+  const [deleteStats, setDeleteStats] = useState<{ auditCount: number; auditItemCount: number } | null>(null);
+  const [auditAction, setAuditAction] = useState<'discard' | 'transfer'>('discard');
+  const [transferTargetId, setTransferTargetId] = useState<string>('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const unassignedCount = useMemo(() => {
     return departments.filter(d => !d.processType || d.processType === 'none').length;
@@ -121,17 +129,41 @@ export default function DepartmentsList({
     }
   };
 
-  const handleDelete = async (dept: Department) => {
-    if (!confirm(`Möchtest du die Abteilung "${dept.name}" wirklich löschen?`)) return;
+  const openDeleteModal = async (dept: Department) => {
+    setDeletingDept(dept);
+    setDeleteError(null);
+    setAuditAction('discard');
+    
+    // Pick another department as default transfer target
+    const other = departments.find(d => d.id !== dept.id);
+    setTransferTargetId(other ? other.id : '');
 
-    setIsDeletingId(dept.id);
-    const res = await deleteDepartment(dept.id);
-    setIsDeletingId(null);
+    setIsDeleting(true);
+    const stats = await getDepartmentAuditStats(dept.id);
+    setDeleteStats(stats);
+    setIsDeleting(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingDept) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    const res = await deleteDepartment(deletingDept.id, {
+      auditAction,
+      targetDepartmentId: auditAction === 'transfer' ? transferTargetId : undefined
+    });
+
+    setIsDeleting(false);
 
     if (res?.error) {
-      alert(res.error);
+      setDeleteError(res.error);
     } else {
-      setDepartments(prev => prev.filter(d => d.id !== dept.id));
+      setDepartments(prev => prev.filter(d => d.id !== deletingDept.id));
+      setDeletingDept(null);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('alerts-updated'));
+      }
     }
   };
 
@@ -346,12 +378,11 @@ export default function DepartmentsList({
                         </button>
                         <button
                           type="button"
-                          disabled={isDeletingId === dept.id}
-                          onClick={() => handleDelete(dept)}
+                          onClick={() => openDeleteModal(dept)}
                           title="Löschen"
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-colors cursor-pointer disabled:opacity-50"
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-colors cursor-pointer"
                         >
-                          {isDeletingId === dept.id ? '⏳' : '🗑️'}
+                          🗑️
                         </button>
                       </div>
                     </td>
@@ -397,6 +428,19 @@ export default function DepartmentsList({
                 />
               </div>
               <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Prozesstyp</label>
+                <select
+                  value={editProcessType}
+                  onChange={(e) => setEditProcessType(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="management">Führung / Management</option>
+                  <option value="core">Kernprozess</option>
+                  <option value="support">Unterstützungsprozess</option>
+                  <option value="">Noch nicht zuweisen</option>
+                </select>
+              </div>
+              <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Leitung / Verantwortlich</label>
                 <input
                   type="text"
@@ -424,6 +468,147 @@ export default function DepartmentsList({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingDept && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span className="text-rose-600">🗑️</span> Abteilung &bdquo;{deletingDept.name}&ldquo; löschen
+              </h3>
+              <button
+                type="button"
+                onClick={() => setDeletingDept(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {deleteError && (
+              <div className="p-3 text-xs text-red-700 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl">
+                {deleteError}
+              </div>
+            )}
+
+            {deleteStats && deleteStats.auditCount > 0 ? (
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 space-y-1.5">
+                  <div className="font-bold flex items-center gap-1.5">
+                    <span>⚠️</span>
+                    <span>Verknüpfte Audits vorhanden:</span>
+                  </div>
+                  <p>
+                    Mit dieser Abteilung sind noch <strong>{deleteStats.auditCount} Audit(s)</strong> mit <strong>{deleteStats.auditItemCount} Auditpunkten</strong> verknüpft.
+                  </p>
+                  <p className="text-[11px] text-amber-700 dark:text-amber-300">
+                    Wie möchtest du mit diesen Audits verfahren?
+                  </p>
+                </div>
+
+                <div className="space-y-2.5 text-xs">
+                  {/* Option 1: Verwerfen (User preferred) */}
+                  <label className={`block p-3 rounded-xl border cursor-pointer transition-all ${
+                    auditAction === 'discard'
+                      ? 'border-red-500 bg-red-50/50 dark:bg-red-950/30 ring-1 ring-red-500/30'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 hover:bg-slate-50'
+                  }`}>
+                    <div className="flex items-start gap-2.5">
+                      <input
+                        type="radio"
+                        name="auditAction"
+                        value="discard"
+                        checked={auditAction === 'discard'}
+                        onChange={() => setAuditAction('discard')}
+                        className="mt-0.5 text-red-600 focus:ring-red-500 cursor-pointer"
+                      />
+                      <div>
+                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <span>🗑️ Audits verwerfen &amp; löschen</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 font-extrabold">Empfohlen</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                          Alle zugehörigen Audits und Auditpunkte dieser Abteilung werden unwiderruflich gelöscht. Falls Normanforderungen dadurch keiner Abteilung mehr zugeordnet sind, schlägt die Benachrichtigungs-Glocke Alarm zur Neuzuweisung.
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Option 2: Transfer */}
+                  <label className={`block p-3 rounded-xl border cursor-pointer transition-all ${
+                    auditAction === 'transfer'
+                      ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 ring-1 ring-blue-500/30'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 hover:bg-slate-50'
+                  }`}>
+                    <div className="flex items-start gap-2.5">
+                      <input
+                        type="radio"
+                        name="auditAction"
+                        value="transfer"
+                        checked={auditAction === 'transfer'}
+                        onChange={() => setAuditAction('transfer')}
+                        className="mt-0.5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <div className="flex-1">
+                        <div className="font-bold text-slate-900 dark:text-white">
+                          🔄 Audits auf eine andere Abteilung übertragen
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                          Überträgt alle Audits und die zugewiesenen Normanforderungen vollständig auf die ausgewählte Abteilung.
+                        </p>
+                        
+                        {auditAction === 'transfer' && (
+                          <div className="mt-2.5">
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                              Zielabteilung auswählen:
+                            </label>
+                            <select
+                              value={transferTargetId}
+                              onChange={(e) => setTransferTargetId(e.target.value)}
+                              className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                            >
+                              {departments
+                                .filter(d => d.id !== deletingDept.id)
+                                .map(d => (
+                                  <option key={d.id} value={d.id}>
+                                    🏢 {d.name} ({d.manager || 'Ohne Leitung'})
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Möchtest du die Abteilung &bdquo;{deletingDept.name}&ldquo; wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+              </p>
+            )}
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setDeletingDept(null)}
+                className="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting || (auditAction === 'transfer' && !transferTargetId)}
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>{isDeleting ? '⏳ Löscht...' : '🗑️ Endgültig löschen'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

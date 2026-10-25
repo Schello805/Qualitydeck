@@ -3,7 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { getSystemAlerts, remapLegacyDepartment, assignDepartmentProcess, SystemAlerts } from '@/actions/alerts';
+import { 
+  getSystemAlerts, 
+  remapLegacyDepartment, 
+  assignDepartmentProcess, 
+  assignRequirementDepartments, 
+  assignRequirementToAllAreas, 
+  SystemAlerts 
+} from '@/actions/alerts';
 
 interface NotificationBellProps {
   initialAlerts?: SystemAlerts;
@@ -14,7 +21,7 @@ export default function NotificationBell({ initialAlerts, departments = [] }: No
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [alerts, setAlerts] = useState<SystemAlerts>(
-    initialAlerts || { totalIssues: 0, unassignedProcessDepts: [], legacyRequirementDepts: [] }
+    initialAlerts || { totalIssues: 0, unassignedProcessDepts: [], legacyRequirementDepts: [], unauditedChapters: [] }
   );
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -133,6 +140,81 @@ export default function NotificationBell({ initialAlerts, departments = [] }: No
           ) : (
             <div className="space-y-3.5 max-h-[70vh] overflow-y-auto pr-1">
               
+              {/* SECTION: Unauditierte Normkapitel (Keiner Abteilung zugewiesen) */}
+              {alerts.unauditedChapters && alerts.unauditedChapters.length > 0 && (
+                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/60 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-red-900 dark:text-red-200">
+                      <span>⚠️</span>
+                      <span>Unauditiert: {alerts.unauditedChapters.length} Kapitel ohne Abteilung</span>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-red-200 dark:bg-red-900 text-red-900 dark:text-red-200">
+                      Dringend
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-red-800 dark:text-red-300 leading-snug">
+                    Diese Normkapitel sind aktuell <strong>keiner Abteilung</strong> zugewiesen und werden daher in keinem Audit geprüft:
+                  </p>
+
+                  <div className="space-y-2 pt-1">
+                    {alerts.unauditedChapters.map(item => (
+                      <div key={item.requirementId} className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-red-200 dark:border-slate-700 space-y-1.5 text-xs">
+                        <div className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
+                          <span className="truncate">Kap. {item.chapter} – {item.title}</span>
+                          {item.category && <span className="text-[10px] text-slate-400 font-normal shrink-0">{item.category}</span>}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                          <button
+                            disabled={isProcessing === `allareas-${item.requirementId}`}
+                            onClick={async () => {
+                              setIsProcessing(`allareas-${item.requirementId}`);
+                              await assignRequirementToAllAreas(item.requirementId);
+                              await loadAlerts();
+                              setIsProcessing(null);
+                              window.dispatchEvent(new CustomEvent('alerts-updated'));
+                            }}
+                            className="px-2 py-1 rounded bg-purple-600 hover:bg-purple-700 text-white font-bold text-[10px] transition-colors shadow-2xs cursor-pointer flex items-center gap-1"
+                          >
+                            <span>🌐</span> Zu &quot;Alle Bereiche&quot;
+                          </button>
+
+                          <select
+                            disabled={isProcessing === `assign-${item.requirementId}`}
+                            onChange={async (e) => {
+                              if (e.target.value) {
+                                setIsProcessing(`assign-${item.requirementId}`);
+                                await assignRequirementDepartments(item.requirementId, [e.target.value]);
+                                await loadAlerts();
+                                setIsProcessing(null);
+                                window.dispatchEvent(new CustomEvent('alerts-updated'));
+                              }
+                            }}
+                            defaultValue=""
+                            className="px-2 py-1 text-[10px] rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none"
+                          >
+                            <option value="" disabled>Abteilung zuweisen...</option>
+                            {departments.map(d => (
+                              <option key={d.id} value={d.name}>{d.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-1">
+                    <Link
+                      href="/matrix"
+                      onClick={() => setIsOpen(false)}
+                      className="block text-center py-1.5 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-colors shadow-xs"
+                    >
+                      In Normmatrix verwalten & zuweisen →
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               {/* SECTION 1: Prozesslandkarte unassigned */}
               {alerts.unassignedProcessDepts.length > 0 && (
                 <div className="p-3 rounded-xl bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/60 space-y-2">

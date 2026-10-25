@@ -1,9 +1,20 @@
 [
   {
+    "revision": 47,
+    "revisionDisplay": "Rev. 47",
+    "commit": "78e80be",
+    "fullCommit": "78e80be47f1d1701ddb222e7e744115f2afc38f1",
+    "date": "2026-10-25T15:26:13+01:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Dialog zum Abteilungsloeschen mit Audit-Verwerfen/Uebertragen und Alarm-Glocke fuer unauditierte Kapitel",
+    "rawMessage": "feat: Dialog zum Abteilungsloeschen mit Audit-Verwerfen/Uebertragen und Alarm-Glocke fuer unauditierte Kapitel"
+  },
+  {
     "revision": 46,
     "revisionDisplay": "Rev. 46",
-    "commit": "6c1d75d",
-    "fullCommit": "6c1d75d608b0d2328f7f1df139e2b2c08c730eae",
+    "commit": "4a287ad",
+    "fullCommit": "4a287ad896fd9d72e5c54412b9bf3dea970b2f94",
     "date": "2026-10-25T15:00:38+01:00",
     "type": "feature",
     "badge": "✨ Neu",

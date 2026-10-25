@@ -35,7 +35,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [alerts, setAlerts] = useState<SystemAlerts>({
     totalIssues: 0,
     unassignedProcessDepts: [],
-    legacyRequirementDepts: []
+    legacyRequirementDepts: [],
+    unauditedChapters: []
   });
   const [departments, setDepartments] = useState<any[]>([]);
 
@@ -137,7 +138,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           href: "/matrix", 
           label: "Normmatrix & Zuordnung", 
           icon: "🗂️",
-          badge: alerts.legacyRequirementDepts.length > 0 ? `${alerts.legacyRequirementDepts.length}!` : null,
+          badge: ((alerts.legacyRequirementDepts?.length || 0) + (alerts.unauditedChapters?.length || 0)) > 0 
+            ? `${(alerts.legacyRequirementDepts?.length || 0) + (alerts.unauditedChapters?.length || 0)}!` 
+            : null,
           badgeColor: 'bg-amber-500 text-white'
         },
         { href: "/requirements", label: "ISO 9001 Normkatalog", icon: "📋" },
