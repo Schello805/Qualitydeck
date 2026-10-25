@@ -53,9 +53,26 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   CHANGED_FILES=$(git diff --name-only "$LOCAL" "$REMOTE" 2>/dev/null || echo "")
   echo -e "${GREEN}Neue Version gefunden!${NC}"
   
-  # Lokale temporäre Dateien verwerfen und pullen
-  git checkout -- CHANGELOG.md package-lock.json src/data/changelog.json src/data/version.json prisma/dev.db 2>/dev/null || true
-  git pull origin main --quiet || (git stash && git pull origin main --quiet)
+  # 1. Sicherung der Live-Datenbank vor dem Pull (Benutzerdaten und Zuordnungen niemals verlieren!)
+  if [ -f "prisma/dev.db" ]; then
+    mkdir -p prisma/backups
+    cp -p prisma/dev.db "prisma/backups/dev_$(date +%Y%m%d_%H%M%S).db" 2>/dev/null || true
+    cp -p prisma/dev.db prisma/dev.db.live 2>/dev/null || true
+  fi
+
+  # Lokale temporäre Build-Metadaten zurücksetzen (ABER NIEMALS dev.db!)
+  git checkout -- CHANGELOG.md package-lock.json src/data/changelog.json src/data/version.json 2>/dev/null || true
+  
+  if ! git pull origin main --quiet 2>/dev/null; then
+    git stash --quiet 2>/dev/null || true
+    git pull origin main --quiet || true
+    git stash pop --quiet 2>/dev/null || true
+  fi
+
+  # Benutzer-Datenbank sicherstellen
+  if [ -f "prisma/dev.db.live" ]; then
+    mv -f prisma/dev.db.live prisma/dev.db 2>/dev/null || true
+  fi
 else
   echo -e "${YELLOW}Erzwungener Rebuild (--force)${NC}"
 fi
@@ -69,16 +86,12 @@ else
   echo -e "📦 NPM-Pakete: ${BLUE}Keine Änderungen (übersprungen)${NC}"
 fi
 
-# 3. Prisma & Datenbank (nur wenn schema oder seed geändert oder --force)
-if [ "$FORCE" -eq 1 ] || echo "$CHANGED_FILES" | grep -qE "prisma/|scripts/setup\.js|scripts/update-iso-texts\.ts"; then
-  echo -ne "🗄️  Aktualisiere Datenbank-Schema & Normtexte... "
-  npx prisma generate >/dev/null 2>&1
-  npx prisma db push --skip-generate --accept-data-loss >/dev/null 2>&1 || npx prisma db push >/dev/null 2>&1
-  node scripts/setup.js --quick >/dev/null 2>&1 || true
-  echo -e "${GREEN}✓ erledigt${NC}"
-else
-  echo -e "🗄️  Datenbank-Schema & Normtexte: ${BLUE}Keine Änderungen (übersprungen)${NC}"
-fi
+# 3. Prisma & Datenbank-Migrationen (Schema, Altdaten-Normalisierung & Abteilungs-Sync)
+echo -ne "🗄️  Aktualisiere Datenbank & migriere Altdaten... "
+npx prisma generate >/dev/null 2>&1
+npx prisma db push --skip-generate --accept-data-loss >/dev/null 2>&1 || npx prisma db push >/dev/null 2>&1
+node scripts/setup.js --quick >/dev/null 2>&1 || true
+echo -e "${GREEN}✓ erledigt${NC}"
 
 # 4. Next.js Produktions-Build
 echo -ne "🏗️  Erstelle Produktions-Build... "

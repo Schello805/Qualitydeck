@@ -1,9 +1,20 @@
 [
   {
+    "revision": 48,
+    "revisionDisplay": "Rev. 48",
+    "commit": "e4bf033",
+    "fullCommit": "e4bf033a07a56308378ec091675cf553df864cdc",
+    "date": "2026-10-25T15:34:22+01:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Datenbankspeicherung dauerhaft sichern & automatische Migration von Personalabteilung/Lean Management",
+    "rawMessage": "fix: Datenbankspeicherung dauerhaft sichern & automatische Migration von Personalabteilung/Lean Management"
+  },
+  {
     "revision": 47,
     "revisionDisplay": "Rev. 47",
-    "commit": "78e80be",
-    "fullCommit": "78e80be47f1d1701ddb222e7e744115f2afc38f1",
+    "commit": "d4da4bf",
+    "fullCommit": "d4da4bfc688f1fb2e2c206a4348068ea440577cd",
     "date": "2026-10-25T15:26:13+01:00",
     "type": "feature",
     "badge": "✨ Neu",

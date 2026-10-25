@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 47 (78e80be)](https://github.com/Schello805/Qualitydeck/commit/78e80be47f1d1701ddb222e7e744115f2afc38f1) • Zuletzt aktualisiert: 25.10.2026 15:26:14
+**Aktueller Stand:** [Rev. 48 (e4bf033)](https://github.com/Schello805/Qualitydeck/commit/e4bf033a07a56308378ec091675cf553df864cdc) • Zuletzt aktualisiert: 25.10.2026 15:34:22
 
 ---
 
-### [Rev. 47] - 25.10.2026, 15:26 (`78e80be`)
+### [Rev. 48] - 25.10.2026, 15:34 (`e4bf033`)
+* **🐛 Behoben:** Datenbankspeicherung dauerhaft sichern & automatische Migration von Personalabteilung/Lean Management
+* *Commit:* [`e4bf033`](https://github.com/Schello805/Qualitydeck/commit/e4bf033a07a56308378ec091675cf553df864cdc)
+
+### [Rev. 47] - 25.10.2026, 15:26 (`d4da4bf`)
 * **✨ Neu:** Dialog zum Abteilungsloeschen mit Audit-Verwerfen/Uebertragen und Alarm-Glocke fuer unauditierte Kapitel
-* *Commit:* [`78e80be`](https://github.com/Schello805/Qualitydeck/commit/78e80be47f1d1701ddb222e7e744115f2afc38f1)
+* *Commit:* [`d4da4bf`](https://github.com/Schello805/Qualitydeck/commit/d4da4bfc688f1fb2e2c206a4348068ea440577cd)
 
 ### [Rev. 46] - 25.10.2026, 15:00 (`4a287ad`)
 * **✨ Neu:** Add complete DIN ISO 9001 norm texts and practical audit guidance for all 72 chapters

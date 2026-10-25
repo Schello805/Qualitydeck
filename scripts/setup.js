@@ -102,14 +102,73 @@ async function main() {
       console.log('✅ Standard-Benutzer erstellt.');
     }
 
-    // Migrate legacy "Plant Management" to "Geschäftsführung" if present
-    const legacyPM = await prisma.department.findFirst({ where: { name: 'Plant Management' } });
-    if (legacyPM) {
-      await prisma.department.update({
-        where: { id: legacyPM.id },
-        data: { name: 'Geschäftsführung' }
+    // 1. Migrate legacy department names if present
+    const legacyMappings = [
+      { from: 'Plant Management', to: 'Geschäftsführung' },
+      { from: 'Personalabteilung', to: 'HR' },
+      { from: 'Lean Management', to: 'LSS (Lean Management)' },
+      { from: 'Geschäftsblatt', to: 'Geschäftsführung' },
+    ];
+
+    for (const mapping of legacyMappings) {
+      const legacyDept = await prisma.department.findFirst({ where: { name: mapping.from } });
+      if (legacyDept) {
+        const targetDept = await prisma.department.findFirst({ where: { name: mapping.to } });
+        if (targetDept) {
+          // Transfer any audits from legacy to target
+          await prisma.audit.updateMany({
+            where: { departmentId: legacyDept.id },
+            data: { departmentId: targetDept.id }
+          });
+          // Remove duplicate legacy department
+          await prisma.department.delete({ where: { id: legacyDept.id } });
+          console.log(`🔄 Altabteilung "${mapping.from}" mit "${mapping.to}" zusammengeführt.`);
+        } else {
+          await prisma.department.update({
+            where: { id: legacyDept.id },
+            data: { name: mapping.to }
+          });
+          console.log(`🔄 Altabteilung "${mapping.from}" zu "${mapping.to}" umbenannt.`);
+        }
+      }
+    }
+
+    // 2. Migrate legacy department references in Requirement.departments
+    const allReqs = await prisma.requirement.findMany();
+    let migratedReqsCount = 0;
+    for (const req of allReqs) {
+      if (!req.departments || req.departments === 'all') continue;
+      let list = [];
+      try {
+        const parsed = JSON.parse(req.departments);
+        if (Array.isArray(parsed)) list = parsed;
+        else list = [req.departments];
+      } catch {
+        list = req.departments.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      let changed = false;
+      const newList = list.map(d => {
+        if (d === 'Personalabteilung') { changed = true; return 'HR'; }
+        if (d === 'Lean Management') { changed = true; return 'LSS (Lean Management)'; }
+        if (d === 'Plant Management') { changed = true; return 'Geschäftsführung'; }
+        if (d === 'Geschäftsblatt') { changed = true; return 'Geschäftsführung'; }
+        return d;
       });
-      console.log('🔄 "Plant Management" zu "Geschäftsführung" migriert.');
+
+      const uniqueList = Array.from(new Set(newList));
+      if (uniqueList.length !== list.length) changed = true;
+
+      if (changed) {
+        await prisma.requirement.update({
+          where: { id: req.id },
+          data: { departments: JSON.stringify(uniqueList) }
+        });
+        migratedReqsCount++;
+      }
+    }
+    if (migratedReqsCount > 0) {
+      console.log(`🔄 ${migratedReqsCount} Normanforderungen auf einheitliche Abteilungsnamen (HR, LSS, Geschäftsführung) migriert.`);
     }
 
     // Ensure all 22 standard departments exist

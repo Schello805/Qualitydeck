@@ -8,8 +8,7 @@ export const isoRequirements = [
     "originalText": "Die Organisation muss Chancen zur Verbesserung bestimmen und auswählen und jegliche notwendigen Maßnahmen einleiten, um die Anforderungen der Kunden zu erfüllen und die Kundenzufriedenheit zu erhöhen. Dies muss einschließen:\na) Verbesserung von Produkten und Dienstleistungen zur Erfüllung von Anforderungen sowie zur Berücksichtigung künftiger Erfordernisse;\nb) Korrektur, Verhinderung oder Verringerung unerwünschter Auswirkungen;\nc) Verbesserung der Leistung und Wirksamkeit des Qualitätsmanagementsystems.",
     "departments": [
       "LSS (Lean Management)",
-      "QS",
-      "Lean Management"
+      "QS"
     ],
     "roles": "all"
   },
@@ -40,8 +39,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -113,8 +110,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -170,8 +165,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -228,8 +221,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -261,8 +252,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -295,8 +284,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -329,8 +316,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -362,8 +347,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -395,8 +378,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -441,8 +422,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -474,8 +453,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -501,8 +478,7 @@ export const isoRequirements = [
     "originalText": "Die Organisation muss die Personen bestimmen und bereitstellen, die für die wirksame Umsetzung ihres Qualitätsmanagementsystems und für das Betreiben und Steuern seiner Prozesse notwendig sind.",
     "departments": [
       "HR",
-      "QM",
-      "Personalabteilung"
+      "QM"
     ],
     "roles": "all"
   },
@@ -567,8 +543,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -581,8 +555,7 @@ export const isoRequirements = [
     "category": "Unterstützung",
     "originalText": "Die Organisation muss das Wissen bestimmen, das benötigt wird, um ihre Prozesse durchzuführen und um die Konformität von Produkten und Dienstleistungen zu erreichen. Dieses Wissen muss aufrechterhalten und in erforderlichem Umfang zur Verfügung gestellt werden. Bei sich ändernden Erfordernissen muss notwendiges Zusatzwissen beschafft werden.",
     "departments": [
-      "HR",
-      "Personalabteilung"
+      "HR"
     ],
     "roles": "all"
   },
@@ -614,8 +587,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -647,8 +618,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -692,8 +661,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -737,8 +704,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -770,8 +735,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -818,8 +781,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung",
       "Verkauf"
     ],
@@ -881,8 +842,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung",
       "Verkauf"
     ],
@@ -930,8 +889,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1002,8 +959,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1062,8 +1017,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1137,8 +1090,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1204,7 +1155,6 @@ export const isoRequirements = [
       "Produktion",
       "Versand",
       "Wareneingang",
-      "Lean Management",
       "Entwicklung",
       "IT",
       "Imp/Exp"
@@ -1280,8 +1230,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1341,8 +1289,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1401,8 +1347,6 @@ export const isoRequirements = [
       "QS",
       "Versand",
       "Wareneingang",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1434,8 +1378,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
@@ -1491,8 +1433,6 @@ export const isoRequirements = [
       "Instandhaltung",
       "IT",
       "Facility",
-      "Personalabteilung",
-      "Lean Management",
       "Entwicklung"
     ],
     "roles": "all"
