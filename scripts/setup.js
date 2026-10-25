@@ -67,6 +67,24 @@ async function main() {
       }
     } else {
       console.log(`✅ ${reqCount} ISO 9001 Anforderungen bereits in Datenbank vorhanden.`);
+      
+      // Check if any requirements have placeholder descriptions or missing original texts
+      const needsUpdate = await prisma.requirement.findFirst({
+        where: {
+          OR: [
+            { description: { contains: 'gemäß DIN EN ISO 9001:2015' } },
+            { originalText: null },
+            { originalText: '' }
+          ]
+        }
+      });
+      if (needsUpdate) {
+        console.log('🔄 Aktualisiere unvollständige ISO-Normtexte & Prüfvorgaben...');
+        const updateScript = path.join(ROOT_DIR, 'scripts', 'update-iso-texts.ts');
+        if (fs.existsSync(updateScript)) {
+          run('npx tsx scripts/update-iso-texts.ts', 'ISO 9001 Normtexte & Prüffokus synchronisieren');
+        }
+      }
     }
 
     // Ensure at least one default QMB user exists

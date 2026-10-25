@@ -854,18 +854,30 @@ export default function AuditsClient({
                 {selectedItem.requirement?.title}
               </h3>
 
-              {selectedItem.requirement?.description && (
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                  {selectedItem.requirement.description}
-                </p>
+              {/* Praktischer Prüffokus für das Audit */}
+              {selectedItem.requirement?.description && !selectedItem.requirement.description.includes('gemäß DIN EN ISO 9001:2015') && (
+                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 space-y-1">
+                  <span className="block font-bold text-[10px] uppercase text-slate-500 dark:text-slate-400 tracking-wider">
+                    🔍 Prüffokus für das Audit:
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
+                    {selectedItem.requirement.description}
+                  </p>
+                </div>
               )}
 
-              {selectedItem.requirement?.originalText && (
-                <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border-l-4 border-blue-500 dark:border-blue-400 text-xs text-slate-700 dark:text-slate-300 italic leading-relaxed whitespace-pre-line">
-                  <span className="block font-bold not-italic text-[10px] uppercase text-blue-700 dark:text-blue-300 mb-1">
-                    📖 Originaltext der Norm DIN EN ISO 9001:
+              {/* Offizieller Normtext */}
+              {selectedItem.requirement?.originalText ? (
+                <div className="p-3.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border-l-4 border-blue-600 dark:border-blue-500 text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line shadow-2xs">
+                  <span className="block font-bold text-[10px] uppercase text-blue-700 dark:text-blue-300 mb-1.5 flex items-center gap-1.5">
+                    <span>📖</span>
+                    <span>Wortlaut der Norm DIN EN ISO 9001:2015:</span>
                   </span>
                   „{selectedItem.requirement.originalText}“
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
+                  ℹ️ Dieser Auditpunkt bezieht sich auf die Normanforderung Kap. {selectedItem.requirement?.chapter} ({selectedItem.requirement?.title}).
                 </div>
               )}
             </div>

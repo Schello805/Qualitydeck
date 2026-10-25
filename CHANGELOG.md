@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 45 (290e66c)](https://github.com/Schello805/Qualitydeck/commit/290e66cd66fe65b3c6e675e48894108fac295202) • Zuletzt aktualisiert: 24.10.2026 21:59:41
+**Aktueller Stand:** [Rev. 46 (6c1d75d)](https://github.com/Schello805/Qualitydeck/commit/6c1d75d608b0d2328f7f1df139e2b2c08c730eae) • Zuletzt aktualisiert: 25.10.2026 15:00:38
 
 ---
 
-### [Rev. 45] - 24.10.2026, 21:59 (`290e66c`)
+### [Rev. 46] - 25.10.2026, 15:00 (`6c1d75d`)
+* **✨ Neu:** Add complete DIN ISO 9001 norm texts and practical audit guidance for all 72 chapters
+* *Commit:* [`6c1d75d`](https://github.com/Schello805/Qualitydeck/commit/6c1d75d608b0d2328f7f1df139e2b2c08c730eae)
+
+### [Rev. 45] - 24.10.2026, 21:59 (`2c164cd`)
 * **✨ Neu:** Add animated notification bell, legacy department remapping, and unassigned process indicators
-* *Commit:* [`290e66c`](https://github.com/Schello805/Qualitydeck/commit/290e66cd66fe65b3c6e675e48894108fac295202)
+* *Commit:* [`2c164cd`](https://github.com/Schello805/Qualitydeck/commit/2c164cd262ef05c2ce4a3e0d1d4ec260a3a38bcd)
 
 ### [Rev. 44] - 24.10.2026, 21:50 (`08dfac8`)
 * **🚀 Update:** perf: Drastically streamline update.sh with smart caching and fast exit

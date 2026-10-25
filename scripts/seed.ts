@@ -7,6 +7,7 @@ async function main() {
   console.log('Seeding requirements into DB...');
   
   for (const req of isoRequirements) {
+    const deptsStr = Array.isArray(req.departments) ? JSON.stringify(req.departments) : (req.departments || 'all');
     await prisma.requirement.upsert({
       where: { chapter: req.chapter },
       update: {
@@ -14,7 +15,7 @@ async function main() {
         description: req.description,
         category: req.category,
         originalText: req.originalText || null,
-        departments: req.departments === 'all' ? 'all' : JSON.stringify(req.departments),
+        departments: deptsStr,
         roles: req.roles,
         isStandard: true
       },
@@ -24,7 +25,7 @@ async function main() {
         description: req.description,
         category: req.category,
         originalText: req.originalText || null,
-        departments: req.departments === 'all' ? 'all' : JSON.stringify(req.departments),
+        departments: deptsStr,
         roles: req.roles,
         isStandard: true
       }

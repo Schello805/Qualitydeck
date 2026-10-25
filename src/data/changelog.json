@@ -1,9 +1,20 @@
 [
   {
+    "revision": 46,
+    "revisionDisplay": "Rev. 46",
+    "commit": "6c1d75d",
+    "fullCommit": "6c1d75d608b0d2328f7f1df139e2b2c08c730eae",
+    "date": "2026-10-25T15:00:38+01:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Add complete DIN ISO 9001 norm texts and practical audit guidance for all 72 chapters",
+    "rawMessage": "feat: Add complete DIN ISO 9001 norm texts and practical audit guidance for all 72 chapters"
+  },
+  {
     "revision": 45,
     "revisionDisplay": "Rev. 45",
-    "commit": "290e66c",
-    "fullCommit": "290e66cd66fe65b3c6e675e48894108fac295202",
+    "commit": "2c164cd",
+    "fullCommit": "2c164cd262ef05c2ce4a3e0d1d4ec260a3a38bcd",
     "date": "2026-10-24T21:59:41+02:00",
     "type": "feature",
     "badge": "✨ Neu",

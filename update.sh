@@ -70,14 +70,14 @@ else
 fi
 
 # 3. Prisma & Datenbank (nur wenn schema oder seed geändert oder --force)
-if [ "$FORCE" -eq 1 ] || echo "$CHANGED_FILES" | grep -qE "prisma/|scripts/setup\.js"; then
-  echo -ne "🗄️  Aktualisiere Datenbank-Schema... "
+if [ "$FORCE" -eq 1 ] || echo "$CHANGED_FILES" | grep -qE "prisma/|scripts/setup\.js|scripts/update-iso-texts\.ts"; then
+  echo -ne "🗄️  Aktualisiere Datenbank-Schema & Normtexte... "
   npx prisma generate >/dev/null 2>&1
   npx prisma db push --skip-generate --accept-data-loss >/dev/null 2>&1 || npx prisma db push >/dev/null 2>&1
   node scripts/setup.js --quick >/dev/null 2>&1 || true
   echo -e "${GREEN}✓ erledigt${NC}"
 else
-  echo -e "🗄️  Datenbank-Schema: ${BLUE}Keine Änderungen (übersprungen)${NC}"
+  echo -e "🗄️  Datenbank-Schema & Normtexte: ${BLUE}Keine Änderungen (übersprungen)${NC}"
 fi
 
 # 4. Next.js Produktions-Build
