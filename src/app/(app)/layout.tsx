@@ -44,11 +44,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      Promise.resolve().then(() => setIsDark(true));
+    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    setIsDark(shouldBeDark);
+    if (shouldBeDark) {
       document.documentElement.classList.add('dark');
     } else {
-      Promise.resolve().then(() => setIsDark(false));
       document.documentElement.classList.remove('dark');
     }
   }, []);
@@ -108,6 +108,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     Promise.resolve().then(() => setMobileMenuOpen(false));
   }, [pathname]);
 
+  // Logo error handling
   const handleLogoError = () => {
     if (logoIndex < logoExts.length - 1) {
       setLogoIndex(prev => prev + 1);
@@ -118,12 +119,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const navGroups = [
     {
+      id: "cockpit",
       title: "Cockpit & Übersicht",
       items: [
         { href: "/dashboard", label: "Management Cockpit", icon: "📊" },
       ]
     },
     {
+      id: "planning",
       title: "Planung & Organisation",
       items: [
         { 
@@ -147,6 +150,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       ]
     },
     {
+      id: "audit",
       title: "Auditierung & KVP",
       items: [
         { href: "/audits", label: "Internes Audit & Bericht (9.2)", icon: "🔍" },
@@ -167,6 +171,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       ]
     },
     {
+      id: "admin",
       title: "Verwaltung & Administration",
       items: [
         { href: "/settings", label: "Verwaltung & Einstellungen", icon: "⚙️" },
@@ -174,6 +179,69 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       ]
     }
   ];
+
+  // Collapsible sidebar sections (persisted in localStorage)
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
+    cockpit: false,
+    planning: false,
+    audit: false,
+    admin: false
+  });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('sidebar_collapsed_sections');
+      if (saved) {
+        setCollapsedSections(JSON.parse(saved));
+      } else {
+        // By default, collapse sections that are not the current active section
+        const initial: Record<string, boolean> = {
+          cockpit: !pathname.startsWith('/dashboard'),
+          planning: !(pathname.startsWith('/process-map') || pathname.startsWith('/departments') || pathname.startsWith('/matrix') || pathname.startsWith('/requirements')),
+          audit: !(pathname.startsWith('/audits') || pathname.startsWith('/action-log') || pathname.startsWith('/complaints')),
+          admin: !(pathname.startsWith('/settings') || pathname.startsWith('/users')),
+        };
+        setCollapsedSections(initial);
+      }
+    } catch {}
+  }, []);
+
+  // When pathname changes, ensure active group is uncollapsed so the user sees where they are
+  useEffect(() => {
+    navGroups.forEach(group => {
+      const isGroupActive = group.items.some(item => pathname.startsWith(item.href));
+      if (isGroupActive && collapsedSections[group.id]) {
+        setCollapsedSections(prev => {
+          const next = { ...prev, [group.id]: false };
+          try { localStorage.setItem('sidebar_collapsed_sections', JSON.stringify(next)); } catch {}
+          return next;
+        });
+      }
+    });
+  }, [pathname]);
+
+  const toggleSection = (id: string) => {
+    setCollapsedSections(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      try {
+        localStorage.setItem('sidebar_collapsed_sections', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const setAllSections = (collapsed: boolean) => {
+    const next: Record<string, boolean> = {
+      cockpit: collapsed,
+      planning: collapsed,
+      audit: collapsed,
+      admin: collapsed
+    };
+    setCollapsedSections(next);
+    try {
+      localStorage.setItem('sidebar_collapsed_sections', JSON.stringify(next));
+    } catch {}
+  };
 
   const renderNavContent = () => (
     <>
@@ -203,41 +271,107 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </button>
         )}
       </div>
+
+      {/* Quick Collapse / Expand bar */}
+      <div className="px-4 pt-3 pb-1 flex items-center justify-between text-[10px] font-bold text-slate-400">
+        <span className="uppercase tracking-wider">Navigation</span>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setAllSections(true)}
+            className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+            title="Alle Bereiche einklappen"
+          >
+            Alle einklappen
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => setAllSections(false)}
+            className="hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+            title="Alle Bereiche ausklappen"
+          >
+            Alle ausklappen
+          </button>
+        </div>
+      </div>
       
-      <nav className="flex-1 p-3.5 space-y-5 overflow-y-auto overflow-x-hidden">
-        {navGroups.map((group, i) => (
-          <div key={i}>
-            <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-              {group.title}
-            </h3>
-            <div className="space-y-1">
-              {group.items.map((link: any) => {
-                const isActive = pathname.startsWith(link.href);
-                return (
-                  <Link 
-                    key={link.href}
-                    href={link.href} 
-                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium transition-colors group ${
-                      isActive 
-                        ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-semibold shadow-sm" 
-                        : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0 pr-2">
-                      <span className="text-lg opacity-85 shrink-0">{link.icon}</span> 
-                      <span className="text-sm whitespace-nowrap">{link.label}</span>
-                    </div>
-                    {link.badge && (
-                      <span className={`text-[11px] font-black px-2 py-0.5 rounded-full shrink-0 ${link.badgeColor || 'bg-blue-600 text-white'} shadow-sm`}>
-                        {link.badge}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
+      <nav className="flex-1 p-3.5 pt-1 space-y-3 overflow-y-auto overflow-x-hidden">
+        {navGroups.map((group) => {
+          const isCollapsed = Boolean(collapsedSections[group.id]);
+          const isGroupActive = group.items.some(item => pathname.startsWith(item.href));
+
+          // Calculate total badge count for this group if collapsed
+          const groupBadgeCount = group.items.reduce((acc, item: any) => {
+            if (!item.badge) return acc;
+            const num = parseInt(String(item.badge).replace('!', ''), 10);
+            return acc + (isNaN(num) ? 1 : num);
+          }, 0);
+
+          return (
+            <div key={group.id} className="transition-all">
+              {/* Clickable Header Button */}
+              <button
+                type="button"
+                onClick={() => toggleSection(group.id)}
+                className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer group/hdr select-none ${
+                  isGroupActive
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/20'
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/70 dark:hover:bg-slate-800/40'
+                }`}
+                title={isCollapsed ? `"${group.title}" ausklappen` : `"${group.title}" einklappen`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`text-[9px] font-mono transition-transform duration-200 inline-block text-slate-400 group-hover/hdr:text-slate-700 dark:group-hover/hdr:text-slate-200 ${
+                    isCollapsed ? '-rotate-90' : 'rotate-0'
+                  }`}>
+                    ▼
+                  </span>
+                  <span>{group.title}</span>
+                </div>
+
+                {/* If collapsed, show aggregate indicator badge */}
+                {isCollapsed && groupBadgeCount > 0 && (
+                  <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-red-500 text-white shadow-2xs">
+                    {groupBadgeCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Items Container with smooth collapsible animation */}
+              <div 
+                className={`space-y-1 transition-all duration-200 overflow-hidden ${
+                  isCollapsed ? 'max-h-0 opacity-0 pointer-events-none mt-0' : 'max-h-96 opacity-100 mt-1'
+                }`}
+              >
+                {group.items.map((link: any) => {
+                  const isActive = pathname.startsWith(link.href);
+                  return (
+                    <Link 
+                      key={link.href}
+                      href={link.href} 
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium transition-colors group ${
+                        isActive 
+                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-semibold shadow-sm" 
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 pr-2">
+                        <span className="text-lg opacity-85 shrink-0">{link.icon}</span> 
+                        <span className="text-sm whitespace-nowrap">{link.label}</span>
+                      </div>
+                      {link.badge && (
+                        <span className={`text-[11px] font-black px-2 py-0.5 rounded-full shrink-0 ${link.badgeColor || 'bg-blue-600 text-white'} shadow-sm`}>
+                          {link.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
       
       <div className="p-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-center space-y-2">

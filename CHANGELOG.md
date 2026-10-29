@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 49 (6fa04ac)](https://github.com/Schello805/Qualitydeck/commit/6fa04ac09417af651d7381224bb2511010ba152d) • Zuletzt aktualisiert: 29.10.2026 08:01:49
+**Aktueller Stand:** [Rev. 50 (aaeadac)](https://github.com/Schello805/Qualitydeck/commit/aaeadaca07b3df9614992346bcd95657ddfab5f9) • Zuletzt aktualisiert: 29.10.2026 08:05:07
 
 ---
 
-### [Rev. 49] - 29.10.2026, 08:01 (`6fa04ac`)
+### [Rev. 50] - 29.10.2026, 08:05 (`aaeadac`)
+* **🐛 Behoben:** Dark/Light Mode Umschaltung mit Tailwind v4 & einklappbare Menuebereiche in Sidebar
+* *Commit:* [`aaeadac`](https://github.com/Schello805/Qualitydeck/commit/aaeadaca07b3df9614992346bcd95657ddfab5f9)
+
+### [Rev. 49] - 29.10.2026, 08:01 (`36ce68c`)
 * **✨ Neu:** KI-Audit-Interview-Assistent (Gemini & OpenAI) & Footer-Update-Anzeige behoben
-* *Commit:* [`6fa04ac`](https://github.com/Schello805/Qualitydeck/commit/6fa04ac09417af651d7381224bb2511010ba152d)
+* *Commit:* [`36ce68c`](https://github.com/Schello805/Qualitydeck/commit/36ce68ca985f707266115e0f2a3d72c9a240e8c4)
 
 ### [Rev. 48] - 25.10.2026, 15:34 (`4725087`)
 * **🐛 Behoben:** Datenbankspeicherung dauerhaft sichern & automatische Migration von Personalabteilung/Lean Management

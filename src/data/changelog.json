@@ -1,9 +1,20 @@
 [
   {
+    "revision": 50,
+    "revisionDisplay": "Rev. 50",
+    "commit": "aaeadac",
+    "fullCommit": "aaeadaca07b3df9614992346bcd95657ddfab5f9",
+    "date": "2026-10-29T08:05:07+01:00",
+    "type": "fix",
+    "badge": "🐛 Behoben",
+    "title": "Dark/Light Mode Umschaltung mit Tailwind v4 & einklappbare Menuebereiche in Sidebar",
+    "rawMessage": "fix: Dark/Light Mode Umschaltung mit Tailwind v4 & einklappbare Menuebereiche in Sidebar"
+  },
+  {
     "revision": 49,
     "revisionDisplay": "Rev. 49",
-    "commit": "6fa04ac",
-    "fullCommit": "6fa04ac09417af651d7381224bb2511010ba152d",
+    "commit": "36ce68c",
+    "fullCommit": "36ce68ca985f707266115e0f2a3d72c9a240e8c4",
     "date": "2026-10-29T08:01:49+01:00",
     "type": "feature",
     "badge": "✨ Neu",
