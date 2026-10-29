@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 48 (e4bf033)](https://github.com/Schello805/Qualitydeck/commit/e4bf033a07a56308378ec091675cf553df864cdc) • Zuletzt aktualisiert: 25.10.2026 15:34:22
+**Aktueller Stand:** [Rev. 49 (6fa04ac)](https://github.com/Schello805/Qualitydeck/commit/6fa04ac09417af651d7381224bb2511010ba152d) • Zuletzt aktualisiert: 29.10.2026 08:01:49
 
 ---
 
-### [Rev. 48] - 25.10.2026, 15:34 (`e4bf033`)
+### [Rev. 49] - 29.10.2026, 08:01 (`6fa04ac`)
+* **✨ Neu:** KI-Audit-Interview-Assistent (Gemini & OpenAI) & Footer-Update-Anzeige behoben
+* *Commit:* [`6fa04ac`](https://github.com/Schello805/Qualitydeck/commit/6fa04ac09417af651d7381224bb2511010ba152d)
+
+### [Rev. 48] - 25.10.2026, 15:34 (`4725087`)
 * **🐛 Behoben:** Datenbankspeicherung dauerhaft sichern & automatische Migration von Personalabteilung/Lean Management
-* *Commit:* [`e4bf033`](https://github.com/Schello805/Qualitydeck/commit/e4bf033a07a56308378ec091675cf553df864cdc)
+* *Commit:* [`4725087`](https://github.com/Schello805/Qualitydeck/commit/47250870f6a7135cc9349b97c66c74ea9afac39c)
 
 ### [Rev. 47] - 25.10.2026, 15:26 (`d4da4bf`)
 * **✨ Neu:** Dialog zum Abteilungsloeschen mit Audit-Verwerfen/Uebertragen und Alarm-Glocke fuer unauditierte Kapitel

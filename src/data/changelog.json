@@ -1,9 +1,20 @@
 [
   {
+    "revision": 49,
+    "revisionDisplay": "Rev. 49",
+    "commit": "6fa04ac",
+    "fullCommit": "6fa04ac09417af651d7381224bb2511010ba152d",
+    "date": "2026-10-29T08:01:49+01:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "KI-Audit-Interview-Assistent (Gemini & OpenAI) & Footer-Update-Anzeige behoben",
+    "rawMessage": "feat: KI-Audit-Interview-Assistent (Gemini & OpenAI) & Footer-Update-Anzeige behoben"
+  },
+  {
     "revision": 48,
     "revisionDisplay": "Rev. 48",
-    "commit": "e4bf033",
-    "fullCommit": "e4bf033a07a56308378ec091675cf553df864cdc",
+    "commit": "4725087",
+    "fullCommit": "47250870f6a7135cc9349b97c66c74ea9afac39c",
     "date": "2026-10-25T15:34:22+01:00",
     "type": "fix",
     "badge": "🐛 Behoben",

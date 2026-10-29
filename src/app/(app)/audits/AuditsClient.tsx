@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { updateAuditReportItem, deleteAuditItem, startNewAudit } from '@/actions/audits';
+import { getAiConfig, generateAuditQuestions, type GeneratedAuditQuestions, type AiConfig } from '@/actions/ai';
 
 function renderTextWithLinks(text?: string | null) {
   if (!text) return null;
@@ -134,6 +135,29 @@ export default function AuditsClient({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // AI Assistant State
+  const [aiConfig, setAiConfig] = useState<AiConfig | null>(null);
+  const [selectedAiProvider, setSelectedAiProvider] = useState<'gemini' | 'openai'>('gemini');
+  const [selectedAiModel, setSelectedAiModel] = useState<string>('');
+  const [isAiExpanded, setIsAiExpanded] = useState<boolean>(true);
+  const [isGeneratingAi, setIsGeneratingAi] = useState<boolean>(false);
+  const [aiResult, setAiResult] = useState<GeneratedAuditQuestions | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadAi() {
+      try {
+        const cfg = await getAiConfig();
+        setAiConfig(cfg);
+        setSelectedAiProvider(cfg.defaultProvider);
+        setSelectedAiModel(cfg.defaultProvider === 'gemini' ? cfg.geminiModel : cfg.openaiModel);
+      } catch (err) {
+        console.error('Fehler beim Laden der KI-Konfiguration:', err);
+      }
+    }
+    loadAi();
+  }, []);
 
   const handleDeleteItem = async (itemToDelete: any) => {
     if (!itemToDelete) return;
@@ -358,6 +382,69 @@ export default function AuditsClient({
     }
 
     setToast(null);
+    setAiResult(null);
+    setAiError(null);
+  };
+
+  const handleGenerateAiQuestions = async () => {
+    if (!selectedItem) return;
+    setIsGeneratingAi(true);
+    setAiError(null);
+    try {
+      const res = await generateAuditQuestions({
+        requirementChapter: selectedItem.requirement?.chapter || '',
+        requirementTitle: selectedItem.requirement?.title || '',
+        requirementDescription: selectedItem.requirement?.description || '',
+        originalText: selectedItem.requirement?.originalText || '',
+        departmentName: selectedItem.audit?.department?.name || 'QM',
+        departmentManager: selectedItem.audit?.department?.manager || '',
+        processType: selectedItem.audit?.department?.processType || '',
+        provider: selectedAiProvider,
+        model: selectedAiModel || undefined,
+        existingNotes: editNotes
+      });
+
+      if (res.error) {
+        setAiError(res.error);
+      } else if (res.data) {
+        setAiResult(res.data);
+      }
+    } catch (e: any) {
+      setAiError(e.message || 'Fehler beim Abrufen der KI-Fragen.');
+    }
+    setIsGeneratingAi(false);
+  };
+
+  const appendToNotes = (text: string) => {
+    setEditNotes(prev => {
+      const cleanPrev = (prev || '').trim();
+      if (!cleanPrev) return text;
+      return `${cleanPrev}\n\n${text}`;
+    });
+  };
+
+  const adoptAllAiIntoNotes = () => {
+    if (!aiResult) return;
+    let text = `--- KI-INTERVIEWLEITFADEN (${aiResult.department} • Kap. ${aiResult.chapter}) ---\n`;
+    if (aiResult.interviewQuestions.length > 0) {
+      text += `\n💬 GEZIELTE AUDIT-FRAGEN:\n`;
+      aiResult.interviewQuestions.forEach((q, i) => {
+        text += `${i + 1}. ${q.question} [Zielgruppe: ${q.targetAudience}]\n   -> Prüffokus: ${q.focus}\n`;
+      });
+    }
+    if (aiResult.evidences.length > 0) {
+      text += `\n🔍 EINGESEHENE STICHPROBEN / NACHWEISE:\n`;
+      aiResult.evidences.forEach((ev) => {
+        text += `- ${ev.document} (${ev.sampleTip})\n`;
+      });
+    }
+    if (aiResult.redFlags.length > 0) {
+      text += `\n⚠️ BEOBACHTETE RISIKEN / FALLSTRICKE:\n`;
+      aiResult.redFlags.forEach((rf) => {
+        text += `- ${rf}\n`;
+      });
+    }
+    appendToNotes(text);
   };
 
   const handleUserSelect = (val: string) => {
@@ -878,6 +965,181 @@ export default function AuditsClient({
               ) : (
                 <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
                   ℹ️ Dieser Auditpunkt bezieht sich auf die Normanforderung Kap. {selectedItem.requirement?.chapter} ({selectedItem.requirement?.title}).
+                </div>
+              )}
+            </div>
+
+            {/* 1.5 KI-AUDIT-INTERVIEWLEITFADEN */}
+            <div className="rounded-2xl border border-purple-200 dark:border-purple-800/80 bg-purple-50/50 dark:bg-purple-950/20 overflow-hidden shadow-xs transition-all">
+              {/* Header / Bar */}
+              <div className="p-3.5 px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-purple-100/60 dark:bg-purple-900/30 border-b border-purple-200/80 dark:border-purple-800/50">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">✨</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-xs text-purple-900 dark:text-purple-200">
+                        KI-Interviewfragen für Abteilung „{selectedItem.audit?.department?.name || 'QM'}“
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200">
+                        ISO-spezifisch
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-purple-700/80 dark:text-purple-300/80">
+                      Erzeugt maßgeschneiderte Fragen, Stichproben und Warnhinweise für dieses Kapitel.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Provider Selector & Generate Button */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    value={selectedAiProvider}
+                    onChange={(e) => {
+                      const p = e.target.value as 'gemini' | 'openai';
+                      setSelectedAiProvider(p);
+                      setSelectedAiModel(p === 'gemini' ? (aiConfig?.geminiModel || 'gemini-2.5-flash') : (aiConfig?.openaiModel || 'gpt-4o-mini'));
+                    }}
+                    className="px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-purple-300 dark:border-purple-700 bg-white dark:bg-slate-900 text-purple-950 dark:text-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                  >
+                    <option value="gemini">
+                      ✨ Google Gemini {aiConfig?.geminiModel ? `(${aiConfig.geminiModel})` : ''} {aiConfig?.defaultProvider === 'gemini' ? '★ Standard' : ''}
+                    </option>
+                    <option value="openai">
+                      🧠 OpenAI {aiConfig?.openaiModel ? `(${aiConfig.openaiModel})` : ''} {aiConfig?.defaultProvider === 'openai' ? '★ Standard' : ''}
+                    </option>
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={handleGenerateAiQuestions}
+                    disabled={isGeneratingAi}
+                    className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {isGeneratingAi ? (
+                      <>
+                        <span className="animate-spin text-sm">⏳</span>
+                        <span>Analysiere Norm &amp; Abteilung...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🤖</span>
+                        <span>{aiResult ? 'Neu generieren' : 'Interviewfragen generieren'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Error Notice */}
+              {aiError && (
+                <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-900 text-xs text-rose-800 dark:text-rose-200 flex items-center justify-between">
+                  <span>⚠️ {aiError}</span>
+                  <Link href="/settings" className="font-bold underline ml-2">API-Keys in Einstellungen prüfen ↗</Link>
+                </div>
+              )}
+
+              {/* Generated Content Body */}
+              {aiResult && (
+                <div className="p-4 space-y-4 animate-in fade-in duration-200 text-xs">
+                  {/* Top action toolbar */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-purple-200/60 dark:border-purple-800/40">
+                    <span className="text-[11px] font-bold text-purple-800 dark:text-purple-300">
+                      Ergebnis für <strong>{aiResult.department}</strong> (via {aiResult.provider} • {aiResult.model}):
+                    </span>
+                    <button
+                      type="button"
+                      onClick={adoptAllAiIntoNotes}
+                      className="px-3 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                      title="Fügt alle Fragen, Nachweise und Risiken direkt in das Textfeld 'Feststellung / Notizen' ein"
+                    >
+                      <span>📋</span>
+                      <span>Alles in Feststellungen übernehmen</span>
+                    </button>
+                  </div>
+
+                  {/* 1. Interview-Fragen */}
+                  <div className="space-y-2">
+                    <span className="font-bold text-[11px] uppercase tracking-wider text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                      <span>💬</span> Konkrete Interview-Fragen an {aiResult.department}:
+                    </span>
+                    <div className="space-y-2">
+                      {aiResult.interviewQuestions.map((q, idx) => (
+                        <div key={idx} className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-purple-200/80 dark:border-purple-800/60 shadow-2xs space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2">
+                              <span className="font-black text-purple-700 dark:text-purple-400 font-mono">{idx + 1}.</span>
+                              <div className="font-semibold text-slate-800 dark:text-slate-100 text-xs">
+                                {q.question}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => appendToNotes(`Frage: "${q.question}"\nPrüffokus: ${q.focus}`)}
+                              className="shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 cursor-pointer"
+                              title="Nur diese Frage in Notizen einfügen"
+                            >
+                              + Notiz
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[10px]">
+                            {q.targetAudience && (
+                              <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                                🎯 Ziel: {q.targetAudience}
+                              </span>
+                            )}
+                            <span className="text-slate-500 dark:text-slate-400">
+                              🔍 <strong>Fokus:</strong> {q.focus}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. Evidenzen & Stichproben */}
+                  {aiResult.evidences.length > 0 && (
+                    <div className="space-y-1.5 pt-1">
+                      <span className="font-bold text-[11px] uppercase tracking-wider text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                        <span>🔍</span> Einzusehende Stichproben &amp; Nachweise (Evidenzen):
+                      </span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {aiResult.evidences.map((ev, idx) => (
+                          <div key={idx} className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-purple-200/80 dark:border-purple-800/60 shadow-2xs flex items-start justify-between gap-2">
+                            <div>
+                              <div className="font-bold text-slate-800 dark:text-slate-100">
+                                📄 {ev.document}
+                              </div>
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                👉 {ev.sampleTip}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => appendToNotes(`Nachweis/Stichprobe: ${ev.document} (${ev.sampleTip})`)}
+                              className="shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 cursor-pointer"
+                              title="Diesen Nachweis in Notizen einfügen"
+                            >
+                              + Notiz
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. Red Flags / Typische Abweichungen */}
+                  {aiResult.redFlags.length > 0 && (
+                    <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/80 space-y-1">
+                      <span className="block font-bold text-[10px] uppercase text-amber-900 dark:text-amber-200 tracking-wider">
+                        ⚠️ Typische Fallstricke &amp; Risiken in dieser Abteilung:
+                      </span>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-amber-800 dark:text-amber-300">
+                        {aiResult.redFlags.map((rf, idx) => (
+                          <li key={idx}>{rf}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

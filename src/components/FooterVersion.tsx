@@ -56,11 +56,11 @@ export default function FooterVersion({ compact = false }: { compact?: boolean }
             title="Klicken für Changelog & Revisions-Details"
           >
             <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
-              {versionData.revisionDisplay}
+              {updateInfo?.currentRevision || versionData.revisionDisplay}
             </span>
             <span className="opacity-40">•</span>
             <span className="font-mono text-[10px] text-slate-500">
-              {versionData.commit}
+              {updateInfo?.currentCommit || versionData.commit}
             </span>
             <span className="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">
               📜

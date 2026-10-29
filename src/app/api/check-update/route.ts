@@ -3,8 +3,23 @@ import versionData from '@/data/version.json';
 
 export async function GET() {
   try {
-    const currentCommit = versionData.commit;
-    const currentRevisionDisplay = versionData.revisionDisplay;
+    let currentCommit = versionData.commit;
+    let currentRevisionDisplay = versionData.revisionDisplay;
+
+    // Detect live git commit on host if available to prevent mismatch between git and static version.json
+    try {
+      const { execSync } = await import('child_process');
+      const liveCommit = execSync('git rev-parse --short HEAD', { encoding: 'utf-8', timeout: 800 }).trim();
+      if (liveCommit) {
+        currentCommit = liveCommit;
+      }
+      const liveCount = execSync('git rev-list --count HEAD', { encoding: 'utf-8', timeout: 800 }).trim();
+      if (liveCount) {
+        currentRevisionDisplay = `Rev. ${liveCount}`;
+      }
+    } catch {
+      // Fallback to versionData
+    }
 
     // Check remote GitHub repository
     const controller = new AbortController();

@@ -1,11 +1,12 @@
 'use client';
 
 import { uploadLogo, getSettings, saveSettings, testSmtpConnection } from '@/actions/settings';
+import { testAiConnection } from '@/actions/ai';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'smtp' | 'automation' | 'users'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'smtp' | 'automation' | 'users' | 'ai'>('profile');
   
   // General & Branding settings
   const [generalSettings, setGeneralSettings] = useState({
@@ -38,6 +39,23 @@ export default function SettingsPage() {
   const [isTestingSmtp, setIsTestingSmtp] = useState(false);
   const [cronMessage, setCronMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
+  // AI Assistant Settings
+  const [aiSettings, setAiSettings] = useState({
+    aiDefaultProvider: 'gemini',
+    geminiApiKey: '',
+    geminiModel: 'gemini-2.5-flash',
+    openaiApiKey: '',
+    openaiModel: 'gpt-4o-mini',
+  });
+  const [isSavingAi, setIsSavingAi] = useState(false);
+  const [aiMessage, setAiMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const [isTestingGemini, setIsTestingGemini] = useState(false);
+  const [isTestingOpenai, setIsTestingOpenai] = useState(false);
+  const [testGeminiResult, setTestGeminiResult] = useState<{ text: string, success: boolean } | null>(null);
+  const [testOpenaiResult, setTestOpenaiResult] = useState<{ text: string, success: boolean } | null>(null);
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
+  const [showOpenaiKey, setShowOpenaiKey] = useState(false);
+
   useEffect(() => {
     async function load() {
       const data = await getSettings();
@@ -55,6 +73,13 @@ export default function SettingsPage() {
         smtpFrom: data.smtpFrom || 'noreply@schellenberger.biz',
         reminderDays: data.reminderDays || '3',
         appUrl: data.appUrl || 'http://localhost:3000'
+      });
+      setAiSettings({
+        aiDefaultProvider: data.aiDefaultProvider || 'gemini',
+        geminiApiKey: data.geminiApiKey || '',
+        geminiModel: data.geminiModel || 'gemini-2.5-flash',
+        openaiApiKey: data.openaiApiKey || '',
+        openaiModel: data.openaiModel || 'gpt-4o-mini',
       });
       if (data.smtpFrom && data.smtpFrom !== 'noreply@schellenberger.biz') {
         setTestRecipient(data.smtpFrom);
@@ -131,6 +156,35 @@ export default function SettingsPage() {
     setIsTestingSmtp(false);
   };
 
+  const handleSaveAi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingAi(true);
+    setAiMessage(null);
+    const res = await saveSettings(aiSettings);
+    if (res.error) {
+      setAiMessage({ text: res.error, type: 'error' });
+    } else {
+      setAiMessage({ text: 'KI-Konfiguration erfolgreich gespeichert!', type: 'success' });
+    }
+    setIsSavingAi(false);
+  };
+
+  const handleTestGemini = async () => {
+    setIsTestingGemini(true);
+    setTestGeminiResult(null);
+    const res = await testAiConnection('gemini', aiSettings.geminiApiKey, aiSettings.geminiModel);
+    setTestGeminiResult({ text: res.message, success: res.success });
+    setIsTestingGemini(false);
+  };
+
+  const handleTestOpenai = async () => {
+    setIsTestingOpenai(true);
+    setTestOpenaiResult(null);
+    const res = await testAiConnection('openai', aiSettings.openaiApiKey, aiSettings.openaiModel);
+    setTestOpenaiResult({ text: res.message, success: res.success });
+    setIsTestingOpenai(false);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
@@ -167,6 +221,7 @@ export default function SettingsPage() {
           { id: 'smtp', label: '2. Mailserver (SMTP)', icon: '✉️' },
           { id: 'automation', label: '3. Fristen & Automatisierung', icon: '⏱️' },
           { id: 'users', label: '4. QM-Rollen & Team', icon: '👥' },
+          { id: 'ai', label: '5. KI-Audit-Assistent', icon: '🤖' },
         ].map(tab => {
           const isActive = activeTab === tab.id;
           return (
@@ -601,6 +656,284 @@ export default function SettingsPage() {
                     <p className="text-xs text-slate-500">Erhält automatische E-Mail-Erinnerungen für zugewiesene Sofort- und Korrekturmaßnahmen.</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: KI-Audit-Assistent & API-Keys */}
+          {activeTab === 'ai' && (
+            <div className="space-y-6">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-2">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <span>🤖</span> KI-Audit-Interview-Assistent (DIN ISO 9001)
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Generiert für jedes Normkapitel und jede Fachabteilung maßgeschneiderte Interview-Fragen, Stichproben und Fallstricke.
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono px-2.5 py-1 bg-purple-100 dark:bg-purple-950/60 rounded font-bold text-purple-700 dark:text-purple-300 self-start sm:self-auto">
+                    Gemini &amp; OpenAI
+                  </span>
+                </div>
+
+                <form onSubmit={handleSaveAi} className="space-y-6">
+                  {/* Standard-Anbieter Auswahl */}
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-3">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      ⭐ Bevorzugter Standard-KI-Anbieter
+                    </label>
+                    <p className="text-xs text-slate-500">
+                      Wähle aus, welcher KI-Agent standardmäßig beim Öffnen eines Auditpunkts aktiv ist (kann beim Auditieren jederzeit gewechselt werden).
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <label 
+                        onClick={() => setAiSettings({ ...aiSettings, aiDefaultProvider: 'gemini' })}
+                        className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                          aiSettings.aiDefaultProvider === 'gemini'
+                            ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 ring-2 ring-blue-500/20'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="aiDefaultProvider"
+                          value="gemini"
+                          checked={aiSettings.aiDefaultProvider === 'gemini'}
+                          onChange={() => setAiSettings({ ...aiSettings, aiDefaultProvider: 'gemini' })}
+                          className="mt-1 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span>✨ Google Gemini</span>
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-extrabold">Empfohlen</span>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Extrem schnelle Reaktionszeit, kostenloses Kontingent im Google AI Studio verfügbar.
+                          </p>
+                        </div>
+                      </label>
+
+                      <label 
+                        onClick={() => setAiSettings({ ...aiSettings, aiDefaultProvider: 'openai' })}
+                        className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                          aiSettings.aiDefaultProvider === 'openai'
+                            ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 ring-2 ring-blue-500/20'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="aiDefaultProvider"
+                          value="openai"
+                          checked={aiSettings.aiDefaultProvider === 'openai'}
+                          onChange={() => setAiSettings({ ...aiSettings, aiDefaultProvider: 'openai' })}
+                          className="mt-1 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span>🧠 OpenAI (ChatGPT)</span>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Bewährte Modelle (GPT-4o Mini / GPT-4o) mit hoher Formulierungstiefe.
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Sektion 1: Google Gemini */}
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-4 bg-white dark:bg-slate-900 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">✨</span>
+                        <div>
+                          <h3 className="font-bold text-sm text-slate-900 dark:text-white">Google Gemini Konfiguration</h3>
+                          <a 
+                            href="https://aistudio.google.com/app/apikey" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
+                          >
+                            <span>Kostenlosen API-Key bei Google AI Studio erstellen ↗</span>
+                          </a>
+                        </div>
+                      </div>
+                      {aiSettings.geminiApiKey && aiSettings.geminiApiKey.length > 5 ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                          ✓ Hinterlegt
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                          Nicht konfiguriert
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
+                          Gemini API Key
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showGeminiKey ? 'text' : 'password'}
+                            value={aiSettings.geminiApiKey}
+                            onChange={e => setAiSettings({ ...aiSettings, geminiApiKey: e.target.value })}
+                            placeholder="AIzaSy..."
+                            className="w-full px-3 py-2 pr-10 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowGeminiKey(!showGeminiKey)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-700 cursor-pointer"
+                            title={showGeminiKey ? 'Verbergen' : 'Anzeigen'}
+                          >
+                            {showGeminiKey ? '🙈' : '👁️'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
+                          Modell
+                        </label>
+                        <select
+                          value={aiSettings.geminiModel}
+                          onChange={e => setAiSettings({ ...aiSettings, geminiModel: e.target.value })}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 font-medium"
+                        >
+                          <option value="gemini-2.5-flash">gemini-2.5-flash (Empfohlen)</option>
+                          <option value="gemini-1.5-flash">gemini-1.5-flash (Standard)</option>
+                          <option value="gemini-1.5-pro">gemini-1.5-pro (Tiefgründig)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <button
+                        type="button"
+                        onClick={handleTestGemini}
+                        disabled={isTestingGemini || !aiSettings.geminiApiKey}
+                        className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span>{isTestingGemini ? '⏳ Testet...' : '🔌 Gemini-Verbindung testen'}</span>
+                      </button>
+
+                      {testGeminiResult && (
+                        <span className={`text-xs font-bold ${testGeminiResult.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {testGeminiResult.text}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sektion 2: OpenAI */}
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-4 bg-white dark:bg-slate-900 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🧠</span>
+                        <div>
+                          <h3 className="font-bold text-sm text-slate-900 dark:text-white">OpenAI Konfiguration</h3>
+                          <a 
+                            href="https://platform.openai.com/api-keys" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
+                          >
+                            <span>OpenAI API-Keys verwalten ↗</span>
+                          </a>
+                        </div>
+                      </div>
+                      {aiSettings.openaiApiKey && aiSettings.openaiApiKey.length > 5 ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                          ✓ Hinterlegt
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                          Nicht konfiguriert
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
+                          OpenAI API Key
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showOpenaiKey ? 'text' : 'password'}
+                            value={aiSettings.openaiApiKey}
+                            onChange={e => setAiSettings({ ...aiSettings, openaiApiKey: e.target.value })}
+                            placeholder="sk-proj-..."
+                            className="w-full px-3 py-2 pr-10 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowOpenaiKey(!showOpenaiKey)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-700 cursor-pointer"
+                            title={showOpenaiKey ? 'Verbergen' : 'Anzeigen'}
+                          >
+                            {showOpenaiKey ? '🙈' : '👁️'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
+                          Modell
+                        </label>
+                        <select
+                          value={aiSettings.openaiModel}
+                          onChange={e => setAiSettings({ ...aiSettings, openaiModel: e.target.value })}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 font-medium"
+                        >
+                          <option value="gpt-4o-mini">gpt-4o-mini (Empfohlen - schnell &amp; günstig)</option>
+                          <option value="gpt-4o">gpt-4o (Flaggschiff)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <button
+                        type="button"
+                        onClick={handleTestOpenai}
+                        disabled={isTestingOpenai || !aiSettings.openaiApiKey}
+                        className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span>{isTestingOpenai ? '⏳ Testet...' : '🔌 OpenAI-Verbindung testen'}</span>
+                      </button>
+
+                      {testOpenaiResult && (
+                        <span className={`text-xs font-bold ${testOpenaiResult.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {testOpenaiResult.text}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Feedback Message */}
+                  {aiMessage && (
+                    <div className={`p-3.5 rounded-xl text-xs font-bold ${aiMessage.type === 'success' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : 'bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-300 border border-red-200 dark:border-red-800'}`}>
+                      {aiMessage.text}
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={isSavingAi}
+                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      <span>💾</span>
+                      <span>{isSavingAi ? 'Speichert...' : 'KI-Einstellungen speichern'}</span>
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}

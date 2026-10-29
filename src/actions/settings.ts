@@ -75,7 +75,10 @@ import { prisma } from '@/lib/prisma';
 
 const ALLOWED_SETTING_KEYS = new Set([
   'smtpHost', 'smtpPort', 'smtpUser', 'smtpPass', 'smtpFrom', 
-  'reminderDays', 'cronSecret', 'appUrl', 'companyName', 'smtpSecure', 'smtpRejectUnauthorized'
+  'reminderDays', 'cronSecret', 'appUrl', 'companyName', 'smtpSecure', 'smtpRejectUnauthorized',
+  'qmbName', 'docHeader', 'siteLocation',
+  // AI Settings
+  'aiDefaultProvider', 'geminiApiKey', 'geminiModel', 'openaiApiKey', 'openaiModel'
 ]);
 
 export async function getSettings() {
@@ -90,6 +93,20 @@ export async function getSettings() {
   } else if (process.env.SMTP_PASS) {
     obj.smtpPass = '•••••••• (via ENV)';
   }
+
+  // Mask AI API keys
+  if (obj.geminiApiKey && obj.geminiApiKey.length > 0) {
+    obj.geminiApiKey = '••••••••';
+  } else if (process.env.GEMINI_API_KEY) {
+    obj.geminiApiKey = '•••••••• (via ENV)';
+  }
+
+  if (obj.openaiApiKey && obj.openaiApiKey.length > 0) {
+    obj.openaiApiKey = '••••••••';
+  } else if (process.env.OPENAI_API_KEY) {
+    obj.openaiApiKey = '•••••••• (via ENV)';
+  }
+
   return obj;
 }
 
@@ -97,8 +114,11 @@ export async function saveSettings(data: Record<string, string>) {
   try {
     for (const [key, value] of Object.entries(data)) {
       if (!ALLOWED_SETTING_KEYS.has(key)) continue;
-      // Do not overwrite existing password if user left it blank or as the masked placeholder
-      if (key === 'smtpPass' && (value === '••••••••' || value.startsWith('••••••••') || !value.trim())) {
+      // Do not overwrite existing secrets if user left it blank or as the masked placeholder
+      if (
+        (key === 'smtpPass' || key === 'geminiApiKey' || key === 'openaiApiKey') && 
+        (value === '••••••••' || value.startsWith('••••••••') || !value.trim())
+      ) {
         continue;
       }
       // Sanitize key and limit value length to avoid memory bloat
