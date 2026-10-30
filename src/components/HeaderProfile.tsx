@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { getCurrentProfile, updateProfile, getUsers } from '@/actions/users';
+import { logoutAction } from '@/actions/auth';
 
 export default function HeaderProfile() {
   const mounted = useSyncExternalStore(
@@ -20,6 +21,8 @@ export default function HeaderProfile() {
   // Edit form state
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [editConfirmPassword, setEditConfirmPassword] = useState('');
   const [editRole, setEditRole] = useState('QMB');
   const [editDepartment, setEditDepartment] = useState('');
   const [editPhone, setEditPhone] = useState('');
@@ -72,6 +75,8 @@ export default function HeaderProfile() {
     if (!profile) return;
     setEditName(profile.name || '');
     setEditEmail(profile.email || '');
+    setEditPassword('');
+    setEditConfirmPassword('');
     setEditRole(profile.role || 'QMB');
     setEditDepartment(profile.department || '');
     setEditPhone(profile.phone || '');
@@ -103,6 +108,19 @@ export default function HeaderProfile() {
     setSaving(true);
     setMessage(null);
 
+    if (editPassword) {
+      if (editPassword.length < 6) {
+        setMessage({ text: 'Das neue Passwort muss mindestens 6 Zeichen lang sein.', type: 'error' });
+        setSaving(false);
+        return;
+      }
+      if (editPassword !== editConfirmPassword) {
+        setMessage({ text: 'Die Passwörter stimmen nicht überein.', type: 'error' });
+        setSaving(false);
+        return;
+      }
+    }
+
     const res = await updateProfile(profile.id, {
       name: editName,
       email: editEmail,
@@ -110,6 +128,7 @@ export default function HeaderProfile() {
       department: editDepartment,
       phone: editPhone,
       image: editImage || '',
+      password: editPassword.trim() || undefined,
     });
 
     if (res?.success && res.user) {
@@ -212,9 +231,19 @@ export default function HeaderProfile() {
           <div className="p-2 space-y-1">
             <button
               onClick={handleOpenEdit}
-              className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-colors flex items-center gap-2"
+              className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <span>✏️</span> Profil bearbeiten (Foto, E-Mail, Name)
+              <span>✏️</span> Profil &amp; Passwort bearbeiten
+            </button>
+
+            <button
+              onClick={async () => {
+                setIsOpen(false);
+                await logoutAction();
+              }}
+              className="w-full text-left px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <span>🚪</span> Abmelden
             </button>
           </div>
 
@@ -408,6 +437,39 @@ export default function HeaderProfile() {
                   placeholder="+49 (0) 123 456789"
                   className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+
+              {/* Passwort ändern */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="font-bold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+                  <span>🔒</span> Passwort ändern (Optional)
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                      Neues Passwort
+                    </label>
+                    <input 
+                      type="password"
+                      value={editPassword}
+                      onChange={e => setEditPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                      Passwort bestätigen
+                    </label>
+                    <input 
+                      type="password"
+                      value={editConfirmPassword}
+                      onChange={e => setEditConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Footer Buttons */}

@@ -19,6 +19,7 @@ export default function UsersClient({ initialUsers, departments }: { initialUser
   // Form State
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [role, setRole] = useState('Mitarbeiter');
   const [department, setDepartment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +34,7 @@ export default function UsersClient({ initialUsers, departments }: { initialUser
     setEditingUser(null);
     setName('');
     setEmail('');
+    setPassword('');
     setRole('Mitarbeiter');
     setDepartment(currentDepartments[0]?.name || '');
     setErrorMessage('');
@@ -45,6 +47,7 @@ export default function UsersClient({ initialUsers, departments }: { initialUser
     setEditingUser(user);
     setName(user.name);
     setEmail(user.email);
+    setPassword('');
     setRole(user.role || 'Mitarbeiter');
     setDepartment(user.department || '');
     setErrorMessage('');
@@ -79,7 +82,13 @@ export default function UsersClient({ initialUsers, departments }: { initialUser
     setErrorMessage('');
 
     if (editingUser) {
-      const res = await updateUser(editingUser.id, { name, email, role, department });
+      const res = await updateUser(editingUser.id, {
+        name,
+        email,
+        role,
+        department,
+        ...(password.trim() ? { password: password.trim() } : {})
+      });
       if (res.error) {
         setErrorMessage(res.error);
       } else if (res.user) {
@@ -88,7 +97,13 @@ export default function UsersClient({ initialUsers, departments }: { initialUser
         router.refresh();
       }
     } else {
-      const res = await createUser({ name, email, role, department });
+      const res = await createUser({
+        name,
+        email,
+        role,
+        department,
+        password: password.trim() || undefined
+      });
       if (res.error) {
         setErrorMessage(res.error);
       } else if (res.user) {
@@ -254,6 +269,92 @@ export default function UsersClient({ initialUsers, departments }: { initialUser
         </div>
       </div>
 
+      {/* ISO 9001 Rollen- und Berechtigungsmatrix */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🛡️</span> Rollen- &amp; Sichtbarkeitskonzept (ISO 9001)
+          </h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Übersicht, wer nach dem Login welche Module und Datensätze einsehen und bearbeiten darf:
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+          {/* QMB */}
+          <div className="p-4 rounded-xl border border-purple-200 dark:border-purple-800/60 bg-purple-50/40 dark:bg-purple-950/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                <span>👑</span> QMB / Admin
+              </span>
+              <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-purple-200 dark:bg-purple-900 text-purple-900 dark:text-purple-200">
+                Vollzugriff
+              </span>
+            </div>
+            <ul className="text-[11px] text-slate-600 dark:text-slate-400 space-y-1 list-disc pl-4">
+              <li>Alle Module, Cockpits &amp; Berichte</li>
+              <li>Systemverwaltung, Mailserver &amp; KI-Keys</li>
+              <li>Benutzer- und Rechteverwaltung</li>
+              <li>Freigabe von 8D-Reports &amp; Audits</li>
+            </ul>
+          </div>
+
+          {/* Auditor */}
+          <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-800/60 bg-blue-50/40 dark:bg-blue-950/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
+                <span>🔍</span> Auditor
+              </span>
+              <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200">
+                Audit &amp; KVP
+              </span>
+            </div>
+            <ul className="text-[11px] text-slate-600 dark:text-slate-400 space-y-1 list-disc pl-4">
+              <li>Audits durchführen &amp; bewerten</li>
+              <li>KI-Interviewfragen für Fachbereiche</li>
+              <li>Maßnahmenplan &amp; Reklamationen</li>
+              <li><strong className="text-rose-600 dark:text-rose-400">Keine</strong> Systemeinstellungen/Passwörter</li>
+            </ul>
+          </div>
+
+          {/* Abteilungsleiter */}
+          <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/40 dark:bg-amber-950/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                <span>🏢</span> Abteilungsleiter
+              </span>
+              <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200">
+                Eigener Bereich
+              </span>
+            </div>
+            <ul className="text-[11px] text-slate-600 dark:text-slate-400 space-y-1 list-disc pl-4">
+              <li>Prozesslandkarte &amp; Abteilungen</li>
+              <li>Auditergebnisse des eigenen Bereichs</li>
+              <li>Reklamationen &amp; Maßnahmen der Abteilung</li>
+              <li><strong className="text-rose-600 dark:text-rose-400">Keine</strong> Systemeinstellungen/Passwörter</li>
+            </ul>
+          </div>
+
+          {/* Mitarbeiter */}
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <span>👤</span> Mitarbeiter / Werker
+              </span>
+              <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
+                Meine Aufgaben
+              </span>
+            </div>
+            <ul className="text-[11px] text-slate-600 dark:text-slate-400 space-y-1 list-disc pl-4">
+              <li><strong>„Meine Aufgaben“</strong> (Action Log personalisiert)</li>
+              <li>Eigene Maßnahmen abarbeiten &amp; belegen</li>
+              <li>Prozesslandkarte &amp; Normkatalog (Referenz)</li>
+              <li><strong className="text-rose-600 dark:text-rose-400">Kein</strong> Zugriff auf fremde Audits/Settings</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* Modal Dialog */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -305,6 +406,24 @@ export default function UsersClient({ initialUsers, departments }: { initialUser
                 />
                 <span className="text-[11px] text-slate-400 mt-1 block">
                   An diese Adresse werden Fälligkeitserinnerungen für Maßnahmen gesendet.
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                  {editingUser ? 'Passwort neu setzen (Optional)' : 'Passwort'}
+                </label>
+                <input 
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                  placeholder={editingUser ? '•••••••• (leer lassen für unverändert)' : 'Standard: "qualitydeck"'}
+                />
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  {editingUser 
+                    ? 'Nur ausfüllen, wenn das Passwort dieses Benutzers geändert werden soll.' 
+                    : 'Wird für den persönlichen Login verwendet (Standard: "qualitydeck").'}
                 </span>
               </div>
 

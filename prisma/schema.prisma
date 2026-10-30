@@ -141,14 +141,17 @@ model ComplaintAction {
 }
 
 model User {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   name       String
-  email      String   @unique
-  role       String?  // 'QMB', 'Auditor', 'Verantwortlicher', etc.
+  email      String    @unique
+  password   String?   // Hashed password (salt:hash)
+  role       String?   @default("Mitarbeiter") // 'QMB', 'Auditor', 'Abteilungsleiter', 'Mitarbeiter'
   department String?
-  image      String?  // Profile picture / Avatar (Data URL or URL)
+  image      String?   // Profile picture / Avatar (Data URL or URL)
   phone      String?
-  createdAt  DateTime @default(now())
+  isActive   Boolean   @default(true)
+  lastLogin  DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model Setting {

@@ -1,9 +1,20 @@
 [
   {
+    "revision": 51,
+    "revisionDisplay": "Rev. 51",
+    "commit": "f915dab",
+    "fullCommit": "f915dabed966e2e79caacf74b978f29bdadca3ec",
+    "date": "2026-10-30T08:01:55+01:00",
+    "type": "feature",
+    "badge": "✨ Neu",
+    "title": "Login-System mit Passwoertern und ISO 9001 Rollenberechtigungen",
+    "rawMessage": "feat: Login-System mit Passwoertern und ISO 9001 Rollenberechtigungen"
+  },
+  {
     "revision": 50,
     "revisionDisplay": "Rev. 50",
-    "commit": "aaeadac",
-    "fullCommit": "aaeadaca07b3df9614992346bcd95657ddfab5f9",
+    "commit": "58ad55f",
+    "fullCommit": "58ad55f8d815f7435fcd23797ba5cb9db7381062",
     "date": "2026-10-29T08:05:07+01:00",
     "type": "fix",
     "badge": "🐛 Behoben",

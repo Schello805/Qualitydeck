@@ -2,13 +2,17 @@
 
 Automatisch gepflegte Revisions-Historie für **Quality Deck** (DIN EN ISO 9001:2015).
 
-**Aktueller Stand:** [Rev. 50 (aaeadac)](https://github.com/Schello805/Qualitydeck/commit/aaeadaca07b3df9614992346bcd95657ddfab5f9) • Zuletzt aktualisiert: 29.10.2026 08:05:07
+**Aktueller Stand:** [Rev. 51 (f915dab)](https://github.com/Schello805/Qualitydeck/commit/f915dabed966e2e79caacf74b978f29bdadca3ec) • Zuletzt aktualisiert: 30.10.2026 08:01:55
 
 ---
 
-### [Rev. 50] - 29.10.2026, 08:05 (`aaeadac`)
+### [Rev. 51] - 30.10.2026, 08:01 (`f915dab`)
+* **✨ Neu:** Login-System mit Passwoertern und ISO 9001 Rollenberechtigungen
+* *Commit:* [`f915dab`](https://github.com/Schello805/Qualitydeck/commit/f915dabed966e2e79caacf74b978f29bdadca3ec)
+
+### [Rev. 50] - 29.10.2026, 08:05 (`58ad55f`)
 * **🐛 Behoben:** Dark/Light Mode Umschaltung mit Tailwind v4 & einklappbare Menuebereiche in Sidebar
-* *Commit:* [`aaeadac`](https://github.com/Schello805/Qualitydeck/commit/aaeadaca07b3df9614992346bcd95657ddfab5f9)
+* *Commit:* [`58ad55f`](https://github.com/Schello805/Qualitydeck/commit/58ad55f8d815f7435fcd23797ba5cb9db7381062)
 
 ### [Rev. 49] - 29.10.2026, 08:01 (`36ce68c`)
 * **✨ Neu:** KI-Audit-Interview-Assistent (Gemini & OpenAI) & Footer-Update-Anzeige behoben

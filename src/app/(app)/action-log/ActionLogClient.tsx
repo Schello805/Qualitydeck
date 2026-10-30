@@ -7,6 +7,7 @@ import {
   toggleActionLogItemStatus, 
   sendActionLogNotificationEmail,
 } from '@/actions/action-log';
+import { getCurrentProfile } from '@/actions/users';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -54,6 +55,10 @@ export default function ActionLogClient({
   const [items, setItems] = useState<any[]>(initialItems);
   const [users] = useState<any[]>(initialUsers);
   
+  // Current logged in user & My Tasks filter
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [onlyMyTasks, setOnlyMyTasks] = useState(false);
+
   // Filters
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<'ALL' | 'audit' | 'complaint'>('ALL');
@@ -147,6 +152,19 @@ export default function ActionLogClient({
     setEditStatus(item.status || 'not_fulfilled');
     setSendEmailOnSave(Boolean(item.responsibleEmail || matchedUser?.email));
   }, [users]);
+
+  // Load current user profile for role & "Meine Aufgaben" filter
+  useEffect(() => {
+    const activeId = typeof window !== 'undefined' ? localStorage.getItem('qd_active_user_id') || undefined : undefined;
+    getCurrentProfile(activeId).then(user => {
+      if (user) {
+        setCurrentUser(user);
+        if (user.role === 'Mitarbeiter') {
+          setOnlyMyTasks(true);
+        }
+      }
+    });
+  }, []);
 
   // Auto-open measure if ?id=... was passed in email link
   useEffect(() => {
@@ -342,6 +360,19 @@ export default function ActionLogClient({
     return { overdue, dueSoon, openAudits, openComplaints, openCount, total: items.length };
   }, [items]);
 
+  // My Tasks count
+  const myTasksCount = useMemo(() => {
+    if (!currentUser) return 0;
+    const myName = (currentUser.name || '').toLowerCase().trim();
+    const myEmail = (currentUser.email || '').toLowerCase().trim();
+    return items.filter(item => {
+      const itemResp = (item.responsible || '').toLowerCase().trim();
+      const itemEmail = (item.responsibleEmail || '').toLowerCase().trim();
+      return (myName && itemResp && (itemResp.includes(myName) || myName.includes(itemResp))) ||
+             (myEmail && itemEmail && itemEmail === myEmail);
+    }).length;
+  }, [items, currentUser]);
+
   // Handle inline resolution
   const handleToggleResolve = async (item: any) => {
     const nextStatus = item.status === 'fulfilled' ? 'not_fulfilled' : 'fulfilled';
@@ -356,6 +387,18 @@ export default function ActionLogClient({
   const filteredItems = useMemo(() => {
     return items
       .filter(item => {
+        // Only My Tasks filter
+        if (onlyMyTasks && currentUser) {
+          const myName = (currentUser.name || '').toLowerCase().trim();
+          const myEmail = (currentUser.email || '').toLowerCase().trim();
+          const itemResp = (item.responsible || '').toLowerCase().trim();
+          const itemEmail = (item.responsibleEmail || '').toLowerCase().trim();
+          const matchesMe = 
+            (myName && itemResp && (itemResp.includes(myName) || myName.includes(itemResp))) ||
+            (myEmail && itemEmail && itemEmail === myEmail);
+          if (!matchesMe) return false;
+        }
+
         // Search
         if (search.trim()) {
           const q = search.toLowerCase();
@@ -647,27 +690,50 @@ export default function ActionLogClient({
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500">Status:</span>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100"
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* My Tasks Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setOnlyMyTasks(!onlyMyTasks)}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                onlyMyTasks 
+                  ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400' 
+                  : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200'
+              }`}
+              title="Filtert alle Maßnahmen, bei denen Sie als Verantwortlicher zugewiesen sind"
             >
-              <option value="ALL">Alle Status</option>
-              <option value="not_fulfilled">Offen / Abweichung</option>
-              <option value="partially">In Bearbeitung</option>
-              <option value="fulfilled">Erledigt</option>
-            </select>
+              <span>👤</span>
+              <span>Nur meine Aufgaben</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                onlyMyTasks ? 'bg-white text-blue-700' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              }`}>
+                {myTasksCount}
+              </span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500">Status:</span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100"
+              >
+                <option value="ALL">Alle Status</option>
+                <option value="not_fulfilled">Offen / Abweichung</option>
+                <option value="partially">In Bearbeitung</option>
+                <option value="fulfilled">Erledigt</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {/* Active Filter indicator */}
-        {(search || sourceFilter !== 'ALL' || pdcaFilter !== 'ALL' || stageFilter !== 'ALL' || departmentFilter !== 'ALL' || urgencyFilter !== 'ALL' || statusFilter !== 'ALL') && (
+        {(onlyMyTasks || search || sourceFilter !== 'ALL' || pdcaFilter !== 'ALL' || stageFilter !== 'ALL' || departmentFilter !== 'ALL' || urgencyFilter !== 'ALL' || statusFilter !== 'ALL') && (
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
             <span>Gefiltert: <strong>{filteredItems.length}</strong> von {items.length} Maßnahmen</span>
             <button 
               onClick={() => { 
+                setOnlyMyTasks(false);
                 setSearch(''); 
                 setSourceFilter('ALL'); 
                 setPdcaFilter('ALL');
@@ -676,7 +742,7 @@ export default function ActionLogClient({
                 setUrgencyFilter('ALL'); 
                 setStatusFilter('ALL'); 
               }}
-              className="text-blue-600 hover:underline font-medium"
+              className="text-blue-600 hover:underline font-medium cursor-pointer"
             >
               Filter zurücksetzen
             </button>

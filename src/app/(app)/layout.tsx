@@ -6,6 +6,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { getNavCounts } from "@/actions/complaints";
 import { getSystemAlerts, SystemAlerts } from "@/actions/alerts";
 import { getDepartments } from "@/actions/departments";
+import { getCurrentProfile } from "@/actions/users";
 import HeaderProfile from "@/components/HeaderProfile";
 import FooterVersion from "@/components/FooterVersion";
 import NotificationBell from "@/components/NotificationBell";
@@ -65,14 +66,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  // Nav counts & Alerts fetching
+  // Current user state
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Nav counts, Alerts & User Profile fetching
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [resCounts, resAlerts, resDepts] = await Promise.all([
+        const activeId = typeof window !== 'undefined' ? localStorage.getItem('qd_active_user_id') || undefined : undefined;
+        const [resCounts, resAlerts, resDepts, resProfile] = await Promise.all([
           getNavCounts(),
           getSystemAlerts(),
-          getDepartments()
+          getDepartments(),
+          getCurrentProfile(activeId)
         ]);
         if (resCounts) {
           setCounts({
@@ -86,6 +92,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         if (resDepts) {
           setDepartments(resDepts);
         }
+        if (resProfile) {
+          setCurrentUser(resProfile);
+        }
       } catch (err) {
         console.error('Failed to load nav counts or alerts', err);
       }
@@ -93,8 +102,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     loadData();
 
     const handleAlertsUpdated = () => loadData();
+    const handleProfileUpdated = () => loadData();
     window.addEventListener('alerts-updated', handleAlertsUpdated);
-    return () => window.removeEventListener('alerts-updated', handleAlertsUpdated);
+    window.addEventListener('profile-updated', handleProfileUpdated);
+    return () => {
+      window.removeEventListener('alerts-updated', handleAlertsUpdated);
+      window.removeEventListener('profile-updated', handleProfileUpdated);
+    };
   }, [pathname]);
 
   useEffect(() => {
@@ -117,7 +131,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  const navGroups = [
+  interface NavItem {
+    href: string;
+    label: string;
+    icon: string;
+    badge?: string | number | null;
+    badgeColor?: string;
+  }
+
+  interface NavGroup {
+    id: string;
+    title: string;
+    items: NavItem[];
+  }
+
+  const navGroups: NavGroup[] = [
     {
       id: "cockpit",
       title: "Cockpit & Übersicht",
@@ -180,6 +208,37 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     }
   ];
 
+  // Role-based navigation filtering
+  const userRole = currentUser?.role || 'QMB';
+  const isQMB = userRole === 'QMB';
+  const isMitarbeiter = userRole === 'Mitarbeiter';
+
+  const visibleNavGroups = navGroups
+    .filter(group => {
+      // Nur QMB hat Zugriff auf Verwaltung & Administration
+      if (group.id === 'admin' && !isQMB) {
+        return false;
+      }
+      return true;
+    })
+    .map(group => {
+      let items = group.items;
+      if (group.id === 'planning' && isMitarbeiter) {
+        // Mitarbeiter sieht die Normmatrix nicht
+        items = items.filter(item => item.href !== '/matrix');
+      }
+      if (group.id === 'audit' && isMitarbeiter) {
+        // Mitarbeiter sieht primär "Meine Aufgaben"
+        items = items.map(item => {
+          if (item.href === '/action-log') {
+            return { ...item, label: 'Meine Aufgaben (KVP 10.2)' };
+          }
+          return item;
+        });
+      }
+      return { ...group, items };
+    });
+
   // Collapsible sidebar sections (persisted in localStorage)
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
     cockpit: false,
@@ -208,7 +267,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   // When pathname changes, ensure active group is uncollapsed so the user sees where they are
   useEffect(() => {
-    navGroups.forEach(group => {
+    visibleNavGroups.forEach(group => {
       const isGroupActive = group.items.some(item => pathname.startsWith(item.href));
       if (isGroupActive && collapsedSections[group.id]) {
         setCollapsedSections(prev => {
@@ -218,7 +277,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         });
       }
     });
-  }, [pathname]);
+  }, [pathname, visibleNavGroups]);
 
   const toggleSection = (id: string) => {
     setCollapsedSections(prev => {
@@ -297,7 +356,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       </div>
       
       <nav className="flex-1 p-3.5 pt-1 space-y-3 overflow-y-auto overflow-x-hidden">
-        {navGroups.map((group) => {
+        {visibleNavGroups.map((group) => {
           const isCollapsed = Boolean(collapsedSections[group.id]);
           const isGroupActive = group.items.some(item => pathname.startsWith(item.href));
 
@@ -374,7 +433,34 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         })}
       </nav>
       
-      <div className="p-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-center space-y-2">
+      {/* Current User Role Card */}
+      {currentUser && (
+        <div className="mx-3.5 mb-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded-md bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+              {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div className="min-w-0 text-left">
+              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                {currentUser?.name || 'Benutzer'}
+              </div>
+              <div className="text-[10px] text-slate-400 truncate">
+                {currentUser?.department || 'ISO 9001'}
+              </div>
+            </div>
+          </div>
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md shrink-0 uppercase tracking-wider ${
+            userRole === 'QMB' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300' :
+            userRole === 'Auditor' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' :
+            userRole === 'Abteilungsleiter' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300' :
+            'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+          }`}>
+            {userRole}
+          </span>
+        </div>
+      )}
+
+      <div className="p-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-center space-y-1.5">
         <div className="font-semibold text-slate-500 dark:text-slate-400 tracking-wider uppercase text-[10px]">
           DIN EN ISO 9001:2015
         </div>

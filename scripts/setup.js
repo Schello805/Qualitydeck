@@ -88,18 +88,39 @@ async function main() {
     }
 
     // Ensure at least one default QMB user exists
+    const crypto = require('crypto');
+    function hashPass(pwd) {
+      const salt = crypto.randomBytes(16).toString('hex');
+      const hash = crypto.scryptSync(pwd, salt, 64).toString('hex');
+      return `${salt}:${hash}`;
+    }
+
     const userCount = await prisma.user.count();
     if (userCount === 0) {
       console.log('👤 Erstelle Standard-Qualitätsmanager (QMB)...');
       await prisma.user.create({
         data: {
           name: 'Qualitätsmanager (QMB)',
-          email: 'qmb@qualitydeck.local',
+          email: 'admin@schellenberger.biz',
+          password: hashPass('admin123'),
           role: 'QMB',
-          department: 'QM'
+          department: 'Qualitätsmanagement'
         }
       });
-      console.log('✅ Standard-Benutzer erstellt.');
+      console.log('✅ Standard-Benutzer erstellt (admin@schellenberger.biz / admin123).');
+    }
+
+    // Ensure all existing users have a hashed password
+    const usersWithoutPassword = await prisma.user.findMany({
+      where: { OR: [{ password: null }, { password: '' }] }
+    });
+    for (const u of usersWithoutPassword) {
+      const defaultPwd = u.role === 'QMB' ? 'admin123' : 'qualitydeck';
+      await prisma.user.update({
+        where: { id: u.id },
+        data: { password: hashPass(defaultPwd) }
+      });
+      console.log(`🔐 Passwort für "${u.name}" (${u.email}) initialisiert: "${defaultPwd}".`);
     }
 
     // 1. Migrate legacy department names if present
